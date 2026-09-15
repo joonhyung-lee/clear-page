@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLEAR</title>
+<style>
+  :root { --fg:#1a1a1a; --muted:#666; --line:#e5e5e5; --accent:#2b5bd7; --bg:#fff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+  main { max-width:900px; margin:0 auto; padding:56px 20px 80px; }
+  header { text-align:center; margin-bottom:48px; }
+  h1 { font-size:2.2rem; line-height:1.2; margin:0 0 8px; }
+  .subtitle { color:var(--muted); margin:0 0 16px; }
+  .authors { margin:0 0 20px; }
+  .btns a { display:inline-block; margin:4px; padding:8px 18px; border:1px solid var(--fg); border-radius:999px; color:var(--fg); text-decoration:none; font-weight:600; }
+  .btns a:hover { background:var(--fg); color:#fff; }
+  section { margin:40px 0; }
+  h2 { font-size:1.4rem; border-bottom:1px solid var(--line); padding-bottom:6px; margin:0 0 16px; }
+  figure { margin:0; }
+  figure img { width:100%; border:1px solid var(--line); border-radius:6px; background:#fff; }
+  figcaption { font-size:.9rem; color:var(--muted); margin-top:6px; text-align:center; }
+  .hero { margin-bottom:40px; }
+  pre { background:#f6f6f6; padding:14px; border-radius:6px; overflow-x:auto; font-size:.9rem; }
+  footer { color:var(--muted); font-size:.85rem; text-align:center; margin-top:60px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>CLEAR: Capability-Aware Latent Ordering for Adaptive Interaction with Movable Objects</h1>
+    <p class="subtitle">ICRA 2027 &middot; Under review</p>
+    <p class="authors">Anonymous Authors</p>
+    <div class="btns">
+      <a href="https://anonymous.4open.science/r/clear-1209/">Code</a>
+    </div>
+  </header>
+
+  <figure class="hero">
+    <img src="assets/overview.png" alt="CLEAR overview: different robots take different routes and interactions depending on their capabilities">
+    <figcaption>Robots with different capabilities (object pushing, crossing steps, driving on slopes) require different routes and object interactions in the same scene.</figcaption>
+  </figure>
+
+  <section>
+    <h2>Abstract</h2>
+    <p>Planning physical interactions in cluttered environments requires reasoning about robot capabilities. For example, a legged robot may climb stairs, while a wheeled robot may need an alternative route. However, the ability to move objects does not ensure task completion, as the interaction order and resulting object configurations can block subsequent actions. To address this challenge, we propose a capability-aware planner that jointly determines <em>which</em> objects to interact with, <em>in which order</em>, and <em>how</em> to move them. Our planner, <u>C</u>apability-Aware <u>L</u>atent Ord<u>e</u>ring for <u>A</u>daptive Inte<u>r</u>action with Movable Objects (CLEAR), learns to select objects and propose alternative interaction orders from scene observations and robot structure. For each proposed sequence, it generates object references, conditioning each prediction on those planned for preceding interactions. The planner checks whether candidate plans are feasible in the proposed interaction order, selects the valid candidate with the fewest object interactions, and replans from updated observations during execution. Our approach is evaluated in three simulation environments: 2D grids, ordered manipulation, and maze navigation. The maze experiments assess the effect of robot-structure conditioning and the ability to replan when environmental perturbations block access to required objects.</p>
+  </section>
+
+  <section>
+    <h2>Method</h2>
+    <figure>
+      <img src="assets/pipeline.png" alt="CLEAR pipeline">
+      <figcaption>(a) Embodiment-aware scene grounding, (b) latent interaction ordering, (c) rank-causal generation, (d) execution and replanning.</figcaption>
+    </figure>
+  </section>
+
+
+  <footer>Code: <a href="https://anonymous.4open.science/r/clear-1209/">anonymous.4open.science/r/clear-1209</a></footer>
+</main>
+</body>
+</html>
