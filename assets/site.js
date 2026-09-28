@@ -27,6 +27,17 @@ function loadScript(path) {
   }
   return scriptLoads.get(path);
 }
+function decodeHex(hex) {
+  if (hex.length % 2 || /[^0-9a-f]/i.test(hex)) throw new Error('Invalid scene data');
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  return bytes;
+}
+function recordingBase64(hex) {
+  const bytes = decodeHex(hex); const chunks = [];
+  for (let i = 0; i < bytes.length; i += 8192) chunks.push(String.fromCharCode(...bytes.subarray(i, i + 8192)));
+  return btoa(chunks.join(''));
+}
 // The same player supports the fixed panels and the enlarged grid previews.
 function wireViewer(viewer, onLaunch = () => {}) {
   const launch = viewer.querySelector('.launch');
@@ -44,14 +55,15 @@ function wireViewer(viewer, onLaunch = () => {}) {
     status.textContent = 'Loading interactive scene…'; viewer.append(status);
     try {
       const scene = viewer.dataset.scene;
-      await Promise.all([loadScript('assets/viser/runtime.js'), loadScript(`assets/recordings/${scene}.js`)]);
+      await Promise.all([loadScript('assets/viser/runtime-hex.js'), loadScript(`assets/recordings/${scene}.hex.js`)]);
       if (attempt !== generation) return;
       const data = window.CLEAR_RECORDINGS?.[scene];
-      if (!data || !window.CLEAR_VIEWER_HTML) throw new Error('Scene unavailable');
+      if (!data || !window.CLEAR_VIEWER_HEX) throw new Error('Scene unavailable');
       const iframe = document.createElement('iframe');
       iframe.title = `${viewer.dataset.title || viewer.closest('article').querySelector('h3').textContent} interactive 3D playback`;
-      const embedded = `<script>window.__VISER_EMBED_DATA__=${JSON.stringify(data)};window.__VISER_EMBED_CONFIG__={darkMode:false};<\/script>`;
-      iframe.srcdoc = window.CLEAR_VIEWER_HTML.replace('</head>', embedded + '</head>');
+      const embedded = `<script>window.__VISER_EMBED_DATA__=${JSON.stringify(recordingBase64(data))};window.__VISER_EMBED_CONFIG__={darkMode:false};<\/script>`;
+      const html = new TextDecoder().decode(decodeHex(window.CLEAR_VIEWER_HEX));
+      iframe.srcdoc = html.replace('</head>', embedded + '</head>');
       iframe.allow = 'fullscreen';
       iframe.addEventListener('load', () => { clearTimeout(timer); status.remove(); }, {once:true});
       timer = setTimeout(() => { status.textContent = 'Loading is taking longer than expected. Return to the video to retry.'; }, 20000);

@@ -6,6 +6,7 @@ of anonymity and cannot inspect a hosting service's configuration or logs.
 """
 import argparse
 import base64
+import binascii
 import getpass
 import gzip
 import io
@@ -35,13 +36,16 @@ def scan(data, label, text=False, vendor=False, depth=0):
     global decoded
     if any(n in data.lower() or n in label.lower().encode() for n in needles):
         fail(label, 'private identifier')
-    if text and not vendor and any(re.search(p, data, re.I) for p in patterns):
+    if text and not vendor and any(re.search(p, data, re.I) for p in patterns if b'@' not in p or b'@' in data):
         fail(label, 'private path or email')
     if depth >= 4:
         return
     # The standalone Viser client embeds compressed CSS, JS, and WASM.
     for i, match in enumerate(re.finditer(rb'["\']([A-Za-z0-9+/=]{100,})["\']', data)):
-        payload = base64.b64decode(match[1])
+        try:
+            payload = base64.b64decode(match[1], validate=True)
+        except binascii.Error:
+            continue
         if payload.startswith(b'\x28\xb5\x2f\xfd'):
             payload = zstandard.ZstdDecompressor().decompress(payload)
         elif payload.startswith(b'\x1f\x8b'):
@@ -53,7 +57,10 @@ def scan(data, label, text=False, vendor=False, depth=0):
         decoded += 1
         scan(payload, f'{label}:embedded-{i}', text=True, vendor=vendor, depth=depth+1)
     for i, match in enumerate(re.finditer(rb'data:[^;,"\s]+;base64,([A-Za-z0-9+/=]+)', data)):
-        payload = base64.b64decode(match[1])
+        try:
+            payload = base64.b64decode(match[1], validate=True)
+        except binascii.Error:
+            continue
         scan(payload, f'{label}:data-{i}', vendor=vendor, depth=depth+1)
 
 
@@ -90,8 +97,12 @@ for path in files:
     if path.suffix == '.viser':
         data = zstandard.ZstdDecompressor().decompress(data[8:]); decoded += 1
     vendor = label.startswith('assets/viser/')
-    if label == 'assets/viser/runtime.js':
-        scan(json.loads(data.decode().split(' = ', 1)[1].rstrip(';\n')).encode(), label+':html', vendor=True)
+    if label == 'assets/viser/runtime-hex.js' or path.name.endswith('.hex.js'):
+        packed = json.loads(data.decode().rsplit(' = ', 1)[1].rstrip(';\n'))
+        payload = bytes.fromhex(packed)
+        if path.name.endswith('.hex.js'):
+            payload = zstandard.ZstdDecompressor().decompress(payload[8:]); decoded += 1
+        scan(payload, label+':decoded', text=True, vendor=vendor)
     scan(data, label, text=path.suffix in ('.html', '.css', '.js', '.md', '.svg', '.viser'), vendor=vendor)
     if path.suffix == '.png':
         im = Image.open(io.BytesIO(data))

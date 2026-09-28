@@ -9,7 +9,7 @@
 <title>CLEAR — Capability-aware interaction planning</title>
 <link href="assets/favicon.svg" rel="icon" type="image/svg+xml"/>
 <link href="assets/site.css" rel="stylesheet"/>
-<script defer="" src="assets/site.js"></script>
+<script defer="" src="assets/site.js?v=2"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -31,7 +31,7 @@
 <div class="section-heading"><h2>Motivation</h2></div>
 <div class="motivation-layout">
 
-<figure><img alt="A humanoid pushes a box, a quadruped crosses steps, and a wheeled robot follows a slope to reach the same goal." height="1836" loading="lazy" src="assets/overview.png" width="2422"/><figcaption>Different capabilities change the available routes and interactions.</figcaption></figure>
+<figure><img alt="A humanoid pushes a box, a quadruped crosses steps, and a wheeled robot follows a slope to reach the same goal." height="1836" loading="lazy" src="assets/overview-anonymous.png" width="2422"/><figcaption>Different capabilities change the available routes and interactions.</figcaption></figure>
 <div class="prose"><p class="academic-copy">Robot morphology determines terrain traversability and feasible object interactions. Planning must account for these constraints and for how each interaction affects subsequent actions.</p></div></div>
 </section>
 <section class="section encoding" id="encoding">
@@ -52,7 +52,7 @@
 </section>
 <section class="section wrap" id="method">
 <div class="section-heading"><h2>Method</h2></div>
-<figure class="pipeline"><img alt="CLEAR pipeline: embodiment-aware scene grounding, latent interaction ordering, rank-causal generation, and execution with replanning." height="960" loading="lazy" src="assets/pipeline.png" width="1697"/><figcaption class="academic-copy">CLEAR proposes interaction orders and generates object motion references conditioned on preceding interactions. Feasibility checks identify valid plans, and updated observations support replanning during execution.</figcaption></figure>
+<figure class="pipeline"><img alt="CLEAR pipeline: embodiment-aware scene grounding, latent interaction ordering, rank-causal generation, and execution with replanning." height="960" loading="lazy" src="assets/pipeline-anonymous.png" width="1697"/><figcaption class="academic-copy">CLEAR proposes interaction orders and generates object motion references conditioned on preceding interactions. Feasibility checks identify valid plans, and updated observations support replanning during execution.</figcaption></figure>
 <details class="abstract"><summary>Read the abstract <span aria-hidden="true">+</span></summary><p id="abstract-text">Planning physical interactions in cluttered environments requires reasoning about robot capabilities. For example, a legged robot may climb stairs, while a wheeled robot may need an alternative route. However, the ability to move objects does not ensure task completion, as the interaction order and resulting object configurations can block subsequent actions. To address this challenge, we propose a capability-aware planner that jointly determines which objects to interact with, in which order, and how to move them. Our planner, Capability-Aware Latent Ordering for Adaptive Interaction with Movable Objects (CLEAR), learns to select objects and propose alternative interaction orders from scene observations and robot structure. For each proposed sequence, it generates object references, conditioning each prediction on those planned for preceding interactions. The planner checks whether candidate plans are feasible in the proposed interaction order, selects the valid candidate with the fewest object interactions, and replans from updated observations during execution. Our approach is evaluated in three simulation environments: 2D grids, ordered manipulation, and maze navigation. The maze experiments assess the effect of robot-structure conditioning and the ability to replan when environmental perturbations block access to required objects.</p></details>
 </section>
 </main>

@@ -9,6 +9,8 @@ Open **http://localhost:8765**. The server binds to loopback and serves only
 No build step, remote font, analytics service, or live Viser server is required.
 Lazy script packages embed recordings directly into the viewer so anonymous
 hosting sandbox policies do not require a cross-origin recording fetch.
+Packed data uses hexadecimal text to prevent name redaction from corrupting
+compressed scene bytes. Figures use fresh paths to avoid stale host caches.
 
 ## Page and media
 
