@@ -10,7 +10,7 @@ No build step, remote font, analytics service, or live Viser server is required.
 Lazy script packages embed recordings directly into the viewer so anonymous
 hosting sandbox policies do not require a cross-origin recording fetch.
 Packed data uses hexadecimal text to prevent name redaction from corrupting
-compressed scene bytes. Content revisions in asset URLs avoid stale browser media caches after refresh.
+compressed scene bytes. Scene downloads share in-flight requests, allow at most two concurrent loads, and retry transient failures up to twice with backoff. Incomplete responses are not cached as successful loads. A failed scene retains its preview and a retry button. Offscreen videos defer loading, and reopening the same hover preview reuses its loaded source. Content revisions in asset URLs avoid stale browser media caches after refresh.
 
 ## Page and media
 

@@ -17,14 +17,51 @@ document.querySelectorAll('video[data-autoplay]').forEach(v => visibility.observ
 
 // Classic script loading also works on hosts that give pages an opaque origin.
 const scriptLoads = new Map();
-function loadScript(path) {
-  if (!scriptLoads.has(path)) {
-    scriptLoads.set(path, new Promise((resolve, reject) => {
-      const script = document.createElement('script'); script.src = clearAssetURL(path);
-      script.onload = resolve;
-      script.onerror = () => { script.remove(); scriptLoads.delete(path); reject(new Error('Scene unavailable')); };
+const scriptQueue = [];
+let activeScripts = 0;
+function drainScripts() {
+  while (activeScripts < 2 && scriptQueue.length) {
+    activeScripts++;
+    const job = scriptQueue.shift();
+    job.run().then(job.resolve, job.reject).finally(() => { activeScripts--; drainScripts(); });
+  }
+}
+function requestScript(path, ready) {
+  return new Promise((resolve, reject) => {
+    scriptQueue.push({resolve, reject, run: () => new Promise((resolve, reject) => {
+      // Another viewer may already have loaded this shared dependency.
+      if (ready()) { resolve(); return; }
+      const script = document.createElement('script');
+      let settled = false;
+      const finish = error => {
+        if (settled) return;
+        settled = true; clearTimeout(timeout);
+        script.onload = script.onerror = null; script.remove();
+        error ? reject(error) : resolve();
+      };
+      const timeout = setTimeout(() => finish(new Error('Scene request timed out')), 45000);
+      script.onload = () => finish(ready() ? null : new Error('Incomplete scene response'));
+      script.onerror = () => finish(new Error('Scene request failed'));
+      script.src = clearAssetURL(path);
       document.head.append(script);
-    }));
+    })});
+    drainScripts();
+  });
+}
+function loadScript(path, ready) {
+  if (ready()) return Promise.resolve();
+  if (!scriptLoads.has(path)) {
+    const pending = (async () => {
+      // Bound retries so a rate-limited host is not flooded with requests.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (attempt) await new Promise(resolve => setTimeout(resolve, attempt === 1 ? 1000 : 4000));
+        try { await requestScript(path, ready); return; }
+        catch (error) { if (attempt === 2) throw error; }
+      }
+    })();
+    scriptLoads.set(path, pending);
+    const forget = () => { if (scriptLoads.get(path) === pending) scriptLoads.delete(path); };
+    pending.then(forget, forget);
   }
   return scriptLoads.get(path);
 }
@@ -43,12 +80,13 @@ function recordingBase64(hex) {
 function wireViewer(viewer, onLaunch = () => {}) {
   const launch = viewer.querySelector('.launch');
   const video = viewer.querySelector('video, img.preview-image');
+  const launchLabel = launch.textContent;
   let timer, generation = 0;
   function reset() {
     generation++; clearTimeout(timer);
     viewer.querySelectorAll('iframe,.viewer-tools,.viewer-status').forEach(e => e.remove());
     const ego=viewer.querySelector('.ego-inset video');if(ego?.readyState)ego.currentTime=0;
-    video.hidden = false; launch.hidden = false; launch.disabled = false;
+    video.hidden = false; launch.hidden = false; launch.disabled = false; launch.textContent = launchLabel;
   }
   viewer.addEventListener('reset-viewer', reset);
   launch.addEventListener('click', async () => {
@@ -56,13 +94,16 @@ function wireViewer(viewer, onLaunch = () => {}) {
     launch.disabled = true;
     const status = document.createElement('div'); status.className = 'viewer-status'; status.setAttribute('role','status');
     status.textContent = 'Loading interactive scene…'; viewer.append(status);
+    timer = setTimeout(() => { status.textContent = 'Still loading… The preview remains available.'; }, 8000);
     try {
       const scene = viewer.dataset.scene;
-      await Promise.all([loadScript('assets/viser/runtime-hex.js'), loadScript(`assets/recordings/${scene}.hex.js`)]);
+      await loadScript('assets/viser/runtime-hex.js', () => !!window.CLEAR_VIEWER_HEX);
       if (attempt !== generation) return;
-      if(viewer.dataset.embodiment)await loadScript('assets/embodiment-bridge.js');
-      if(viewer.dataset.ego||viewer.dataset.generation)await loadScript('assets/playback-bridge.js');
-      if(viewer.dataset.orderStage)await loadScript('assets/order-bridge.js');
+      await loadScript(`assets/recordings/${scene}.hex.js`, () => !!window.CLEAR_RECORDINGS?.[scene]);
+      if (attempt !== generation) return;
+      if(viewer.dataset.embodiment)await loadScript('assets/embodiment-bridge.js', () => typeof window.CLEAR_EMBODIMENT_BRIDGE === 'function');
+      if(viewer.dataset.ego||viewer.dataset.generation)await loadScript('assets/playback-bridge.js', () => typeof window.CLEAR_PLAYBACK_BRIDGE === 'function');
+      if(viewer.dataset.orderStage)await loadScript('assets/order-bridge.js', () => typeof window.CLEAR_ORDER_BRIDGE === 'function');
       if(attempt !== generation)return;
       const data = window.CLEAR_RECORDINGS?.[scene];
       if (!data || !window.CLEAR_VIEWER_HEX) throw new Error('Scene unavailable');
@@ -74,15 +115,19 @@ function wireViewer(viewer, onLaunch = () => {}) {
       iframe.srcdoc = html.replace('</head>', embedded + '</head>');
       iframe.allow = 'fullscreen';
       iframe.addEventListener('load', () => { clearTimeout(timer); status.remove(); if(viewer.dataset.embodiment)iframe.contentWindow.postMessage({type:'clear-embodiment-mode',mode:viewer.dataset.displayMode||'structure'},'*'); }, {once:true});
+      clearTimeout(timer);
       timer = setTimeout(() => { status.textContent = 'Loading is taking longer than expected. Return to the video to retry.'; }, 20000);
       video.pause?.(); video.hidden = true; launch.hidden = true; viewer.append(iframe);
+      const ego = viewer.querySelector('.ego-inset video');
+      if (ego && ego.readyState === 0) { ego.preload = 'auto'; ego.load(); }
       const back = document.createElement('button'); back.type='button'; back.className='viewer-tools'; back.textContent=video.tagName==='VIDEO'?'Back to video':'Back to preview';
       back.addEventListener('click', () => { reset(); if(!reduced.matches) video.play?.().catch(()=>{}); launch.focus(); });
       viewer.append(back);
     } catch {
       if(attempt !== generation) return;
-      status.textContent='Scene unavailable. Please retry.'; launch.disabled=false;
-      timer=setTimeout(()=>status.remove(),2500);
+      clearTimeout(timer);
+      status.textContent='3D could not load. The preview is still available. Please wait a moment, then retry.';
+      launch.disabled=false; launch.textContent='Retry 3D';
     }
   });
   return reset;
@@ -103,8 +148,11 @@ for (const grid of document.querySelectorAll('.media-grid')) {
     const preview=tile.querySelector('video');
     video.poster=preview.poster;
     video.preload='auto';
-    video.onloadedmetadata=()=>{if(current===tile&&Number.isFinite(preview.currentTime))video.currentTime=preview.currentTime;};
-    video.src=tile.querySelector('source').src;
+    const syncPreview=()=>{if(current===tile&&Number.isFinite(preview.currentTime))video.currentTime=preview.currentTime;};
+    video.onloadedmetadata=syncPreview;
+    const source=tile.querySelector('source').src;
+    if(video.src!==source)video.src=source;
+    else if(video.readyState>=1)syncPreview();
     overlay.hidden=false; grid.classList.add('has-focus');
     if(!reduced.matches || pin) video.play().catch(()=>{});
   }
