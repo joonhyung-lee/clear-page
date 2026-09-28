@@ -1,0 +1,211 @@
+[
+  {
+    "scene": "maze-e03-highmass-g1-cdgs",
+    "experiment": "exp3",
+    "group": "highmass-g1",
+    "method": "CDGS",
+    "replay": false,
+    "success": false,
+    "status": "no_valid_plan_found",
+    "duration": 0.0,
+    "frames": 1
+  },
+  {
+    "scene": "maze-e03-highmass-g1-clear",
+    "experiment": "exp3",
+    "group": "highmass-g1",
+    "method": "CLEAR (ours)",
+    "replay": true,
+    "success": true,
+    "status": "goal_reached",
+    "duration": 122.5,
+    "frames": 1226
+  },
+  {
+    "scene": "maze-e03-highmass-g1-get-encoder",
+    "experiment": "exp3",
+    "group": "highmass-g1",
+    "method": "GET encoder",
+    "replay": true,
+    "success": true,
+    "status": "goal_reached",
+    "duration": 116.4,
+    "frames": 1165
+  },
+  {
+    "scene": "maze-e03-highmass-g1-namo-llm",
+    "experiment": "exp3",
+    "group": "highmass-g1",
+    "method": "NAMO LLM",
+    "replay": false,
+    "success": false,
+    "status": "no_valid_plan_found",
+    "duration": 0.0,
+    "frames": 1
+  },
+  {
+    "scene": "maze-e03-highmass-g1-namo-sampling",
+    "experiment": "exp3",
+    "group": "highmass-g1",
+    "method": "NAMO sampling",
+    "replay": false,
+    "success": false,
+    "status": "no_valid_plan_found",
+    "duration": 0.0,
+    "frames": 1
+  },
+  {
+    "scene": "maze-e03-highmass-g1-no-affordance",
+    "experiment": "exp3",
+    "group": "highmass-g1",
+    "method": "Without affordance",
+    "replay": true,
+    "success": true,
+    "status": "goal_reached",
+    "duration": 123.1,
+    "frames": 1232
+  },
+  {
+    "scene": "maze-e03-highmass-g1-noemb",
+    "experiment": "exp3",
+    "group": "highmass-g1",
+    "method": "Without embodiment",
+    "replay": true,
+    "success": false,
+    "status": "CONTROLLER_TIMEOUT",
+    "duration": 85.4,
+    "frames": 855
+  },
+  {
+    "scene": "maze-e03-highmass-g1-robot-id",
+    "experiment": "exp3",
+    "group": "highmass-g1",
+    "method": "Robot ID",
+    "replay": true,
+    "success": true,
+    "status": "goal_reached",
+    "duration": 127.7,
+    "frames": 1278
+  },
+  {
+    "scene": "maze-e03-highmass-g1-specialist",
+    "experiment": "exp3",
+    "group": "highmass-g1",
+    "method": "Specialist",
+    "replay": true,
+    "success": true,
+    "status": "goal_reached",
+    "duration": 128.6,
+    "frames": 1287
+  },
+  {
+    "scene": "maze-e03-highmass-spot-arm-cdgs",
+    "experiment": "exp3",
+    "group": "highmass-spot-arm",
+    "method": "CDGS",
+    "replay": false,
+    "success": false,
+    "status": "no_valid_plan_found",
+    "duration": 0.0,
+    "frames": 1
+  },
+  {
+    "scene": "maze-e03-highmass-spot-arm-clear",
+    "experiment": "exp3",
+    "group": "highmass-spot-arm",
+    "method": "CLEAR (ours)",
+    "replay": true,
+    "success": true,
+    "status": "goal_reached",
+    "duration": 73.78,
+    "frames": 739
+  },
+  {
+    "scene": "maze-e03-highmass-spot-arm-namo-llm",
+    "experiment": "exp3",
+    "group": "highmass-spot-arm",
+    "method": "NAMO LLM",
+    "replay": true,
+    "success": false,
+    "status": "CONTROLLER_TIMEOUT",
+    "duration": 126.26,
+    "frames": 1264
+  },
+  {
+    "scene": "maze-e03-highmass-spot-arm-namo-sampling",
+    "experiment": "exp3",
+    "group": "highmass-spot-arm",
+    "method": "NAMO sampling",
+    "replay": true,
+    "success": false,
+    "status": "CONTROLLER_TIMEOUT",
+    "duration": 187.64,
+    "frames": 1878
+  },
+  {
+    "scene": "maze-e03-parallel-terrain-g1-clear",
+    "experiment": "exp3",
+    "group": "terrain-g1",
+    "method": "CLEAR (ours)",
+    "replay": true,
+    "success": true,
+    "status": "goal_reached",
+    "duration": 38.4,
+    "frames": 385
+  },
+  {
+    "scene": "maze-e03-parallel-terrain-g1-no-affordance",
+    "experiment": "exp3",
+    "group": "terrain-g1",
+    "method": "Without affordance",
+    "replay": true,
+    "success": false,
+    "status": "final_navigation_failed",
+    "duration": 90.0,
+    "frames": 901
+  },
+  {
+    "scene": "horizon-A-contrast-heavy02-clear",
+    "experiment": "exp4",
+    "group": "A",
+    "method": "CLEAR (ours)",
+    "replay": true,
+    "success": true,
+    "status": "goal_reached",
+    "duration": 267.8,
+    "frames": 2679
+  },
+  {
+    "scene": "horizon-A-contrast-heavy02-clear-frozen",
+    "experiment": "exp4",
+    "group": "A",
+    "method": "CLEAR without replanning",
+    "replay": true,
+    "success": false,
+    "status": "object_path_failed",
+    "duration": 180.5,
+    "frames": 1806
+  },
+  {
+    "scene": "horizon-B-solid-v2-clear",
+    "experiment": "exp4",
+    "group": "B",
+    "method": "CLEAR (ours)",
+    "replay": true,
+    "success": true,
+    "status": "goal_reached",
+    "duration": 190.8,
+    "frames": 1909
+  },
+  {
+    "scene": "horizon-B-solid-v2-clear-frozen",
+    "experiment": "exp4",
+    "group": "B",
+    "method": "CLEAR without replanning",
+    "replay": true,
+    "success": true,
+    "status": "goal_reached",
+    "duration": 202.2,
+    "frames": 2023
+  }
+]

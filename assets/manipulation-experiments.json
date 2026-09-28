@@ -1,0 +1,56 @@
+[
+  {
+    "scene": "manipulation-bc",
+    "method": "Behavior cloning",
+    "success": true,
+    "duration": 7.45,
+    "decisions": 5,
+    "violations": 0,
+    "frames": 160
+  },
+  {
+    "scene": "manipulation-bc-shared",
+    "method": "Behavior cloning with shared encoder",
+    "success": true,
+    "duration": 5.2,
+    "decisions": 3,
+    "violations": 0,
+    "frames": 111
+  },
+  {
+    "scene": "manipulation-classical",
+    "method": "Classical planner",
+    "success": true,
+    "duration": 5.55,
+    "decisions": 3,
+    "violations": 0,
+    "frames": 118
+  },
+  {
+    "scene": "manipulation-clear",
+    "method": "CLEAR (ours)",
+    "success": true,
+    "duration": 5.2,
+    "decisions": 3,
+    "violations": 0,
+    "frames": 111
+  },
+  {
+    "scene": "manipulation-clear-noaffordance",
+    "method": "Without affordance",
+    "success": true,
+    "duration": 5.2,
+    "decisions": 3,
+    "violations": 0,
+    "frames": 111
+  },
+  {
+    "scene": "manipulation-clear-nocausal",
+    "method": "Without causal masking",
+    "success": true,
+    "duration": 18.9,
+    "decisions": 8,
+    "violations": 3,
+    "frames": 395
+  }
+]

@@ -27,19 +27,18 @@ paths = subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others'
 files = sorted({ROOT / s.decode() for s in paths if s and (ROOT / s.decode()).is_file()})
 failed = set()
 decoded = 0
-patterns = [rb'/home/[a-z0-9_-]+', rb'/mnt/[^\s"<>]+', rb'[a-z0-9_.+-]+@[a-z0-9.-]+\.[a-z]{2,}']
+patterns = [rb'/' + rb'home/[a-z0-9_-]+', rb'/' + rb'mnt/[^\s"<>]+', rb'[a-z0-9_.+-]+@[a-z0-9.-]+\.[a-z]{2,}']
 
 def fail(label, reason):
     failed.add((label, reason))
 
 def scan(data, label, text=False, vendor=False, depth=0):
     global decoded
-    if any(n in data.lower() or n in label.lower().encode() for n in needles):
-        fail(label, 'private identifier')
-    if text and not vendor and any(re.search(p, data, re.I) for p in patterns if b'@' not in p or b'@' in data):
-        fail(label, 'private path or email')
     if depth >= 4:
+        if any(n in data.lower() or n in label.lower().encode() for n in needles):
+            fail(label, 'private identifier')
         return
+    encoded_ranges = []
     # The standalone Viser client embeds compressed CSS, JS, and WASM.
     for i, match in enumerate(re.finditer(rb'["\']([A-Za-z0-9+/=]{100,})["\']', data)):
         try:
@@ -55,13 +54,26 @@ def scan(data, label, text=False, vendor=False, depth=0):
         else:
             continue
         decoded += 1
+        encoded_ranges.append(match.span(1))
         scan(payload, f'{label}:embedded-{i}', text=True, vendor=vendor, depth=depth+1)
     for i, match in enumerate(re.finditer(rb'data:[^;,"\s]+;base64,([A-Za-z0-9+/=]+)', data)):
         try:
             payload = base64.b64decode(match[1], validate=True)
         except binascii.Error:
             continue
+        encoded_ranges.append(match.span(1))
         scan(payload, f'{label}:data-{i}', vendor=vendor, depth=depth+1)
+
+    # Check the actual decoded payload above, not coincidental name fragments
+    # in its base64 spelling. All surrounding plaintext still gets scanned.
+    visible = bytearray(data)
+    for start, end in encoded_ranges:
+        visible[start:end] = b' ' * (end-start)
+    plain = bytes(visible)
+    if any(n in plain.lower() or n in label.lower().encode() for n in needles):
+        fail(label, 'private identifier')
+    if text and not vendor and any(re.search(p, plain, re.I) for p in patterns if b'@' not in p or b'@' in plain):
+        fail(label, 'private path or email')
 
 
 def mp4_atoms(data, start, end, label):
@@ -103,7 +115,7 @@ for path in files:
         if path.name.endswith('.hex.js'):
             payload = zstandard.ZstdDecompressor().decompress(payload[8:]); decoded += 1
         scan(payload, label+':decoded', text=True, vendor=vendor)
-    scan(data, label, text=path.suffix in ('.html', '.css', '.js', '.md', '.svg', '.viser'), vendor=vendor)
+    scan(data, label, text=path.suffix in ('.html', '.css', '.js', '.md', '.svg', '.viser', '.json', '.py', '.txt', '.yml', '.yaml', '.toml', '.xml', '.csv'), vendor=vendor)
     if path.suffix == '.png':
         im = Image.open(io.BytesIO(data))
         if set(im.info) - {'srgb', 'gamma', 'chromaticity', 'transparency', 'aspect'}:

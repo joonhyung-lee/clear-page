@@ -1,3 +1,4 @@
+function clearAssetURL(path) { const base=path.split('?')[0], version=window.CLEAR_ASSET_REVISIONS?.[base]; return version ? base+'?v='+version : path; }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const hoverAvailable = matchMedia('(hover: hover) and (pointer: fine)');
 const teaser = document.querySelector('#teaser');
@@ -19,7 +20,7 @@ const scriptLoads = new Map();
 function loadScript(path) {
   if (!scriptLoads.has(path)) {
     scriptLoads.set(path, new Promise((resolve, reject) => {
-      const script = document.createElement('script'); script.src = path;
+      const script = document.createElement('script'); script.src = clearAssetURL(path);
       script.onload = resolve;
       script.onerror = () => { script.remove(); scriptLoads.delete(path); reject(new Error('Scene unavailable')); };
       document.head.append(script);
@@ -41,13 +42,15 @@ function recordingBase64(hex) {
 // The same player supports the fixed panels and the enlarged grid previews.
 function wireViewer(viewer, onLaunch = () => {}) {
   const launch = viewer.querySelector('.launch');
-  const video = viewer.querySelector('video');
+  const video = viewer.querySelector('video, img.preview-image');
   let timer, generation = 0;
   function reset() {
     generation++; clearTimeout(timer);
     viewer.querySelectorAll('iframe,.viewer-tools,.viewer-status').forEach(e => e.remove());
+    const ego=viewer.querySelector('.ego-inset video');if(ego?.readyState)ego.currentTime=0;
     video.hidden = false; launch.hidden = false; launch.disabled = false;
   }
+  viewer.addEventListener('reset-viewer', reset);
   launch.addEventListener('click', async () => {
     reset(); onLaunch(); const attempt = generation;
     launch.disabled = true;
@@ -57,19 +60,24 @@ function wireViewer(viewer, onLaunch = () => {}) {
       const scene = viewer.dataset.scene;
       await Promise.all([loadScript('assets/viser/runtime-hex.js'), loadScript(`assets/recordings/${scene}.hex.js`)]);
       if (attempt !== generation) return;
+      if(viewer.dataset.embodiment)await loadScript('assets/embodiment-bridge.js');
+      if(viewer.dataset.ego||viewer.dataset.generation)await loadScript('assets/playback-bridge.js');
+      if(viewer.dataset.orderStage)await loadScript('assets/order-bridge.js');
+      if(attempt !== generation)return;
       const data = window.CLEAR_RECORDINGS?.[scene];
       if (!data || !window.CLEAR_VIEWER_HEX) throw new Error('Scene unavailable');
       const iframe = document.createElement('iframe');
       iframe.title = `${viewer.dataset.title || viewer.closest('article').querySelector('h3').textContent} interactive 3D playback`;
-      const embedded = `<script>window.__VISER_EMBED_DATA__=${JSON.stringify(recordingBase64(data))};window.__VISER_EMBED_CONFIG__={darkMode:false};<\/script>`;
+      const bridge=(viewer.dataset.embodiment ? `window.__CLEAR_EMBODIMENT__=${JSON.stringify({robot:viewer.dataset.embodiment,mode:viewer.dataset.displayMode||'structure'})};(${window.CLEAR_EMBODIMENT_BRIDGE.toString()})();` : '')+((viewer.dataset.ego||viewer.dataset.generation) ? `(${window.CLEAR_PLAYBACK_BRIDGE.toString()})();` : '')+(viewer.dataset.orderStage ? `window.__CLEAR_ORDER__=${JSON.stringify({stage:viewer.dataset.orderStage,sample:+viewer.dataset.orderSample||0})};(${window.CLEAR_ORDER_BRIDGE.toString()})();` : '');
+      const embedded = `<script>${bridge}window.__VISER_EMBED_DATA__=${JSON.stringify(recordingBase64(data))};window.__VISER_EMBED_CONFIG__={darkMode:false};<\/script>`;
       const html = new TextDecoder().decode(decodeHex(window.CLEAR_VIEWER_HEX));
       iframe.srcdoc = html.replace('</head>', embedded + '</head>');
       iframe.allow = 'fullscreen';
-      iframe.addEventListener('load', () => { clearTimeout(timer); status.remove(); }, {once:true});
+      iframe.addEventListener('load', () => { clearTimeout(timer); status.remove(); if(viewer.dataset.embodiment)iframe.contentWindow.postMessage({type:'clear-embodiment-mode',mode:viewer.dataset.displayMode||'structure'},'*'); }, {once:true});
       timer = setTimeout(() => { status.textContent = 'Loading is taking longer than expected. Return to the video to retry.'; }, 20000);
-      video.pause(); video.hidden = true; launch.hidden = true; viewer.append(iframe);
-      const back = document.createElement('button'); back.type='button'; back.className='viewer-tools'; back.textContent='Back to video';
-      back.addEventListener('click', () => { reset(); if(!reduced.matches) video.play().catch(()=>{}); launch.focus(); });
+      video.pause?.(); video.hidden = true; launch.hidden = true; viewer.append(iframe);
+      const back = document.createElement('button'); back.type='button'; back.className='viewer-tools'; back.textContent=video.tagName==='VIDEO'?'Back to video':'Back to preview';
+      back.addEventListener('click', () => { reset(); if(!reduced.matches) video.play?.().catch(()=>{}); launch.focus(); });
       viewer.append(back);
     } catch {
       if(attempt !== generation) return;
@@ -92,7 +100,10 @@ for (const grid of document.querySelectorAll('.media-grid')) {
     viewer.dataset.scene=tile.dataset.scene; viewer.dataset.title=tile.dataset.title;
     overlay.querySelector('.focus-title').textContent=tile.dataset.title;
     viewer.querySelector('.launch').setAttribute('aria-label',`Play ${tile.dataset.title} in 3D`);
-    video.poster=tile.querySelector('video').poster;
+    const preview=tile.querySelector('video');
+    video.poster=preview.poster;
+    video.preload='auto';
+    video.onloadedmetadata=()=>{if(current===tile&&Number.isFinite(preview.currentTime))video.currentTime=preview.currentTime;};
     video.src=tile.querySelector('source').src;
     overlay.hidden=false; grid.classList.add('has-focus');
     if(!reduced.matches || pin) video.play().catch(()=>{});
@@ -112,4 +123,42 @@ for (const grid of document.querySelectorAll('.media-grid')) {
 }
 reduced.addEventListener('change', () => {
   if(reduced.matches) document.querySelectorAll('#teaser,video[data-autoplay]').forEach(v=>v.pause());
+});
+
+const gridFamily = document.querySelector('#grid-family');
+gridFamily?.addEventListener('change', () => {
+  document.querySelectorAll('[data-family]').forEach(panel => {
+    panel.hidden = panel.dataset.family !== gridFamily.value;
+    if (panel.hidden) panel.querySelectorAll('.viewer-tools').forEach(button => button.click());
+  });
+});
+
+const mazeFamily = document.querySelector('#maze-family');
+mazeFamily?.addEventListener('change', () => {
+  document.querySelectorAll('[data-maze-family]').forEach(panel => {
+    panel.hidden = panel.dataset.mazeFamily !== mazeFamily.value;
+    if (panel.hidden) panel.querySelectorAll('.viewer-tools').forEach(button => button.click());
+  });
+});
+
+const mpcView = document.querySelector('#mpc-view');
+mpcView?.addEventListener('change', () => {
+  document.querySelectorAll('.mpc-comparison .viewer').forEach(viewer => {
+    viewer.dispatchEvent(new Event('reset-viewer'));
+    const base = viewer.dataset.scene.replace(/-candidates$/, '');
+    const scene = base + (mpcView.value === 'candidates' ? '-candidates' : '');
+    viewer.dataset.scene = scene;
+    viewer.querySelector('.preview-image').src = clearAssetURL(`assets/media/${scene}.png`);
+  });
+});
+
+// Source-window validation also works when the host gives iframes opaque origins.
+window.addEventListener('message',event=>{
+  if(event.data?.type!=='clear-playback-time'||!Number.isFinite(event.data.time))return;
+  for(const viewer of document.querySelectorAll('.viewer[data-ego]')){
+    if(viewer.querySelector('iframe')?.contentWindow!==event.source)continue;
+    const video=viewer.querySelector('.ego-inset video');
+    const time=Math.max(0,Math.min(event.data.time,Number.isFinite(video.duration)?video.duration-.01:event.data.time));
+    if(video.readyState&&Math.abs(video.currentTime-time)>.055)video.currentTime=time;
+  }
 });

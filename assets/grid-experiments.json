@@ -1,0 +1,242 @@
+[
+  {
+    "scene": "grid-direct-autoregressive",
+    "family": "direct",
+    "method": "Autoregressive",
+    "success": true,
+    "interactions": 1,
+    "frames": 32
+  },
+  {
+    "scene": "grid-direct-gumbel-sinkhorn",
+    "family": "direct",
+    "method": "Gumbel\u2013Sinkhorn",
+    "success": true,
+    "interactions": 1,
+    "frames": 32
+  },
+  {
+    "scene": "grid-direct-polynet",
+    "family": "direct",
+    "method": "PolyNet",
+    "success": true,
+    "interactions": 1,
+    "frames": 32
+  },
+  {
+    "scene": "grid-direct-clear-ro",
+    "family": "direct",
+    "method": "CLEAR-RO",
+    "success": true,
+    "interactions": 0,
+    "frames": 26
+  },
+  {
+    "scene": "grid-direct-clear-ho",
+    "family": "direct",
+    "method": "CLEAR-HO",
+    "success": true,
+    "interactions": 0,
+    "frames": 26
+  },
+  {
+    "scene": "grid-direct-clear",
+    "family": "direct",
+    "method": "CLEAR (ours)",
+    "success": true,
+    "interactions": 0,
+    "frames": 26
+  },
+  {
+    "scene": "grid-single_gate-autoregressive",
+    "family": "single_gate",
+    "method": "Autoregressive",
+    "success": false,
+    "interactions": 0,
+    "frames": 2
+  },
+  {
+    "scene": "grid-single_gate-gumbel-sinkhorn",
+    "family": "single_gate",
+    "method": "Gumbel\u2013Sinkhorn",
+    "success": false,
+    "interactions": 0,
+    "frames": 2
+  },
+  {
+    "scene": "grid-single_gate-polynet",
+    "family": "single_gate",
+    "method": "PolyNet",
+    "success": true,
+    "interactions": 1,
+    "frames": 29
+  },
+  {
+    "scene": "grid-single_gate-clear-ro",
+    "family": "single_gate",
+    "method": "CLEAR-RO",
+    "success": true,
+    "interactions": 1,
+    "frames": 29
+  },
+  {
+    "scene": "grid-single_gate-clear-ho",
+    "family": "single_gate",
+    "method": "CLEAR-HO",
+    "success": true,
+    "interactions": 1,
+    "frames": 29
+  },
+  {
+    "scene": "grid-single_gate-clear",
+    "family": "single_gate",
+    "method": "CLEAR (ours)",
+    "success": true,
+    "interactions": 1,
+    "frames": 29
+  },
+  {
+    "scene": "grid-chain-autoregressive",
+    "family": "chain",
+    "method": "Autoregressive",
+    "success": false,
+    "interactions": 1,
+    "frames": 18
+  },
+  {
+    "scene": "grid-chain-gumbel-sinkhorn",
+    "family": "chain",
+    "method": "Gumbel\u2013Sinkhorn",
+    "success": false,
+    "interactions": 1,
+    "frames": 18
+  },
+  {
+    "scene": "grid-chain-polynet",
+    "family": "chain",
+    "method": "PolyNet",
+    "success": false,
+    "interactions": 1,
+    "frames": 18
+  },
+  {
+    "scene": "grid-chain-clear-ro",
+    "family": "chain",
+    "method": "CLEAR-RO",
+    "success": false,
+    "interactions": 0,
+    "frames": 2
+  },
+  {
+    "scene": "grid-chain-clear-ho",
+    "family": "chain",
+    "method": "CLEAR-HO",
+    "success": false,
+    "interactions": 0,
+    "frames": 2
+  },
+  {
+    "scene": "grid-chain-clear",
+    "family": "chain",
+    "method": "CLEAR (ours)",
+    "success": true,
+    "interactions": 3,
+    "frames": 51
+  },
+  {
+    "scene": "grid-branch-autoregressive",
+    "family": "branch",
+    "method": "Autoregressive",
+    "success": false,
+    "interactions": 1,
+    "frames": 7
+  },
+  {
+    "scene": "grid-branch-gumbel-sinkhorn",
+    "family": "branch",
+    "method": "Gumbel\u2013Sinkhorn",
+    "success": true,
+    "interactions": 3,
+    "frames": 58
+  },
+  {
+    "scene": "grid-branch-polynet",
+    "family": "branch",
+    "method": "PolyNet",
+    "success": false,
+    "interactions": 1,
+    "frames": 8
+  },
+  {
+    "scene": "grid-branch-clear-ro",
+    "family": "branch",
+    "method": "CLEAR-RO",
+    "success": false,
+    "interactions": 0,
+    "frames": 2
+  },
+  {
+    "scene": "grid-branch-clear-ho",
+    "family": "branch",
+    "method": "CLEAR-HO",
+    "success": false,
+    "interactions": 0,
+    "frames": 2
+  },
+  {
+    "scene": "grid-branch-clear",
+    "family": "branch",
+    "method": "CLEAR (ours)",
+    "success": true,
+    "interactions": 2,
+    "frames": 42
+  },
+  {
+    "scene": "grid-distractor-autoregressive",
+    "family": "distractor",
+    "method": "Autoregressive",
+    "success": false,
+    "interactions": 1,
+    "frames": 18
+  },
+  {
+    "scene": "grid-distractor-gumbel-sinkhorn",
+    "family": "distractor",
+    "method": "Gumbel\u2013Sinkhorn",
+    "success": false,
+    "interactions": 1,
+    "frames": 18
+  },
+  {
+    "scene": "grid-distractor-polynet",
+    "family": "distractor",
+    "method": "PolyNet",
+    "success": false,
+    "interactions": 1,
+    "frames": 18
+  },
+  {
+    "scene": "grid-distractor-clear-ro",
+    "family": "distractor",
+    "method": "CLEAR-RO",
+    "success": true,
+    "interactions": 1,
+    "frames": 49
+  },
+  {
+    "scene": "grid-distractor-clear-ho",
+    "family": "distractor",
+    "method": "CLEAR-HO",
+    "success": true,
+    "interactions": 1,
+    "frames": 49
+  },
+  {
+    "scene": "grid-distractor-clear",
+    "family": "distractor",
+    "method": "CLEAR (ours)",
+    "success": true,
+    "interactions": 1,
+    "frames": 49
+  }
+]
