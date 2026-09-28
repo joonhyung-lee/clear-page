@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local source video; publish only the sanitized web copy.
+/clear_video_final.mp4

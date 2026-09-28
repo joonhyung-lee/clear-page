@@ -1,61 +1,61 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CLEAR</title>
-<style>
-  :root { --fg:#1a1a1a; --muted:#666; --line:#e5e5e5; --accent:#2b5bd7; --bg:#fff; }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
-  main { max-width:900px; margin:0 auto; padding:56px 20px 80px; }
-  header { text-align:center; margin-bottom:48px; }
-  h1 { font-size:2.2rem; line-height:1.2; margin:0 0 8px; }
-  .subtitle { color:var(--muted); margin:0 0 16px; }
-  .authors { margin:0 0 20px; }
-  .btns a { display:inline-block; margin:4px; padding:8px 18px; border:1px solid var(--fg); border-radius:999px; color:var(--fg); text-decoration:none; font-weight:600; }
-  .btns a:hover { background:var(--fg); color:#fff; }
-  section { margin:40px 0; }
-  h2 { font-size:1.4rem; border-bottom:1px solid var(--line); padding-bottom:6px; margin:0 0 16px; }
-  figure { margin:0; }
-  figure img { width:100%; border:1px solid var(--line); border-radius:6px; background:#fff; }
-  figcaption { font-size:.9rem; color:var(--muted); margin-top:6px; text-align:center; }
-  .hero { margin-bottom:40px; }
-  pre { background:#f6f6f6; padding:14px; border-radius:6px; overflow-x:auto; font-size:.9rem; }
-  footer { color:var(--muted); font-size:.85rem; text-align:center; margin-top:60px; }
-</style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="CLEAR: capability-aware planning for robots interacting with movable objects. Anonymous research project." name="description"/>
+<meta content="no-referrer" name="referrer"/>
+<title>CLEAR — Capability-aware interaction planning</title>
+<link href="assets/favicon.svg" rel="icon" type="image/svg+xml"/>
+<link href="assets/site.css" rel="stylesheet"/>
+<script defer="" src="assets/site.js"></script>
 </head>
 <body>
-<main>
-  <header>
-    <h1>CLEAR: Capability-Aware Latent Ordering for Adaptive Interaction with Movable Objects</h1>
-    <p class="subtitle">ICRA 2027 &middot; Under review</p>
-    <p class="authors">Anonymous Authors</p>
-    <div class="btns">
-      <a href="https://anonymous.4open.science/r/clear-1209/">Code</a>
-    </div>
-  </header>
+<a class="skip" href="#main">Skip to content</a>
+<header class="hero" id="top">
+<video aria-label="Top-down replay of four robot embodiments navigating the same course" autoplay="" class="hero-video" id="teaser" loop="" muted="" playsinline="" poster="assets/media/teaser.png" preload="auto">
+<source src="assets/media/teaser.mp4" type="video/mp4"/>
+</video>
+<div class="hero-content wrap">
+<div class="hero-copy"><h1>CLEAR: Capability-Aware Latent Ordering for Adaptive Interaction with Movable Objects</h1><p>Anonymous Authors · ICRA 2027 · Under review</p></div>
+</div>
+<div class="hero-bottom wrap"><button id="hero-toggle" type="button">Pause teaser <span aria-hidden="true">Ⅱ</span></button></div>
+</header>
+<main id="main">
+<section aria-labelledby="tldr-title" class="tldr wrap" id="tldr">
+<h2 class="" id="tldr-title">TL;DR</h2>
 
-  <figure class="hero">
-    <img src="assets/overview.png" alt="CLEAR overview: different robots take different routes and interactions depending on their capabilities">
-    <figcaption>Robots with different capabilities (object pushing, crossing steps, driving on slopes) require different routes and object interactions in the same scene.</figcaption>
-  </figure>
+<video aria-label="CLEAR research overview video" class="tldr-video" controls="" loop="" muted="" playsinline="" poster="assets/media/tldr.png" preload="metadata"><source src="assets/media/tldr.mp4" type="video/mp4"/></video><p class="academic-copy">CLEAR jointly selects objects, determines their interaction order, and generates motion references conditioned on robot morphology and scene geometry.</p></section>
+<section class="section wrap" id="motivation">
+<div class="section-heading"><h2>Motivation</h2></div>
+<div class="motivation-layout">
 
-  <section>
-    <h2>Abstract</h2>
-    <p>Planning physical interactions in cluttered environments requires reasoning about robot capabilities. For example, a legged robot may climb stairs, while a wheeled robot may need an alternative route. However, the ability to move objects does not ensure task completion, as the interaction order and resulting object configurations can block subsequent actions. To address this challenge, we propose a capability-aware planner that jointly determines <em>which</em> objects to interact with, <em>in which order</em>, and <em>how</em> to move them. Our planner, <u>C</u>apability-Aware <u>L</u>atent Ord<u>e</u>ring for <u>A</u>daptive Inte<u>r</u>action with Movable Objects (CLEAR), learns to select objects and propose alternative interaction orders from scene observations and robot structure. For each proposed sequence, it generates object references, conditioning each prediction on those planned for preceding interactions. The planner checks whether candidate plans are feasible in the proposed interaction order, selects the valid candidate with the fewest object interactions, and replans from updated observations during execution. Our approach is evaluated in three simulation environments: 2D grids, ordered manipulation, and maze navigation. The maze experiments assess the effect of robot-structure conditioning and the ability to replan when environmental perturbations block access to required objects.</p>
-  </section>
-
-  <section>
-    <h2>Method</h2>
-    <figure>
-      <img src="assets/pipeline.png" alt="CLEAR pipeline">
-      <figcaption>(a) Embodiment-aware scene grounding, (b) latent interaction ordering, (c) rank-causal generation, (d) execution and replanning.</figcaption>
-    </figure>
-  </section>
-
-
-  <footer>Code: <a href="https://anonymous.4open.science/r/clear-1209/">anonymous.4open.science/r/clear-1209</a></footer>
+<figure><img alt="A humanoid pushes a box, a quadruped crosses steps, and a wheeled robot follows a slope to reach the same goal." height="1836" loading="lazy" src="assets/overview.png" width="2422"/><figcaption>Different capabilities change the available routes and interactions.</figcaption></figure>
+<div class="prose"><p class="academic-copy">Robot morphology determines terrain traversability and feasible object interactions. Planning must account for these constraints and for how each interaction affects subsequent actions.</p></div></div>
+</section>
+<section class="section encoding" id="encoding">
+<div class="wrap">
+<div class="section-heading"><h2>Embodiment-Encoding</h2></div>
+<div class="three-up">
+<article class="component"><div class="component-label"><h3>Robot structure</h3></div><div aria-label="Structure video grid" class="media-grid" data-grid="structure"><button aria-label="Expand G1" class="media-tile" data-scene="structure-g1" data-title="G1" type="button"><video aria-label="G1 preview" data-autoplay="" loop="" muted="" playsinline="" poster="assets/media/structure-g1.png" preload="none"><source src="assets/media/structure-g1.mp4" type="video/mp4"/></video><span>G1</span></button><button aria-label="Expand Spot" class="media-tile" data-scene="structure-spot" data-title="Spot" type="button"><video aria-label="Spot preview" data-autoplay="" loop="" muted="" playsinline="" poster="assets/media/structure-spot.png" preload="none"><source src="assets/media/structure-spot.mp4" type="video/mp4"/></video><span>Spot</span></button><button aria-label="Expand Spot + arm" class="media-tile" data-scene="structure-spot_arm" data-title="Spot + arm" type="button"><video aria-label="Spot + arm preview" data-autoplay="" loop="" muted="" playsinline="" poster="assets/media/structure-spot_arm.png" preload="none"><source src="assets/media/structure-spot_arm.mp4" type="video/mp4"/></video><span>Spot + arm</span></button><button aria-label="Expand Husky" class="media-tile" data-scene="structure-husky" data-title="Husky" type="button"><video aria-label="Husky preview" data-autoplay="" loop="" muted="" playsinline="" poster="assets/media/structure-husky.png" preload="none"><source src="assets/media/structure-husky.mp4" type="video/mp4"/></video><span>Husky</span></button><div class="grid-focus" hidden=""><div class="viewer focus-viewer" data-scene=""><video loop="" muted="" playsinline="" preload="none"></video><button class="launch" type="button">Play in 3D</button></div><span class="focus-title"></span><button aria-label="Close enlarged preview" class="focus-close" type="button">×</button></div></div><p>Transparent meshes expose each robot’s kinematic structure.</p></article>
+<article class="component"><div class="component-label"><h3>Object states</h3></div><div class="viewer" data-scene="objects"><video aria-label="Object states preview" data-autoplay="" loop="" muted="" playsinline="" poster="assets/media/objects.png" preload="none"><source src="assets/media/objects.mp4" type="video/mp4"/></video><button aria-label="Play interactive Object states visualization" class="launch" type="button"><span aria-hidden="true">▶</span> Play in 3D</button></div><p>Object poses describe the configuration before interaction.</p></article>
+<article class="component"><div class="component-label"><h3>Scene</h3></div><div aria-label="Scene video grid" class="media-grid" data-grid="scene"><button aria-label="Expand Stairs" class="media-tile" data-scene="scene-stairs" data-title="Stairs" type="button"><video aria-label="Stairs preview" data-autoplay="" loop="" muted="" playsinline="" poster="assets/media/scene-stairs.png" preload="none"><source src="assets/media/scene-stairs.mp4" type="video/mp4"/></video><span>Stairs</span></button><button aria-label="Expand Stepped bridge" class="media-tile" data-scene="scene-steps" data-title="Stepped bridge" type="button"><video aria-label="Stepped bridge preview" data-autoplay="" loop="" muted="" playsinline="" poster="assets/media/scene-steps.png" preload="none"><source src="assets/media/scene-steps.mp4" type="video/mp4"/></video><span>Stepped bridge</span></button><button aria-label="Expand Slope" class="media-tile" data-scene="scene-slope" data-title="Slope" type="button"><video aria-label="Slope preview" data-autoplay="" loop="" muted="" playsinline="" poster="assets/media/scene-slope.png" preload="none"><source src="assets/media/scene-slope.mp4" type="video/mp4"/></video><span>Slope</span></button><button aria-label="Expand Mixed terrain" class="media-tile" data-scene="scene-maze" data-title="Mixed terrain" type="button"><video aria-label="Mixed terrain preview" data-autoplay="" loop="" muted="" playsinline="" poster="assets/media/scene-maze.png" preload="none"><source src="assets/media/scene-maze.mp4" type="video/mp4"/></video><span>Mixed terrain</span></button><div class="grid-focus" hidden=""><div class="viewer focus-viewer" data-scene=""><video loop="" muted="" playsinline="" preload="none"></video><button class="launch" type="button">Play in 3D</button></div><span class="focus-title"></span><button aria-label="Close enlarged preview" class="focus-close" type="button">×</button></div></div><p>Recorded trajectories span stairs, slopes, and a stepped bridge visualization.</p></article>
+</div><p class="section-intro">Robot morphology, object poses, and scene geometry jointly specify the planning context.</p>
+<p class="viewer-note">Hover or select a tile to enlarge it. Select Play in 3D to inspect the scene.</p>
+<div class="two-up affordances">
+<article><div class="component-label"><h3>Accessibility</h3></div><div class="viewer affordance-viewer" data-scene="highlight-accessibility"><video aria-label="Accessibility demonstration: approach to a movable box" controls="" loop="" muted="" playsinline="" poster="assets/media/accessibility.png" preload="metadata"><source src="assets/media/accessibility.mp4" type="video/mp4"/></video><button class="launch" type="button">Inspect mesh highlights</button></div><p class="caption">Accessibility describes whether the robot can reach a feasible contact configuration around an object.</p></article>
+<article><div class="component-label"><h3>Capability</h3></div><div class="viewer affordance-viewer" data-scene="highlight-capability"><video aria-label="Capability demonstration: humanoid pushing a box" controls="" loop="" muted="" playsinline="" poster="assets/media/capability.png" preload="metadata"><source src="assets/media/capability.mp4" type="video/mp4"/></video><button class="launch" type="button">Inspect mesh highlights</button></div><p class="caption">Capability describes the robot motions and contact actions available for executing an interaction.</p></article>
+</div>
+<p class="viewer-note">Mesh highlights illustrate arm chains and support mechanisms. They do not represent learned scores.</p>
+</div>
+</section>
+<section class="section wrap" id="method">
+<div class="section-heading"><h2>Method</h2></div>
+<figure class="pipeline"><img alt="CLEAR pipeline: embodiment-aware scene grounding, latent interaction ordering, rank-causal generation, and execution with replanning." height="960" loading="lazy" src="assets/pipeline.png" width="1697"/><figcaption class="academic-copy">CLEAR proposes interaction orders and generates object motion references conditioned on preceding interactions. Feasibility checks identify valid plans, and updated observations support replanning during execution.</figcaption></figure>
+<details class="abstract"><summary>Read the abstract <span aria-hidden="true">+</span></summary><p id="abstract-text">Planning physical interactions in cluttered environments requires reasoning about robot capabilities. For example, a legged robot may climb stairs, while a wheeled robot may need an alternative route. However, the ability to move objects does not ensure task completion, as the interaction order and resulting object configurations can block subsequent actions. To address this challenge, we propose a capability-aware planner that jointly determines which objects to interact with, in which order, and how to move them. Our planner, Capability-Aware Latent Ordering for Adaptive Interaction with Movable Objects (CLEAR), learns to select objects and propose alternative interaction orders from scene observations and robot structure. For each proposed sequence, it generates object references, conditioning each prediction on those planned for preceding interactions. The planner checks whether candidate plans are feasible in the proposed interaction order, selects the valid candidate with the fewest object interactions, and replans from updated observations during execution. Our approach is evaluated in three simulation environments: 2D grids, ordered manipulation, and maze navigation. The maze experiments assess the effect of robot-structure conditioning and the ability to replan when environmental perturbations block access to required objects.</p></details>
+</section>
 </main>
+<footer class="wrap"><span>Anonymous Authors · ICRA 2027 · Under review</span><a href="https://anonymous.4open.science/r/clear-1209/" rel="noreferrer">Anonymous code ↗</a></footer>
 </body>
 </html>
