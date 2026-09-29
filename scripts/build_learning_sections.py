@@ -28,4 +28,6 @@ for paragraph in execution.find_all('p'):
   paragraph.string='The faint surface field shows learned contact scores. Two outlined regions locate the recorded left and right palms projected onto the object. These geometric contact neighborhoods are separate from the learned affordance field and do not assert measured contact forces.'
 for source in ['assets/learning-explorer.js','assets/mpc-process.js']:
  if not any(t.get('src','').split('?')[0]==source for t in s.find_all('script')):s.head.append(s.new_tag('script',attrs={'src':source,'defer':''}))
+from refine_method_presentation import refine
+refine(s)
 (root/'index.html').write_text(str(s).rstrip()+'\n')

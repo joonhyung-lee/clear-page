@@ -7,6 +7,10 @@
   let initialized=false,visible=false,playing=!reduced.matches,index=0,progress=0,last=0,frame=0,samples=[],dots=[],filter='all';
   const canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d'),range=root.querySelector('.sample-progress'),play=root.querySelector('.sample-play');
   const grid=root.querySelector('.sample-explorer-grid');
+  let mediaTimer;
+  const movie=root.dataset.kind==='grounding'?document.createElement('video'):null;
+  if(movie){movie.className='sample-video';movie.muted=true;movie.loop=true;movie.playsInline=true;movie.preload='metadata';movie.setAttribute('aria-label','Recorded physical robot attempt');canvas.before(movie);const map=document.createElement('details');map.className='sample-map-details';const title=document.createElement('summary');title.textContent='Trajectory map';map.append(title);canvas.after(map);map.append(canvas);movie.addEventListener('loadeddata',()=>{if(visible&&playing)movie.play().catch(()=>{});});}
+
   const connector=element('svg',{'class':'sample-connector','aria-hidden':'true'}),leader=element('path',{'class':'sample-leader',fill:'none'}),outline=element('path',{'class':'sample-view-outline',fill:'none'});
   const defs=element('defs',{}),mask=element('mask',{id:'sample-reveal-'+root.dataset.kind}),reveal=element('path',{fill:'none',stroke:'white','stroke-width':7,pathLength:1});
   const arrow=element('marker',{id:'sample-arrow-'+root.dataset.kind,viewBox:'0 0 8 8',refX:7,refY:4,markerWidth:6,markerHeight:6,orient:'auto'});arrow.append(element('path',{d:'M 1 1 L 7 4 L 1 7',fill:'none',stroke:'#748d80','stroke-width':1.2}));
@@ -14,7 +18,7 @@
   const phaseLabel=document.createElement('p');phaseLabel.className='sample-phase';canvas.after(phaseLabel);
   function connect(animate=false){
    if(!dots[index]||!visible)return;
-   const bounds=grid.getBoundingClientRect(),a=dots[index].getBoundingClientRect(),b=canvas.getBoundingClientRect();
+   const bounds=grid.getBoundingClientRect(),a=dots[index].getBoundingClientRect(),b=(movie||canvas).getBoundingClientRect();
    connector.setAttribute('viewBox',`0 0 ${bounds.width} ${bounds.height}`);
    const x=a.x+a.width/2-bounds.x,y=a.y+a.height/2-bounds.y,l=b.x-bounds.x,t=b.y-bounds.y,r=l+b.width,bottom=t+b.height;
    const stacked=b.y>a.bottom+30,tx=stacked?r-24:l,ty=stacked?t:t+Math.min(70,b.height/3),lane=bounds.width+8;
@@ -60,22 +64,24 @@
    phaseLabel.textContent=phase+(interval?` · label interval ${interval[0].toFixed(1)}–${interval[1].toFixed(1)} s`:'');
    range.value=progress;root.querySelector('.sample-time').textContent=time.toFixed(1)+' s';play.textContent=playing?'Pause rollout':'Play rollout';
   }
-  function tick(now){frame=0;if(!visible||!playing||!initialized||document.hidden)return;const f=samples[index]?.rollout;if(!f)return;const duration=Math.max(3,Math.min(22,f.at(-1)[0]-f[0][0]));if(last)progress=(progress+(now-last)/(duration*1000))%1;last=now;render();frame=requestAnimationFrame(tick);}
+  function tick(now){frame=0;if(!visible||!playing||!initialized||document.hidden)return;const f=samples[index]?.rollout;if(!f)return;const duration=Math.max(3,Math.min(22,f.at(-1)[0]-f[0][0]));if(movie){if(movie.readyState>=2)progress=Math.min(1,movie.currentTime/(f.at(-1)[0]-f[0][0]||1));}else if(last)progress=(progress+(now-last)/(duration*1000))%1;last=now;render();frame=requestAnimationFrame(tick);}
   function schedule(){if(!frame&&visible&&!document.hidden&&playing&&initialized){last=0;frame=requestAnimationFrame(tick);}}
   function select(i){
    index=(i+samples.length)%samples.length;progress=0;const sample=samples[index];
+   if(movie){clearTimeout(mediaTimer);movie.pause();movie.removeAttribute('src');movie.load();const file='assets/media/attempts/attempt-'+String(index).padStart(3,'0');movie.poster=clearAssetURL(file+'.png');mediaTimer=setTimeout(()=>{movie.src=clearAssetURL(file+'.mp4');movie.load();},150);}
+
    dots.forEach((dot,j)=>{dot.classList.toggle('selected',j===index);dot.setAttribute('tabindex',j===index?'0':'-1');dot.setAttribute('aria-pressed',String(j===index));});
    root.querySelector('.sample-title').textContent=`Sample ${index+1} · ${sample.body==='g1'?'G1':'Spot + arm'} · ${sample.split==='train'?'Training':'Validation'}`;
-   root.querySelector('.sample-inputs').textContent=`Inputs: ${sample.links} structural rows, ${sample.scene.objects.length} object ${sample.scene.objects.length===1?'state':'states'}, scene geometry${sample.query?', and one directed query':''}.`;
+   root.querySelector('.sample-inputs').textContent=`${sample.links} body links · ${sample.scene.objects.length} objects`;
    const target=root.querySelector('.sample-target');target.replaceChildren();
    if(root.dataset.kind==='grounding'){
-    const p=document.createElement('p');p.textContent=`Safe crossing target: ${sample.target}. Predicted probability: ${(100*sample.prediction).toFixed(1)}%.`;target.append(p);
-    if(sample.outcome){const outcome=document.createElement('p');outcome.textContent='Recorded outcome: '+(sample.outcome.fell?'a fall was observed.':sample.outcome.collision?'a collision was observed.':sample.outcome.success?'the crossing completed safely.':'the crossing did not complete.');target.append(outcome);}
+    const p=document.createElement('p');p.textContent=`Predicted safe crossing: ${(100*sample.prediction).toFixed(1)}%`;target.append(p);
+    if(sample.outcome){const outcome=document.createElement('p');outcome.textContent='Observed: '+(sample.outcome.fell?'Fall':sample.outcome.collision?'Collision':sample.outcome.success?'Safe crossing':'Incomplete');target.append(outcome);}
    }else{
     const p=document.createElement('p');p.textContent='Reference order: '+(sample.paths.length?sample.paths.map(p=>'Object '+p.object).join(' → '):'No object interaction');target.append(p);
     const table=document.createElement('table');table.innerHTML='<thead><tr><th>Object</th><th>Target rank</th><th>Selection</th><th>Priority μ</th></tr></thead>';const body=document.createElement('tbody');
-    sample.rank.forEach((rank,j)=>{const row=document.createElement('tr');for(const value of [sample.scene.objects[j].object_id,rank<0?'Not selected':rank,(100*sample.selection[j]).toFixed(1)+'%',sample.mu[j].toFixed(2)]){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}body.append(row);});table.append(body);target.append(table);
-    const loss=document.createElement('p');loss.className='sample-loss-values';loss.textContent=`Checkpoint losses on this sample: selection ${sample.losses.selection.toFixed(3)}, rank ${sample.losses.order.toFixed(3)}, Gaussian regularization ${sample.losses.kl.toFixed(3)}.`;target.append(loss);
+    sample.rank.forEach((rank,j)=>{const row=document.createElement('tr');for(const value of [sample.scene.objects[j].object_id,rank<0?'Not selected':rank,(100*sample.selection[j]).toFixed(1)+'%',sample.mu[j].toFixed(2)]){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}body.append(row);});table.append(body);const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Targets and losses';details.append(summary,table);target.append(details);
+    const loss=document.createElement('p');loss.className='sample-loss-values';loss.textContent=`Checkpoint losses on this sample: selection ${sample.losses.selection.toFixed(3)}, rank ${sample.losses.order.toFixed(3)}, Gaussian regularization ${sample.losses.kl.toFixed(3)}.`;details.append(loss);
    }
    render();connect(true);schedule();
   }
@@ -96,7 +102,7 @@
      if(closest>=0&&closest!==index)select(closest);
     });
     const layouts=new Set(samples.map(s=>JSON.stringify([s.scene.walls,s.scene.terrain,s.scene.objects]))).size,heights=samples.flatMap(s=>s.scene.terrain.map(t=>t.height_m??t.end_height_m??0));
-    root.querySelector('.sample-count').textContent=`${samples.filter(s=>s.split==='train').length} training and ${samples.filter(s=>s.split==='val').length} validation samples. ${samples.filter(s=>s.scene.terrain.length).length} samples in stair scenes and ${samples.filter(s=>!s.scene.terrain.length).length} in flat scenes, across ${layouts} scene layouts.${heights.length?` Step heights span ${Math.min(...heights).toFixed(2)}–${Math.max(...heights).toFixed(2)} m.`:""}`;
+    root.querySelector('.sample-count').textContent=`${samples.length} samples · ${layouts} scene layouts`;
     const filters=document.createElement('div');filters.className='sample-filters';filters.setAttribute('role','group');filters.setAttribute('aria-label','Filter recorded samples');
     const options=[['all','All samples'],['g1','G1'],['spot_arm','Spot + arm'],['stairs','Stair scenes'],['flat','Flat scenes'],...(root.dataset.kind==='grounding'?[['safe','Safe'],['blocked','Failed crossing']]:[['interaction','Object interaction']])];
     for(const [key,label]of options){const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('aria-pressed',String(key===filter));button.onclick=()=>{filter=key;filters.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));dots.forEach((dot,i)=>{dot.classList.toggle('filtered',!matches(samples[i]));dot.setAttribute('aria-disabled',String(!matches(samples[i])));});const next=samples.findIndex(matches);if(next>=0)select(next);};filters.append(button);}
@@ -106,11 +112,11 @@
     status.hidden=true;root.querySelector('.learning-content').hidden=false;const preferred=samples.findIndex(s=>s.split==='train'&&(root.dataset.kind==='ordering'?s.paths.length>1:s.target===1&&Math.max(...s.rollout.map(f=>f[5]))-Math.min(...s.rollout.map(f=>f[5]))>.3));select(preferred<0?0:preferred);
    }catch{initialized=false;status.textContent='Samples are taking longer to load. ';const button=document.createElement('button');button.type='button';button.textContent='Retry samples';button.onclick=initialize;status.append(button);}
   }
-  const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;root.classList.toggle('is-visible',visible);if(visible){initialize();connect();schedule();}else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:'160px'});observer.observe(root);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else schedule();});
-  play.addEventListener('click',()=>{playing=!playing;render();schedule();});range.addEventListener('input',()=>{progress=+range.value;playing=false;render();});
+  const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;root.classList.toggle('is-visible',visible);if(visible){initialize();connect();schedule();if(movie&&playing&&movie.readyState>=2)movie.play().catch(()=>{});}else{cancelAnimationFrame(frame);frame=0;last=0;movie?.pause();}},{rootMargin:'160px'});observer.observe(root);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;movie?.pause();}else{schedule();if(movie&&visible&&playing)movie.play().catch(()=>{});}});
+  play.addEventListener('click',()=>{playing=!playing;if(movie){if(playing)movie.play().catch(()=>{});else movie.pause();}render();schedule();});range.addEventListener('input',()=>{progress=+range.value;playing=false;if(movie){movie.pause();const f=samples[index].rollout;if(movie.readyState)movie.currentTime=progress*(f.at(-1)[0]-f[0][0]);}render();});
   function advance(direction){for(let step=1;step<=samples.length;step++){const i=(index+direction*step+samples.length)%samples.length;if(matches(samples[i])){select(i);break;}}}
   root.querySelector('.sample-prev').onclick=()=>advance(-1);root.querySelector('.sample-next').onclick=()=>advance(1);
-  reduced.addEventListener('change',()=>{if(reduced.matches){playing=false;render();}});
+  reduced.addEventListener('change',()=>{if(reduced.matches){playing=false;movie?.pause();render();}});
  }
 })();

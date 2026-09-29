@@ -399,3 +399,14 @@ window.addEventListener('message',event=>{
     if(video.readyState&&Math.abs(video.currentTime-time)>.055)video.currentTime=time;
   }
 });
+
+// Detail views accompany the video preview as well as native 3D playback.
+for(const viewer of document.querySelectorAll('.mpc-comparison .viewer[data-ego]')){
+ const main=viewer.querySelector('.preview-video'),detail=viewer.querySelector('.ego-inset video');
+ if(!main||!detail)continue;
+ const synchronize=()=>{if(viewer.querySelector('iframe.scene-ready'))return;if(detail.readyState&&Math.abs(detail.currentTime-main.currentTime)>.08)detail.currentTime=Math.min(main.currentTime,detail.duration-.01);};
+ main.addEventListener('play',()=>{if(detail.preload==='none'){detail.preload='auto';detail.load();}synchronize();detail.play().catch(()=>{});});
+ for(const name of ['timeupdate','seeking','seeked'])main.addEventListener(name,synchronize);
+ main.addEventListener('pause',()=>detail.pause());main.addEventListener('ended',()=>detail.pause());
+ detail.addEventListener('loadeddata',()=>{synchronize();if(!main.paused&&!viewer.querySelector('iframe.scene-ready'))detail.play().catch(()=>{});});
+}
