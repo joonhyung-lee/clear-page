@@ -70,7 +70,8 @@ async def main():
                 videos = await page.locator('.mpc-scenes-grid .experiment-viewer').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().top)')
                 assert len(videos) == 4 and max(videos) - min(videos) < 1, (width, videos)
                 w = (await page.locator('#training-objective').bounding_box())['width']
-                assert abs(w / width - .85) < .001
+                expected = width - 280 if width >= 1200 else width * .85
+                assert abs(w - expected) < 1
             if width in [1440, 390]:
                 await page.locator('.mpc-scenes-grid').screenshot(path=f'/tmp/comparison-layout-{width}.png')
                 await page.locator('#training-objective').screenshot(path=f'/tmp/training-losses-{width}.png')

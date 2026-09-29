@@ -4,7 +4,7 @@ from playwright.async_api import async_playwright
 async def main():
  async with async_playwright() as p:
   b=await p.chromium.launch();page=await b.new_page(viewport={'width':1440,'height':1000},reduced_motion='reduce');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-  await page.goto('http://localhost:8765',wait_until='domcontentloaded');root=page.locator('#mpc-process');await root.scroll_into_view_if_needed();await root.locator('.mpc-process-content').wait_for()
+  await page.goto('http://localhost:8765/#mpc-process',wait_until='domcontentloaded');root=page.locator('#mpc-process');await root.scroll_into_view_if_needed();await root.locator('.mpc-process-content').wait_for()
   assert await root.get_attribute('data-play-limit')=='15'
   slider=root.locator('#mpc-process-update');await slider.evaluate('e=>{e.value=.5;e.dispatchEvent(new Event("input"))}')
   canvas=root.locator('canvas').first

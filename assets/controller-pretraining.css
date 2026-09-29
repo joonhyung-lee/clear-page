@@ -1,0 +1,23 @@
+#controller-pretraining{margin:30px 0 24px;padding-top:22px;border-top:1px solid #e2e6dc}
+#controller-pretraining>h4{font-size:18px;font-weight:500;margin:0 0 12px}
+.loco-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:24px 0 18px}
+.loco-bodies,.loco-metrics{display:flex;gap:5px;flex-wrap:wrap}
+.loco-toolbar button,.loco-metrics button,.loco-loading button{border:1px solid #dce3d5;background:#fff;padding:6px 12px;font-size:12px}
+.loco-toolbar button[aria-pressed=true],.loco-metrics button[aria-pressed=true]{background:#edf2e8;border-color:#9faf94;color:#334e2b}
+.loco-checkpoint{font-size:11px;color:#7d8576;font-variant-numeric:tabular-nums}
+.loco-row{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:start}
+.loco-rollout{min-width:0}.loco-rollout video{display:block;width:100%;aspect-ratio:8/5;background:#f3f5ef}
+.loco-rollout figcaption{font-size:12px;margin:10px 0 0}
+.loco-body-note{font-size:12px;line-height:1.6;color:#7d8576;margin:5px 0 0}
+.loco-evidence{min-width:0;min-height:455px}.loco-metrics{margin-bottom:14px}.loco-metrics button{padding:4px 9px;font-size:11px}
+.loco-chart{position:relative;margin:0 0 9px;min-width:0}.loco-chart figcaption{font-size:11px;margin:0 0 2px;color:#63705c}
+.loco-chart canvas{display:block;width:100%;height:104px;touch-action:pan-y}
+.loco-chart canvas:focus-visible{outline:1px solid #829775;outline-offset:2px}
+.loco-tooltip{position:absolute;z-index:2;max-width:100%;width:195px;padding:8px 10px;background:#fffffff5;border:1px solid #c1cdb6;pointer-events:none;font-size:11px;line-height:1.5;font-variant-numeric:tabular-nums}
+.loco-tooltip strong{display:block;font-weight:500}.loco-tooltip span{display:block;color:#718069}
+.loco-phases{display:flex;gap:6px 14px;flex-wrap:wrap;margin:7px 0;font-size:10px;color:#748168}
+.loco-phases span:before{content:'';display:inline-block;width:12px;height:2px;vertical-align:middle;background:var(--phase);margin-right:5px}
+.loco-loading{font-size:12px;color:#738369;min-height:280px;padding-top:60px}
+.loco-status{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+.loco-evidence-note{font-size:11px;color:#7a8272;line-height:1.65;margin:12px 0}
+@media(max-width:800px){.loco-row{grid-template-columns:1fr;gap:20px}.loco-checkpoint{font-size:10px}.loco-toolbar{gap:10px}.loco-toolbar button{padding:6px 10px}}
