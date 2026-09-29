@@ -7,10 +7,31 @@
   let initialized=false,visible=false,playing=!reduced.matches,index=0,progress=0,last=0,frame=0,samples=[],dots=[],filter='all';
   const canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d'),range=root.querySelector('.sample-progress'),play=root.querySelector('.sample-play');
   const grid=root.querySelector('.sample-explorer-grid');
-  let mediaTimer;
+  let mediaTimer, movieVisible=false;
   const movie=root.dataset.kind==='grounding'?document.createElement('video'):null;
-  if(movie){movie.className='sample-video';movie.muted=true;movie.loop=true;movie.playsInline=true;movie.preload='metadata';movie.setAttribute('aria-label','Recorded physical robot attempt');canvas.before(movie);const map=document.createElement('details');map.className='sample-map-details';const title=document.createElement('summary');title.textContent='Trajectory map';map.append(title);canvas.after(map);map.append(canvas);movie.addEventListener('loadeddata',()=>{if(visible&&playing)movie.play().catch(()=>{});});}
+  if(movie){movie.className='sample-video';movie.muted=true;movie.loop=true;movie.playsInline=true;movie.preload='metadata';movie.setAttribute('aria-label','Recorded physical robot attempt');canvas.before(movie);const map=document.createElement('div');map.className='sample-map-details';const title=document.createElement('h5');title.textContent='Trajectory map';map.append(title);canvas.after(map);map.append(canvas);movie.addEventListener('loadeddata',()=>{if(movieVisible&&playing&&!document.hidden)movie.play().catch(()=>{});});}
 
+  const factors=document.createElement('div');factors.className='sample-factors';factors.setAttribute('role','group');factors.setAttribute('aria-label','Match observed inputs to dataset points');
+  const factorNote=document.createElement('p');factorNote.className='sample-factor-note';
+  root.querySelector('.sample-scatter').before(factors,factorNote);
+  const signature=(sample,key)=>JSON.stringify(key==='body'?[sample.body,sample.links]:key==='objects'?sample.scene.objects:key==='scene'?[sample.scene.walls,sample.scene.terrain]:sample.query||[sample.scene.start,sample.scene.goal]);
+  function highlightFactor(key){
+   const sample=samples[index];if(!sample)return;
+   root.dataset.factor=key||'';let count=0;
+   dots.forEach((dot,i)=>{const same=!!key&&signature(samples[i],key)===signature(sample,key);if(same)count++;dot.classList.toggle('factor-match',same);dot.classList.toggle('factor-unmatched',!!key&&!same);});
+   root.dataset.factorMatches=String(count);
+   factorNote.textContent=key?count+' recorded samples share this '+({body:'body structure',objects:'object configuration',scene:'scene geometry',query:'query'}[key])+'.': 'Hover or focus an input to outline matching samples. Each point encodes the combined inputs. The t-SNE axes do not represent individual factors.';
+  }
+  function inputFactors(sample){
+   factors.replaceChildren();
+   const point=p=>p?`(${p.slice(0,2).map(v=>v.toFixed(1)).join(', ')})`:'Recorded start';
+   const query=sample.query||[sample.scene.start,sample.scene.goal];
+   const items=[['body','Body',`${sample.body==='g1'?'G1':'Spot + arm'} · ${sample.links} links`],['objects','Objects',`${sample.scene.objects.length} objects`],['scene','Scene',`${sample.scene.terrain.length} terrain patches · ${sample.scene.walls.length} walls`],['query',sample.query?'Query':'Start → goal',`${point(query[0])} → ${point(query[1])}`]];
+   for(const [key,label,value] of items){const button=document.createElement('button');button.type='button';button.dataset.factor=key;const name=document.createElement('span'),detail=document.createElement('strong');name.textContent=label;detail.textContent=value;button.append(name,detail);button.onpointerenter=button.onfocus=()=>highlightFactor(key);button.onpointerleave=()=>{if(document.activeElement!==button)highlightFactor(null);};button.onblur=()=>highlightFactor(null);button.onclick=()=>highlightFactor(key);factors.append(button);}
+   highlightFactor(null);
+  }
+
+  if(movie)new IntersectionObserver(entries=>{movieVisible=entries[0].isIntersecting;if(movieVisible&&playing&&!document.hidden)movie.play().catch(()=>{});else movie.pause();}).observe(movie);
   let objectFocus=null;
   if(root.dataset.kind==='ordering'){
    const legend=document.createElement('p');legend.className='sample-map-legend';legend.textContent='Dashed green: recorded route · Colored objects: reference interactions';canvas.after(legend);
@@ -82,6 +103,7 @@
    dots.forEach((dot,j)=>{dot.classList.toggle('selected',j===index);dot.setAttribute('tabindex',j===index?'0':'-1');dot.setAttribute('aria-pressed',String(j===index));});
    root.querySelector('.sample-title').textContent=`Sample ${index+1} · ${sample.body==='g1'?'G1':'Spot + arm'} · ${sample.split==='train'?'Training':'Validation'}`;
    root.querySelector('.sample-inputs').textContent=`${sample.links} body links · ${sample.scene.objects.length} objects`;
+   inputFactors(sample);
    const target=root.querySelector('.sample-target');target.replaceChildren();
    if(root.dataset.kind==='grounding'){
     const p=document.createElement('p');p.textContent=`Predicted safe crossing: ${(100*sample.prediction).toFixed(1)}%`;target.append(p);
@@ -91,7 +113,7 @@
     const label=document.createElement('span');label.textContent=sample.paths.length?'Move along the route':'Route needs no object interaction';sequence.append(label);
     sample.paths.forEach((path,j)=>{const button=document.createElement('button');button.type='button';button.textContent=(j+1)+'. Object '+path.object;button.onclick=()=>{objectFocus=path.object;let k=1;while(k<sample.rollout.length&&Math.hypot(sample.rollout[k][4][path.object][0]-sample.rollout[0][4][path.object][0],sample.rollout[k][4][path.object][1]-sample.rollout[0][4][path.object][1])<.025)k++;k=Math.min(k,sample.rollout.length-1);progress=(sample.rollout[k][0]-sample.rollout[0][0])/(sample.rollout.at(-1)[0]-sample.rollout[0][0]);playing=false;render();};sequence.append(button);});target.append(sequence);
     const table=document.createElement('table');table.innerHTML='<thead><tr><th>Object</th><th>Selection probability</th><th>Priority μ ± σ</th></tr></thead>';const body=document.createElement('tbody');
-    sample.rank.forEach((rank,j)=>{const row=document.createElement('tr');for(const value of [sample.scene.objects[j].object_id,(sample.selection[j]<.001?'<0.1':sample.selection[j]>.999?'>99.9':(100*sample.selection[j]).toFixed(1))+'%',sample.mu[j].toFixed(2)+' ± '+sample.sigma[j].toFixed(2)]){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}body.append(row);});table.append(body);const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Model predictions';details.append(summary,table);target.append(details);
+    sample.rank.forEach((rank,j)=>{const row=document.createElement('tr');for(const value of [sample.scene.objects[j].object_id,(sample.selection[j]<.001?'<0.1':sample.selection[j]>.999?'>99.9':(100*sample.selection[j]).toFixed(1))+'%',sample.mu[j].toFixed(2)+' ± '+sample.sigma[j].toFixed(2)]){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}body.append(row);});table.append(body);const details=document.createElement('div'),summary=document.createElement('h5');summary.textContent='Model predictions';details.append(summary,table);target.append(details);
 
    }
    render();connect(true);schedule();
@@ -124,9 +146,9 @@
     status.hidden=true;root.querySelector('.learning-content').hidden=false;const preferred=samples.findIndex(s=>s.split==='train'&&(root.dataset.kind==='ordering'?s.paths.length>1:s.target===1&&Math.max(...s.rollout.map(f=>f[5]))-Math.min(...s.rollout.map(f=>f[5]))>.3));select(preferred<0?0:preferred);
    }catch{initialized=false;status.textContent='Samples are taking longer to load. ';const button=document.createElement('button');button.type='button';button.textContent='Retry samples';button.onclick=initialize;status.append(button);}
   }
-  const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;root.classList.toggle('is-visible',visible);if(visible){initialize();connect();schedule();if(movie&&playing&&movie.readyState>=2)movie.play().catch(()=>{});}else{cancelAnimationFrame(frame);frame=0;last=0;movie?.pause();}},{rootMargin:'160px'});observer.observe(root);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;movie?.pause();}else{schedule();if(movie&&visible&&playing)movie.play().catch(()=>{});}});
-  play.addEventListener('click',()=>{playing=!playing;if(movie){if(playing)movie.play().catch(()=>{});else movie.pause();}render();schedule();});range.addEventListener('input',()=>{progress=+range.value;playing=false;if(movie){movie.pause();const f=samples[index].rollout;if(movie.readyState)movie.currentTime=progress*(f.at(-1)[0]-f[0][0]);}render();});
+  const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;root.classList.toggle('is-visible',visible);if(visible){initialize();connect();schedule();if(movie&&movieVisible&&playing&&movie.readyState>=2)movie.play().catch(()=>{});}else{cancelAnimationFrame(frame);frame=0;last=0;movie?.pause();}},{rootMargin:'0px'});observer.observe(root);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;movie?.pause();}else{schedule();if(movie&&movieVisible&&playing)movie.play().catch(()=>{});}});
+  play.addEventListener('click',()=>{playing=!playing;if(movie){if(playing&&movieVisible)movie.play().catch(()=>{});else movie.pause();}render();schedule();});range.addEventListener('input',()=>{progress=+range.value;playing=false;if(movie){movie.pause();const f=samples[index].rollout;if(movie.readyState)movie.currentTime=progress*(f.at(-1)[0]-f[0][0]);}render();});
   function advance(direction){for(let step=1;step<=samples.length;step++){const i=(index+direction*step+samples.length)%samples.length;if(matches(samples[i])){select(i);break;}}}
   root.querySelector('.sample-prev').onclick=()=>advance(-1);root.querySelector('.sample-next').onclick=()=>advance(1);
   reduced.addEventListener('change',()=>{if(reduced.matches){playing=false;movie?.pause();render();}});

@@ -29,11 +29,11 @@
   order.forEach((o,k)=>{if(k){const arrow=document.createElement('span');arrow.textContent='→';sequence.append(arrow);}const token=document.createElement('strong');token.style.borderColor=colors[o.i%colors.length];token.textContent='Object '+o.i;sequence.append(token);});host.append(sequence);
  };
  const layout=document.querySelector('.maze-order-layout'),d=window.CLEAR_MAZE_TRACE;if(!layout||!d)return;
- const chart=document.createElement('div');chart.className='ordering-main';chart.innerHTML='<h4>Sample priorities, then sort the selected objects</h4><div class="ordering-plot"></div><p class="figure-caption">Curves show the learned Gaussian priorities. Dots mark one saved draw. All four saved draws produce the same order.</p>';
+ const chart=document.createElement('div');chart.className='ordering-main';chart.innerHTML='<h5>Sample priorities and sort the selected objects</h5><div class="ordering-plot"></div><p class="figure-caption">Curves show the learned Gaussian priorities. Dots mark one saved draw. All four saved draws produce the same order.</p>';
  const context=layout.querySelector('#context-formation');if(context)context.after(chart);else layout.prepend(chart);
  const readout=layout.querySelector('.maze-order-readout'),result=readout.querySelector('#maze-order-result');result.hidden=true;
  chart.append(readout.querySelector('.control-row'));
- const details=document.createElement('details');details.className='ordering-spatial method-details';const summary=document.createElement('summary');summary.textContent='Inspect the spatial context and numeric predictions';details.append(summary);const columns=document.createElement('div');columns.className='ordering-spatial-columns';columns.append(layout.querySelector('.viewer'),readout);details.append(columns);layout.append(details);
+ const details=document.createElement('div');details.className='ordering-spatial method-details';const summary=document.createElement('h5');summary.textContent='Inspect the spatial context and numeric predictions';details.append(summary);const columns=document.createElement('div');columns.className='ordering-spatial-columns';columns.append(layout.querySelector('.viewer'),readout);details.append(columns);layout.append(details);
  function draw(){const sample=Number(layout.querySelector('.viewer').dataset.orderSample||0);window.clearOrderingPlot(chart.querySelector('.ordering-plot'),d,d.traces[sample]);chart.dataset.sample=sample;}
  document.addEventListener('clear-order-draw',draw);draw();
  const play=document.createElement('button');play.type='button';play.className='order-draw-play';play.textContent='Play saved draws';play.setAttribute('aria-pressed','false');chart.querySelector('.control-row').prepend(play);

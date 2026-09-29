@@ -7,7 +7,7 @@ def refine(soup):
   marker.attrs.pop('markerWidth',None);marker.attrs.pop('markerHeight',None)
   marker['markerwidth']='10';marker['markerheight']='10'
  for section in soup.select('.learning-explorer'):
-  kind=section.get('data-kind');section.select_one('h4 + p').string=('Select a point to replay the recorded attempt and compare its outcome with the prediction.' if kind=='grounding' else 'Follow the recorded route from start to goal and inspect the objects moved along it.')
+  kind=section.get('data-kind');section.select_one('h4 + p, h5 + p').string=('Select a point to replay the recorded attempt and compare its outcome with the prediction.' if kind=='grounding' else 'Follow the recorded route from start to goal and inspect the objects moved along it.')
   section.select_one('.sample-scatter').find_next_sibling('figcaption').string='Select a recorded sample.'
   if not section.select_one('.sample-explanation-details'):
    details=soup.new_tag('details',attrs={'class':'sample-explanation-details method-details'});summary=soup.new_tag('summary');summary.string='Data and supervision';details.append(summary)

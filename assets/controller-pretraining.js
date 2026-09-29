@@ -1,22 +1,28 @@
 /* Numeric training traces are loaded per embodiment, only when the section is nearby. */
 (() => {
   const root = document.querySelector('#controller-pretraining'); if (!root) return;
-  const charts = [...root.querySelectorAll('[data-loco-chart]')], videos = [...root.querySelectorAll('video')];
+  const charts = [...root.querySelectorAll('[data-loco-chart]')], viewers = [...root.querySelectorAll('[data-loco-viewer]')];
   const colors = ['#64879b', '#9d8760', '#708963'];
   const labels = {value:'Value loss', policy:'Policy surrogate loss', entropy:'Policy entropy', reward:'Episode return', terrain:'Mean terrain level', tracking:'Velocity tracking error', arm:'Arm curriculum level'};
-  const notes = {g1:'Terrain adapted G1 policy with action rate regularization.', spot:'Nominal arm pretraining transferred to the arm free body.', spot_arm:'Arm pose curriculum with the deployed folded pose.'};
+  const notes = {g1:'Warm start → terrain adaptation → action rate regularization.', spot:'Nominal arm training → torso control on mixed terrain.', spot_arm:'Continued training with an expanding arm pose curriculum.'};
+  const stages={g1:[0,5000,17000,22800],spot:[0,7000,8400,13200],spot_arm:[13200,18000,22600,28000]};
+  const stageNames={g1:['Warm start','Terrain adaptation','Terrain adaptation','Action rate regularization'],spot:['Early training','Torso control','Mixed terrain','Final checkpoint'],spot_arm:['Arm curriculum begins','Arm curriculum','Arm curriculum','Final checkpoint']};
+  let stageIndex=0, pendingStage=null;
   let body = 'g1', mode = 'optimization', data = null, step = null, hovered = null, near = false, onscreen = false, frame;
   const number = n => Number(n.toPrecision(5)).toString();
   function keys() { return mode === 'optimization' ? ['value','policy','entropy'] : ['reward','terrain',body === 'spot_arm' ? 'arm' : 'tracking']; }
-  function media() {
-    for (const video of videos) {
-      const selected = video.dataset.locoVideo === body; video.hidden = !selected;
-      if (selected && near && !video.getAttribute('src')) { video.src = clearAssetURL(video.dataset.src); video.load(); }
-      if ((!selected || !onscreen || document.hidden) && !video.paused) video.pause();
-      if (selected && onscreen && !document.hidden && video.readyState >= 2 && !video.dataset.started && !reduced.matches) { video.dataset.started='true'; video.play().catch(() => { delete video.dataset.started; }); }
-    }
+  function activeViewer(){return viewers.find(v=>v.dataset.locoViewer===body);}
+  function media(){viewers.forEach(v=>v.hidden=v.dataset.locoViewer!==body);}
+  function showStage(index,seek=false){
+    stageIndex=index;root.dataset.checkpoint=String(stages[body][index]);
+    root.querySelector('.loco-checkpoint').textContent='Iteration '+stages[body][index].toLocaleString('en-US')+' · '+stageNames[body][index];
+    root.querySelectorAll('[data-loco-stage]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.locoStage)===index)));
+    if(seek){const f=activeViewer().querySelector('iframe.scene-ready');if(f){pendingStage=null;f.contentWindow.postMessage({type:'clear-playback-command',time:index*8+.001,playing:!reduced.matches},'*');}else{pendingStage=index;if(!activeViewer().querySelector('.viewer-status'))activeViewer().querySelector('.launch').click();}}
+    schedule();
   }
-  videos.forEach(video => video.addEventListener('loadeddata',media));
+  function stageButtons(){const host=root.querySelector('.loco-stages');host.replaceChildren();stages[body].forEach((iteration,i)=>{const button=document.createElement('button');button.type='button';button.dataset.locoStage=i;button.textContent=iteration.toLocaleString('en-US');button.setAttribute('aria-label','Inspect checkpoint at iteration '+iteration);button.onclick=()=>showStage(i,true);host.append(button);});showStage(0);}
+  viewers.forEach(v=>{observeAutomaticScene(v);v.addEventListener('scene-settled',e=>{if(v===activeViewer()&&!e.detail?.failed&&pendingStage!==null)showStage(pendingStage,true);});});
+  window.addEventListener('message',e=>{if(e.data?.type!=='clear-playback-time'||e.source!==activeViewer()?.querySelector('iframe')?.contentWindow||!Number.isFinite(e.data.time))return;const index=Math.min(3,Math.floor(e.data.time/8));if(index!==stageIndex)showStage(index);});
   function nearest(rows, x) {
     let lo = 0, hi = rows.length - 1;
     while (lo < hi) { const m = (lo + hi) >> 1; if (rows[m][0] < x) lo = m + 1; else hi = m; }
@@ -54,7 +60,8 @@
         }
         ctx.stroke();
       });ctx.restore();
-      const row = step===null ? null : data.samples[nearest(data.samples,step)];
+      ctx.strokeStyle='#7f9370';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x(stages[body][stageIndex]),top);ctx.lineTo(x(stages[body][stageIndex]),bottom);ctx.stroke();
+      const row = data.samples[nearest(data.samples,step??stages[body][stageIndex])];
       const inspected = row ? {step:row[0],phase:row[1],metric:key,value:row[col]} : null;
       chart.dataset.inspected = JSON.stringify(inspected);
       if(row) {
@@ -73,13 +80,13 @@
   async function load() {
     const requested=body;
     root.querySelector('.loco-body-note').textContent=notes[body];
-    root.querySelector('.loco-checkpoint').textContent='';media();
+    stageButtons();media();
     root.querySelector('.loco-loading').hidden=false;root.querySelector('.loco-charts').hidden=true;
     try {
       await loadScript('assets/locomotion-training-'+requested+'.js',()=>!!window.CLEAR_LOCOMOTION_DATA?.[requested]);
       if(body!==requested)return;
       data=window.CLEAR_LOCOMOTION_DATA[body];step=null;hovered=null;
-      root.querySelector('.loco-checkpoint').textContent='Checkpoint · iteration '+data.checkpointIteration.toLocaleString('en-US');
+      showStage(stageIndex);
       root.querySelector('.loco-loading').hidden=true;root.querySelector('.loco-charts').hidden=false;
       const legend=root.querySelector('.loco-phases');legend.replaceChildren();data.phases.forEach((p,i)=>{const label=document.createElement('span');label.style.setProperty('--phase',colors[i]);label.textContent=p.label;legend.append(label);});
       root.dataset.body=body;render();
@@ -88,7 +95,7 @@
       const node=root.querySelector('.loco-loading');node.replaceChildren(document.createTextNode('Training curves could not load. '));const button=document.createElement('button');button.textContent='Retry';button.onclick=load;node.append(button);
     }
   }
-  root.querySelectorAll('[data-loco-body]').forEach(button=>button.onclick=()=>{if(body===button.dataset.locoBody)return;body=button.dataset.locoBody;data=null;root.querySelectorAll('[data-loco-body]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));load();});
+  root.querySelectorAll('[data-loco-body]').forEach(button=>button.onclick=()=>{if(body===button.dataset.locoBody)return;body=button.dataset.locoBody;data=null;pendingStage=null;root.querySelectorAll('[data-loco-body]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));load();});
   root.querySelectorAll('[data-loco-metrics]').forEach(button=>button.onclick=()=>{mode=button.dataset.locoMetrics;root.querySelectorAll('[data-loco-metrics]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();});
   for(const chart of charts) {
     const canvas=chart.querySelector('canvas');
@@ -105,7 +112,7 @@
       root.querySelector('.loco-status').textContent=labels[point.metric]+', iteration '+point.step+', '+(point.value===null?'not recorded':number(point.value));
     });
   }
-  new IntersectionObserver(entries=>{near=entries[0].isIntersecting;if(near&&!data)load();media();},{rootMargin:'180px'}).observe(root);
+  new IntersectionObserver(entries=>{near=entries[0].isIntersecting;if(near&&!data)load();media();},{rootMargin:'0px'}).observe(root);
   new IntersectionObserver(entries=>{onscreen=entries[0].isIntersecting;media();},{threshold:0}).observe(root);
   document.addEventListener('visibilitychange',media);new ResizeObserver(schedule).observe(root);
 })();

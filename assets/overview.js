@@ -77,7 +77,7 @@
   // Inline inspection keeps the complete pipeline visible above the example.
   const preview=document.createElement('div');preview.id='overview-preview';preview.className='overview-preview-inline';preview.setAttribute('role','region');preview.setAttribute('aria-label','Component example');flow.after(preview);
   const leaders=document.createElementNS(ns,'svg');leaders.classList.add('overview-detail-leaders');leaders.setAttribute('aria-hidden','true');root.append(leaders);
-  let previewOwner=null,launchTimer;const galleries=new Map();
+  let previewOwner=null,launchTimer; const onScreen=()=>{const r=preview.getBoundingClientRect();return !document.hidden&&r.bottom>0&&r.top<innerHeight;};const galleries=new Map();
   function drawPreview(){
     if(!previewOwner)return;
     const r=root.getBoundingClientRect(),a=previewOwner.getBoundingClientRect(),b=preview.getBoundingClientRect();
@@ -89,7 +89,7 @@
   }
   function hidePreview(){root.querySelectorAll('.overview-inspectable').forEach(n=>n.classList.remove('inspecting'));}
   function showPreview(node,items){
-    if(previewOwner===node&&galleries.has(node)){if(!reducedMotion.matches)galleries.get(node).querySelectorAll('video').forEach(v=>v.play().catch(()=>{}));return;}
+    if(previewOwner===node&&galleries.has(node)){if(onScreen()&&!reducedMotion.matches)galleries.get(node).querySelectorAll('video').forEach(v=>v.play().catch(()=>{}));return;}
     clearTimeout(launchTimer);preview.querySelectorAll('video').forEach(v=>v.pause());preview.querySelectorAll('iframe').forEach(f=>f.contentWindow?.postMessage({type:'clear-scene-visible',visible:false},'*'));
     previewOwner=node;preview.querySelectorAll(':scope > div').forEach(g=>g.hidden=true);hidePreview();node.classList.add('inspecting');
     const stage=node.id.replace('overview-','');
@@ -122,7 +122,7 @@
       });
     }
     gallery.hidden=false;
-    launchTimer=setTimeout(()=>{if(previewOwner!==node)return;gallery.querySelectorAll('video').forEach(v=>{if(!reducedMotion.matches)v.play().catch(()=>{});});gallery.querySelectorAll('.viewer').forEach(v=>{const frame=v.querySelector('iframe');if(frame)frame.contentWindow.postMessage({type:'clear-scene-visible',visible:true},'*');else if(!reducedMotion.matches)v.querySelector('.launch').click();});},220);
+    launchTimer=setTimeout(()=>{if(previewOwner!==node||!onScreen())return;gallery.querySelectorAll('video').forEach(v=>{if(!reducedMotion.matches)v.play().catch(()=>{});});gallery.querySelectorAll('.viewer').forEach(v=>{const frame=v.querySelector('iframe');if(frame)frame.contentWindow.postMessage({type:'clear-scene-visible',visible:true},'*');else if(!reducedMotion.matches)v.querySelector('.launch').click();});},220);
     drawPreview();
   }
 
@@ -134,8 +134,8 @@
   }
   document.addEventListener('keydown',event=>{if(event.key==='Escape')hidePreview();});
   new ResizeObserver(drawPreview).observe(preview);
-  new IntersectionObserver(entries=>{const visible=entries[0].isIntersecting;preview.querySelectorAll('video').forEach(v=>{if(!visible)v.pause();else if(!reducedMotion.matches&&!v.closest('[hidden]'))v.play().catch(()=>{});});if(visible)svg.unpauseAnimations?.();else svg.pauseAnimations?.();},{threshold:.01}).observe(preview);
-  document.addEventListener('visibilitychange',()=>{const box=preview.getBoundingClientRect();preview.querySelectorAll('video').forEach(v=>{if(document.hidden)v.pause();else if(!reducedMotion.matches&&!v.closest('[hidden]')&&box.top<innerHeight&&box.bottom>0)v.play().catch(()=>{});});});
+  new IntersectionObserver(entries=>{const visible=entries[0].isIntersecting;preview.querySelectorAll('video').forEach(v=>{if(!visible)v.pause();else if(!reducedMotion.matches&&!v.closest('[hidden]'))v.play().catch(()=>{});});},{threshold:.01}).observe(preview);
+  document.addEventListener('visibilitychange',()=>{const flowBox=flow.getBoundingClientRect();if(document.hidden||flowBox.bottom<=0||flowBox.top>=innerHeight)svg.pauseAnimations?.();else svg.unpauseAnimations?.();const box=preview.getBoundingClientRect();preview.querySelectorAll('video').forEach(v=>{if(document.hidden){v.pause();svg.pauseAnimations?.();}else if(!reducedMotion.matches&&!v.closest('[hidden]')&&box.top<innerHeight&&box.bottom>0)v.play().catch(()=>{});});});
 
   Object.entries(examples).forEach(([stage,items])=>{
     const node=root.querySelector('#overview-'+stage);addPreview(node,items,stage);node.setAttribute('role','button');node.setAttribute('aria-label','Explore '+stage);
@@ -147,6 +147,9 @@
   root.querySelectorAll('#overview-inputs>div').forEach((node,i)=>addPreview(node,[inputExamples[i]],'input-'+i));
   reducedMotion.addEventListener('change',draw);
   new ResizeObserver(()=>{draw();drawPreview();}).observe(flow);
-  showPreview(root.querySelector('#overview-grounding'),examples.grounding);
+  // Prepare the initial gallery without starting media until it actually enters view.
+  new IntersectionObserver(entries=>{if(entries[0].isIntersecting&&!previewOwner)showPreview(root.querySelector('#overview-grounding'),examples.grounding);}).observe(root);
+  svg.pauseAnimations?.();
+  new IntersectionObserver(entries=>{if(entries[0].isIntersecting&&!document.hidden)svg.unpauseAnimations?.();else svg.pauseAnimations?.();}).observe(flow);
   document.fonts.ready.then(draw);
 })();

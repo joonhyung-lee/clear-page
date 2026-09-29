@@ -109,7 +109,7 @@
    status.hidden=true;root.querySelector('.mpc-process-content').hidden=false;render();schedule();
   }catch(error){data=null;status.textContent='Trajectories are taking longer to load. ';const b=document.createElement('button');b.textContent='Retry';b.onclick=initialize;status.append(b);}finally{loading=false;}
  }
- new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible){initialize();schedule();}else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:'120px'}).observe(root);
+ new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible){initialize();schedule();}else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:'0px'}).observe(root);
  play.onclick=()=>{playing=!playing;if(playing&&elapsed>=playLimit)elapsed=0;render();schedule();};slider.oninput=()=>{elapsed=+slider.value*playLimit;render();};
  root.querySelectorAll('[data-mpc-view]').forEach(button=>button.onclick=()=>{mode=button.dataset.mpcView;if(mode==='2d'&&robotOverlay){robotOverlay=false;showContext();}root.querySelectorAll('[data-mpc-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();});
  root.querySelector('#mpc-robot-context').onclick=()=>{if(mode==='2d')root.querySelector('[data-mpc-view="3d"]').click();robotOverlay=!robotOverlay;showContext();};

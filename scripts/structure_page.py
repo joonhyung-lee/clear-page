@@ -1,46 +1,76 @@
-"""Keep a short reading path, with deep links into optional interactive detail."""
+"""Keep essential method sections visible, with stable hierarchical deep links."""
 from pathlib import Path
 from bs4 import BeautifulSoup
 root = Path(__file__).resolve().parents[1]
 p = root / 'index.html'
 s = BeautifulSoup(p.read_text(), 'html.parser')
 
-def disclosure(node, title, identity):
-    if node.parent.get('id') == identity:
-        return node.parent
+# The main reading path is visible by default. Deep links keep stable IDs.
+for d in s.select('details'):
+    d.name = 'section' if d.get('id') or 'reading-detail' in d.get('class', []) else 'div'
+    d.attrs.pop('open', None)
+    title = d.find('summary', recursive=False)
+    if title:
+        title.name = 'h4' if 'reading-detail' in d.get('class', []) else 'h5'
+        if title.get_text(strip=True) == 'Read the abstract +': title.string = 'Abstract'
+        if title.get_text(strip=True) == 'View the paper diagram': title.string = 'Architecture in the paper'
+
+def subsection(node, title, identity):
     old = s.select_one('#' + identity)
     if old:
-        old.append(node.extract())
+        if node.parent is not old:
+            old.append(node.extract())
         return old
-    d = s.new_tag('details', attrs={'class': 'reading-detail', 'id': identity})
-    summary = s.new_tag('summary')
-    summary.string = title
-    d.append(summary)
-    node.insert_before(d)
-    d.append(node.extract())
-    return d
+    section = s.new_tag('section', attrs={'class': 'reading-detail', 'id': identity})
+    heading = s.new_tag('h4'); heading.string = title; section.append(heading)
+    node.insert_before(section); section.append(node.extract())
+    return section
 
-for key, title in [('grounding', 'Explore grounding samples'), ('ordering', 'Explore selection and ordering samples')]:
+for key, title in [('grounding', 'Dataset, representation and supervision'), ('ordering', 'Dataset and reference interactions')]:
     node = s.select_one('#learning-' + key)
     if node:
-        disclosure(node, title, key + '-samples')
-node = s.select_one('#method-grounding > .method-with-notation')
-if node:
-    d = disclosure(node, 'Grounding representation and supervision', 'grounding-formulation')
-    for selector in ['#method-grounding > .method-loss', '#method-grounding > .training-loss-jump', '#method-grounding > .method-details']:
-        child = s.select_one(selector)
-        if child:
-            d.append(child.extract())
+        section = subsection(node, title, key + '-samples')
+        section.select_one('h4').string = title
+        heading = node.find('h4', recursive=False)
+        if heading: heading.name = 'h5'
+
+mesh = s.select_one('#embodiment-demo')
+if mesh: subsection(mesh, 'Inspect embodiment mesh and interaction highlights', 'grounding-mesh')
+formulation = s.select_one('#grounding-formulation')
+samples = s.select_one('#grounding-samples')
+if formulation and samples:
+    for child in list(formulation.find_all(recursive=False)):
+        if child.name not in ['h4', 'summary']: samples.append(child.extract())
+    formulation.decompose()
+# Builders can also supply the representation without a wrapper.
+for selector in ['#method-grounding > .method-with-notation', '#method-grounding > .method-loss', '#method-grounding > .training-loss-jump', '#method-grounding > .method-details']:
+    node = s.select_one(selector)
+    if node and samples: samples.append(node.extract())
+layout = s.select_one('.maze-order-layout')
+if layout:
+    context = subsection(layout, 'From scene context to an interaction order', 'ordering-context')
+    for node in list(s.select('#method-order > .method-details')): context.append(node.extract())
+# The concise encoder and BCE equations already appear beside the dataset.
+# Retain the concrete input definition without repeating equations and pseudocode.
+detail = s.select_one('#grounding-samples > .method-details')
+if detail:
+    for node in list(detail.find_all(recursive=False)):
+        if node.name != 'div' or 'feature-columns' not in node.get('class', []): node.decompose()
+    detail['class'] = 'grounding-input-definition'
+for node in s.select('#ordering-context .method-code'): node.decompose()
+for node in s.select('#ordering-context > .method-details > h5'):
+    node.string = 'Selection and ordering supervision'
 node = s.select_one('#mpc-process')
-if node:
-    disclosure(node, 'Inspect controller trajectories and palm contact', 'controller-trajectories')
+if node: subsection(node, 'Controller trajectories and palm contact', 'controller-trajectories')
 for key in ['grid', 'manipulation', 'maze', 'horizon']:
     article = s.select_one('#experiment-' + key)
-    if not article.select_one('#experiment-' + key + '-replays'):
+    if article and not article.select_one('#experiment-' + key + '-replays'):
         nodes = [c for c in article.find_all(recursive=False) if c.name != 'h3' and 'experiment-claim' not in c.get('class', [])]
-        d = disclosure(nodes[0], 'Explore recorded comparisons', 'experiment-' + key + '-replays')
-        for node in nodes[1:]:
-            d.append(node.extract())
+        section = subsection(nodes[0], 'Recorded comparisons', 'experiment-' + key + '-replays')
+        for node in nodes[1:]: section.append(node.extract())
+for title in s.select('.abstract > h5'): title.string = 'Abstract'
+for title in s.select('.overview-paper-figure > h5'): title.string = 'Architecture in the paper'
+for video in s.select('video[autoplay]'): video.attrs.pop('autoplay', None)
 for node in s.select('.method-nav, #page-contents, #contents-toggle'):
     node.decompose()
 items = [
@@ -48,8 +78,8 @@ items = [
  ('encoding', 'Embodiment encoding', []),
  ('method', 'Method', [
   ('clear-overview', 'Architecture', []),
-  ('method-grounding', 'Grounding', [('controller-pretraining', 'Controller pretraining', []), ('grounding-mesh', 'Body and interaction', []), ('grounding-samples', 'Training samples', []), ('grounding-formulation', 'Representation', [])]),
-  ('method-order', 'Interaction ordering', [('ordering-samples', 'Training samples', [])]),
+  ('method-grounding', 'Grounding', [('controller-pretraining', 'Learning to move', []), ('grounding-mesh', 'Body and interaction', []), ('grounding-samples', 'Dataset and supervision', [])]),
+  ('method-order', 'Interaction ordering', [('ordering-samples', 'Reference interactions', []), ('ordering-context', 'Context and sampling', [])]),
   ('method-flow', 'Motion generation', [('training-objective', 'Training objective', [])]),
   ('method-execution', 'Execution', [('controller-trajectories', 'Controller trajectories', [])])]),
  ('experiments', 'Experiments', [(f'experiment-{key}', title, []) for key, title in [('grid', '2D grid'), ('manipulation', 'Manipulation'), ('maze', 'Maze navigation'), ('horizon', 'Long horizon')]])]

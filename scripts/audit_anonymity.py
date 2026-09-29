@@ -14,6 +14,7 @@ import json
 import re
 import struct
 import subprocess
+import msgpack
 from pathlib import Path
 import zstandard
 from PIL import Image
@@ -102,20 +103,62 @@ def mp4_atoms(data, start, end, label):
             mp4_atoms(data, body+(4 if kind == b'meta' else 0), start+size, label)
         start += size
 
+
+def scan_recording(raw, label):
+    """Inspect metadata as text and typed numeric buffers as binary.
+
+    A float32 coordinate can coincidentally spell an email-shaped byte sequence.
+    Do not interpret typed floating-point arrays as text. Known private terms
+    are still checked in every buffer, and untyped/other payloads get the full
+    text scan. Length and alignment checks prevent unchecked trailing data.
+    """
+    size = int.from_bytes(raw[:8], 'little')
+    record = msgpack.unpackb(raw[8:8+size], raw=False)
+    def inline_binary(value):
+        if not isinstance(value, bytes): raise TypeError(type(value).__name__)
+        scan(value, label + ':inline-data', text=True)
+        return {'inlineBytes': len(value)}
+    scan(json.dumps(record, default=inline_binary).encode(), label + ':metadata', text=True)
+    types = {}
+    def visit(value):
+        if isinstance(value, dict):
+            if '__binary_index' in value:
+                types.setdefault(value['__binary_index'], set()).add(value.get('dtype'))
+            for child in value.values(): visit(child)
+        elif isinstance(value, list):
+            for child in value: visit(child)
+    visit(record)
+    cursor = 8 + size
+    for index, length in enumerate(record['binaryBufferLengths']):
+        aligned = (cursor + 7) // 8 * 8
+        if any(raw[cursor:aligned]): fail(label, 'nonzero recording padding')
+        cursor = aligned
+        buffer = raw[cursor:cursor+length]
+        if len(buffer) != length: fail(label, 'truncated recording buffer')
+        floating = bool(types.get(index)) and types[index] <= {'<f4', '<f8', '>f4', '>f8'}
+        if floating and any(length % int(dtype[-1]) for dtype in types[index]):
+            fail(label, 'invalid numeric buffer length')
+        scan(buffer, label + ':buffer-' + str(index), text=not floating)
+        cursor += length
+    if cursor != len(raw): fail(label, 'unparsed recording bytes')
+
 for path in files:
     label = str(path.relative_to(ROOT))
     if path.is_symlink(): fail(label, 'symlink')
     data = path.read_bytes()
     if path.suffix == '.viser':
         data = zstandard.ZstdDecompressor().decompress(data[8:]); decoded += 1
+        scan_recording(data, label + ':decoded')
     vendor = label.startswith('assets/viser/')
     if label == 'assets/viser/runtime-hex.js' or path.name.endswith('.hex.js'):
         packed = json.loads(data.decode().rsplit(' = ', 1)[1].rstrip(';\n'))
         payload = bytes.fromhex(packed)
         if path.name.endswith('.hex.js'):
             payload = zstandard.ZstdDecompressor().decompress(payload[8:]); decoded += 1
-        scan(payload, label+':decoded', text=True, vendor=vendor)
-    scan(data, label, text=path.suffix in ('.html', '.css', '.js', '.md', '.svg', '.viser', '.json', '.py', '.txt', '.yml', '.yaml', '.toml', '.xml', '.csv'), vendor=vendor)
+            scan_recording(payload, label+':decoded')
+        else:
+            scan(payload, label+':decoded', text=True, vendor=vendor)
+    scan(data, label, text=path.suffix in ('.html', '.css', '.js', '.md', '.svg', '.json', '.py', '.txt', '.yml', '.yaml', '.toml', '.xml', '.csv'), vendor=vendor)
     if path.suffix == '.png':
         im = Image.open(io.BytesIO(data))
         if set(im.info) - {'srgb', 'gamma', 'chromaticity', 'transparency', 'aspect'}:

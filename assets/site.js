@@ -85,7 +85,7 @@ document.addEventListener('visibilitychange', () => {
   else {
     drainMedia();
     for (const [video,state] of mediaStates) if (state.visible && state.loaded && !reduced.matches && !video.closest('.viewer')?.querySelector('iframe')) video.play().catch(() => {});
-    if (!heroManuallyPaused && !reduced.matches && teaser.getBoundingClientRect().bottom > 0) teaser.play().catch(updateHero);
+    if (!heroManuallyPaused && !reduced.matches && teaser.getBoundingClientRect().bottom > 0 && teaser.getBoundingClientRect().top < innerHeight) teaser.play().catch(updateHero);
   }
 });
 
@@ -141,7 +141,7 @@ function observeAutomaticScene(viewer) {
       if (viewer.querySelector('iframe,.viewer-status')) return;
       autoScenes.add(viewer); drainScenes();
     }, 550);
-  }, {rootMargin:'120px 0px'});
+  }, {rootMargin:'0px'});
   viewer.querySelector('.launch').addEventListener('click', () => { attempted = true; });
   observer.observe(viewer);
 }
@@ -149,10 +149,26 @@ document.addEventListener('visibilitychange', drainScenes);
 
 // Runs inside each native player, including opaque-origin anonymous embeds.
 function sceneLifecycle() {
-  let ready = false, visible = true, resume = false;
+  let ready = false, visible = false, resume = false, initialized = false;
+  // The native player applies time-zero messages on its first tick. Pausing
+  // before those messages arrive leaves an empty canvas at time zero.
+  function hasScene() {
+    const root = document.querySelector('#root');
+    const key = root && Object.keys(root).find(k => k.startsWith('__reactContainer'));
+    if (!key) return false;
+    const queue = [root[key], root[key]?.stateNode?.current], seen = new Set();
+    while (queue.length) {
+      const f = queue.pop(); if (!f || seen.has(f)) continue; seen.add(f);
+      const viewer = f.memoizedProps?.value;
+      if (viewer?.useSceneTree?.getAll) return Object.keys(viewer.useSceneTree.getAll()).length > 2;
+      queue.push(f.child, f.sibling, f.alternate);
+    }
+    return false;
+  }
   window.addEventListener('webglcontextlost', () => parent.postMessage({type:'clear-scene-error'}, '*'), true);
   const apply = () => {
-    const button = document.querySelector('button');
+    if (!initialized) return;
+    const button = document.querySelector('[class*="tabler-icon-player-play"],[class*="tabler-icon-player-pause"]')?.closest('button');
     if (!button) return;
     const playing = !!button.querySelector('.tabler-icon-player-pause-filled');
     if (!visible && playing) { resume = true; button.click(); }
@@ -163,6 +179,8 @@ function sceneLifecycle() {
     visible = event.data.visible; apply();
   });
   const timer = setInterval(() => {
+    initialized ||= hasScene();
+    if (!initialized) return;
     apply();
     if (ready || !document.querySelector('canvas') || !document.querySelector('input')) return;
     ready = true;
@@ -275,7 +293,7 @@ function wireViewer(viewer, onLaunch = () => {}) {
       const iframe = document.createElement('iframe');
       iframe.title = `${viewer.dataset.title || viewer.closest('article').querySelector('h3').textContent} interactive 3D playback`;
       const bridge=(viewer.dataset.embodiment ? `window.__CLEAR_EMBODIMENT__=${JSON.stringify({robot:viewer.dataset.embodiment,mode:viewer.dataset.displayMode||'structure'})};(${window.CLEAR_EMBODIMENT_BRIDGE.toString()})();` : '')+((viewer.dataset.ego||viewer.dataset.generation) ? `(${window.CLEAR_PLAYBACK_BRIDGE.toString()})();` : '')+(viewer.dataset.orderStage ? `window.__CLEAR_ORDER__=${JSON.stringify({stage:viewer.dataset.orderStage,sample:+viewer.dataset.orderSample||0})};(${window.CLEAR_ORDER_BRIDGE.toString()})();` : '');
-      const embedded = `<script>window.__CLEAR_EXTERNAL_TIMELINE__=${viewer.dataset.externalTimeline==='true'};(${sceneLifecycle.toString()})();${bridge}window.__VISER_EMBED_DATA__=${JSON.stringify(recordingBase64(data))};window.__VISER_EMBED_CONFIG__={darkMode:false};<\/script>`;
+      const embedded = `<script>window.__CLEAR_CHECKPOINT_REPLAY__=${!!viewer.dataset.locoViewer};window.__CLEAR_EXTERNAL_TIMELINE__=${viewer.dataset.externalTimeline==='true'};(${sceneLifecycle.toString()})();${bridge}window.__VISER_EMBED_DATA__=${JSON.stringify(recordingBase64(data))};window.__VISER_EMBED_CONFIG__={darkMode:false};<\/script>`;
       const html = new TextDecoder().decode(decodeHex(window.CLEAR_VIEWER_HEX));
       iframe.srcdoc = html.replace('</head>', embedded + '</head>');
       iframe.allow = 'fullscreen';
@@ -421,3 +439,6 @@ for(const button of document.querySelectorAll('[data-mpc-seek]')){
   if(video.readyState)seek();else{video.addEventListener('loadedmetadata',seek,{once:true});video.load();}
  });
 }
+
+// CSS traces follow document visibility as well as their viewport observer.
+document.addEventListener('visibilitychange',()=>document.documentElement.toggleAttribute('data-page-hidden',document.hidden));

@@ -4,12 +4,12 @@ Run serve.py on port 8765 first. Uses Playwright Chromium and local fault inject
 """
 import asyncio
 from playwright.async_api import async_playwright
-from check_scene_loading import BASE
+from check_scene_loading import BASE, FIXTURE
 
 # Delay canvas creation to distinguish HTML load from native playback readiness.
 RUNTIME = '''<!doctype html><head></head><body><script>
-setTimeout(()=>{document.body.innerHTML='<canvas></canvas><input value="0"><button><i class="tabler-icon-player-pause-filled"></i></button>';
-const button=document.querySelector('button');button.onclick=()=>button.firstChild.classList.toggle('tabler-icon-player-pause-filled');},500);
+setTimeout(()=>{document.body.innerHTML='<div id=root></div><canvas></canvas><input value="0"><button><i class="tabler-icon-player-pause-filled"></i></button>';
+const view={useSceneTree:{getAll:()=>({root:1,axes:1,mesh:1})}};document.querySelector('#root').__reactContainerMock={memoizedProps:{value:view}};const button=document.querySelector('button');button.onclick=()=>{const playing=button.firstChild.classList.toggle('tabler-icon-player-pause-filled');button.firstChild.classList.toggle('tabler-icon-player-play-filled',!playing);};},500);
 </script></body>'''.encode().hex()
 
 async def gallery(browser):
@@ -27,12 +27,12 @@ async def gallery(browser):
     await page.route('**/recordings/*.hex.js*',recording)
     await page.goto(BASE,wait_until='networkidle')
     root = page.locator('#embodiment-demo')
-    await root.scroll_into_view_if_needed()
+    await root.evaluate("e=>e.scrollIntoView({block:'start'})")
     await page.wait_for_timeout(100)
     await page.evaluate('window.scrollTo(0,0)')
     await page.wait_for_timeout(750)
     assert calls == [], calls
-    await root.scroll_into_view_if_needed()
+    await root.evaluate("e=>e.scrollIntoView({block:'start'})")
     await page.wait_for_function("document.querySelector('#embodiment-demo iframe')")
     scene = await root.locator('iframe').first.evaluate('f=>f.parentElement.dataset.scene')
     first = root.locator(f'.viewer[data-scene="{scene}"]')
@@ -51,18 +51,20 @@ async def gallery(browser):
         native = await frame.content_frame()
         assert await native.locator('.tabler-icon-player-pause-filled').count() == 0
     count = len(calls)
-    await root.scroll_into_view_if_needed()
+    await first.scroll_into_view_if_needed()
     await page.wait_for_timeout(200)
     assert len(calls) == count, calls
     assert await first.locator('iframe').get_attribute('data-identity') == 'retained'
-    assert await first.frame_locator('iframe').locator('.tabler-icon-player-pause-filled').count() == 1
+    await first.frame_locator('iframe').locator('.tabler-icon-player-pause-filled').wait_for(state='attached',timeout=5000)
     # An intentional pause survives leaving and returning to the section.
     await first.frame_locator('iframe').locator('button').click()
     await page.evaluate('window.scrollTo(0,0)')
     await page.wait_for_timeout(200)
-    await root.scroll_into_view_if_needed()
+    await first.scroll_into_view_if_needed()
     await page.wait_for_timeout(200)
     assert await first.frame_locator('iframe').locator('.tabler-icon-player-pause-filled').count() == 0
+    await first.scroll_into_view_if_needed()
+    await page.wait_for_timeout(150)
     # A graphics context loss restarts locally once, without new downloads.
     await first.frame_locator('iframe').locator('canvas').evaluate("c=>c.dispatchEvent(new Event('webglcontextlost'))")
     await page.wait_for_function("!document.querySelector('#embodiment-demo iframe[data-identity]')")
@@ -141,9 +143,32 @@ async def previews(browser, exhausted=False):
     await page.close()
     print('Near-only preview preparation, transient video recovery, offscreen pause and no scroll reload: PASS',flush=True)
 
+async def exact_viewport(browser):
+    page = await browser.new_page(viewport={'width':1000,'height':800})
+    calls=[]
+    fixture=FIXTURE.replace('<article>', '<div style="height:1200px"></div><article>')+'<script>observeAutomaticScene(document.querySelector(".viewer"));</script>'
+    await page.route(BASE+'/',lambda r:r.fulfill(body=fixture,content_type='text/html'))
+    async def runtime(route):
+        calls.append('runtime');await route.fulfill(body=f'window.CLEAR_VIEWER_HEX="{RUNTIME}";',content_type='text/javascript')
+    async def recording(route):
+        calls.append('recording');await route.fulfill(body='window.CLEAR_RECORDINGS={objects:"00"};',content_type='text/javascript')
+    await page.route('**/runtime-hex.js*',runtime)
+    await page.route('**/objects.hex.js*',recording)
+    await page.goto(BASE+'/',wait_until='domcontentloaded')
+    viewer=page.locator('.viewer')
+    await viewer.evaluate('e=>scrollBy(0,e.getBoundingClientRect().top-innerHeight-40)')
+    await page.wait_for_timeout(900)
+    assert not calls,calls
+    await viewer.scroll_into_view_if_needed()
+    await viewer.locator('iframe.scene-ready').wait_for()
+    assert calls==['runtime','recording'],calls
+    await page.close()
+    print('A scene 40 px outside the viewport stays inactive until it enters: PASS',flush=True)
+
 async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch()
+        await exact_viewport(browser)
         await gallery(browser)
         await cancel_automatic(browser)
         await previews(browser)

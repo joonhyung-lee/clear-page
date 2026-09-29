@@ -10,12 +10,14 @@ async def main():
   await page.goto('http://localhost:8765',wait_until='domcontentloaded')
   nav=page.locator('#page-contents')
   assert await nav.locator('li[data-depth="3"]').count()>=4
-  assert await page.locator('.reading-detail[open]').count()==0
+  assert await page.locator('details').count()==0
+  assert await page.locator('#method-grounding > section').count()==3
+  assert await page.locator('#method-order > section').count()==2
   await page.locator('#method-grounding').scroll_into_view_if_needed()
   await page.wait_for_timeout(150)
   await nav.locator('a[href="#grounding-samples"]').click()
   await page.wait_for_timeout(200)
-  assert await page.locator('#grounding-samples').get_attribute('open') is not None
+  assert await page.locator('#grounding-samples').is_visible()
   assert await nav.locator('a[aria-current]').get_attribute('href')=='#grounding-samples'
   assert await nav.locator('li[data-current-branch]').count()==3
   await nav.locator('a[href="#training-objective"]').click()
@@ -27,13 +29,13 @@ async def main():
   await page.screenshot(path='/tmp/page-contents-desktop.png')
   await nav.locator('a[href="#controller-trajectories"]').click()
   await page.locator('#mpc-process .mpc-process-content').wait_for()
-  assert await page.locator('#controller-trajectories').get_attribute('open') is not None
+  assert await page.locator('#controller-trajectories').is_visible()
   assert await nav.locator('a[aria-current]').get_attribute('href')=='#controller-trajectories'
   await page.go_back();await page.wait_for_timeout(200)
   assert page.url.endswith('#training-objective')
   await page.goto('http://localhost:8765/#learning-ordering',wait_until='domcontentloaded')
   await page.wait_for_timeout(400)
-  assert await page.locator('#ordering-samples').get_attribute('open') is not None
+  assert await page.locator('#ordering-samples').is_visible()
   for width in [1440,1280,1024,768,390]:
    await page.set_viewport_size({'width':width,'height':1000})
    await page.wait_for_timeout(150)
@@ -48,5 +50,5 @@ async def main():
    if width==390:await page.screenshot(path='/tmp/page-contents-mobile.png')
   assert not errors,errors
   await browser.close()
- print('PASS hierarchical contents, scroll position, deep-link reveal, history, compact details, rail separation and mobile menu')
+ print('PASS hierarchical contents, scroll position, deep links, history, expanded subsections, rail separation and mobile menu')
 asyncio.run(main())
