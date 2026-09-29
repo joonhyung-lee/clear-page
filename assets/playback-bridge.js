@@ -1,6 +1,7 @@
 /* Native timeline remains authoritative, including seeks and pauses. */
 window.CLEAR_PLAYBACK_BRIDGE=function(){
  let previous='',command=null;
+ if(window.__CLEAR_EXTERNAL_TIMELINE__){const style=document.createElement('style');style.textContent='.mantine-Paper-root:has([role=slider]){display:none!important}';document.head.append(style);}
  function seek(time){
   const el=document.querySelector('[role=slider]');if(!el)return false;
   let f=el[Object.keys(el).find(k=>k.startsWith('__reactFiber'))];

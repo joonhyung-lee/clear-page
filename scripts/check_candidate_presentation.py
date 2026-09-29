@@ -7,8 +7,8 @@ records=json.loads((ROOT/'assets/mpc-process-data.js').read_text().split('=',1)[
 async def main():
  async with async_playwright() as p:
   browser=await p.chromium.launch();page=await browser.new_page(viewport={'width':1440,'height':1050},reduced_motion='reduce');errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-  await page.goto('http://localhost:8765',wait_until='domcontentloaded');root=page.locator('#mpc-process');await root.scroll_into_view_if_needed();await root.locator('.mpc-process-content').wait_for()
-  async def seek(t):await root.locator('input').evaluate('(e,t)=>{e.value=t/40;e.dispatchEvent(new Event("input"))}',t)
+  await page.goto('http://localhost:8765',wait_until='domcontentloaded');root=page.locator('#mpc-process');await root.scroll_into_view_if_needed();await root.locator('.mpc-process-content').wait_for();await root.locator('#mpc-full-rollout').check()
+  async def seek(t):await root.locator('#mpc-process-update').evaluate('(e,t)=>{e.value=t/40;e.dispatchEvent(new Event("input"))}',t)
   await seek(8)
   before={name:await root.locator('[data-process='+name+']').get_attribute('data-update') for name in records}
   pixels=await root.locator('canvas').first.evaluate('e=>e.toDataURL()');await seek(8.1)
@@ -24,7 +24,7 @@ async def main():
    await root.locator('[data-mpc-view="'+mode+'"]').click()
    assert await root.locator('[data-process]').evaluate_all('es=>es.map(e=>[e.dataset.update,e.dataset.retained])')==source
    assert await root.locator('canvas').evaluate_all('(es,m)=>es.every(e=>e.dataset.view===m)',mode)
-  assert await root.locator('button').count()==3;await root.screenshot(path='/tmp/candidate-final.png')
+  assert await root.locator('button').count()==5;await root.screenshot(path='/tmp/candidate-final.png')
   order=page.locator('.ordering-main');await order.scroll_into_view_if_needed();assert await order.locator('svg g').count()==3;assert await page.locator('.ordering-spatial .viewer').is_hidden()
   assert await order.locator('.ordering-sequence strong').all_text_contents()==['Object 1','Object 2']
   a=await order.locator('svg').inner_html();await order.locator('#maze-order-next').click();assert a!=await order.locator('svg').inner_html();assert await order.get_attribute('data-sample')=='1'
