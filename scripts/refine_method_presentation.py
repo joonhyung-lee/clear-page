@@ -31,7 +31,7 @@ def refine(soup):
    if span.get_text(strip=True)=='→':span.decompose()
  process=soup.find(id='mpc-process')
  if process:
-  process.select_one('h4 + p').string='The full execution stays on fixed time axes. The outlined window is magnified above, with matching A, B and C anchors.'
+  process.select_one('h4 + p').string='The complete recorded trajectory remains visible in light gray. Black marks the observed portion as Now advances. The outlined forecast window is magnified above.'
   for caption in process.select('.mpc-process-pair figcaption'):caption.decompose()
   for figure in process.select('[data-process]'):
    if len(figure.select('canvas'))==1:
@@ -44,7 +44,7 @@ def refine(soup):
   stages=process.select_one('.mpc-stages')
   if stages:stages.decompose()
   if not process.select_one('.mpc-display-options'):
-   options=BeautifulSoup('<div class="mpc-display-options"><div class="mpc-legend"><span class="candidate">Candidates</span><span class="chosen">Selected</span><span class="observed">Observed</span></div></div>','html.parser')
+   options=BeautifulSoup('<div class="mpc-display-options"><div class="mpc-legend"><span class="candidate">Candidates</span><span class="chosen">Selected</span><span class="future">Recorded future</span><span class="observed">Observed</span></div></div>','html.parser')
    process.select_one('.mpc-process-controls').insert_after(options)
   if not process.select_one('#mpc-process-speed'):
    speed=BeautifulSoup('<label class="mpc-speed">Speed <select id="mpc-process-speed" aria-label="Search replay speed"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select></label>','html.parser');process.select_one('.mpc-process-controls').append(speed)
@@ -54,9 +54,9 @@ def refine(soup):
   if not process.select_one('.mpc-candidate-controls'):
    options=BeautifulSoup('<div class="mpc-candidate-controls" role="group" aria-label="Candidate selection display"><button type="button" data-candidates="all" aria-pressed="true">All candidates</button><button type="button" data-candidates="retained" aria-pressed="false">Retained only</button></div>','html.parser');process.select_one('.mpc-anchor-controls').append(options)
   legend=process.select_one('.mpc-legend')
-  if legend:legend.clear();legend.append(BeautifulSoup('<span class="candidate">Candidates</span><span class="chosen">Retained</span><span class="applied">Applied</span><span class="observed">Observed</span>','html.parser'))
+  if legend:legend.clear();legend.append(BeautifulSoup('<span class="candidate">Candidates</span><span class="chosen">Retained</span><span class="applied">Applied</span><span class="future">Recorded future</span><span class="observed">Observed</span>','html.parser'))
   scope=process.select_one('.method-details p')
-  if scope:scope.string='The main axes cover the full 40 s execution and the final prediction horizon. The optimized recording ends at 14 s. Faint main traces show the complete recorded execution and dark traces show the portion already observed. Forecast details subtract the common nominal motion to reveal real candidate variation in millimetres. CLEAR applies a retained candidate, while SUMO rolls out the command formed from its two elites. Anchor inspection and filtering pause the display so the same population can be compared. These controls do not resample the optimizer.'
+  if scope:scope.string='The main axes cover the full 40 s execution and the final prediction horizon. The optimized recording ends at 14 s. The complete recorded execution is visible from the start in translucent gray, including later motion. Only the portion already observed is drawn in black, ending at Now. This future context comes from the saved execution and is not a forecast available to the controller. Forecast details subtract the common nominal motion to reveal real candidate variation in millimetres. CLEAR applies a retained candidate, while SUMO rolls out the command formed from its two elites. Anchor inspection and filtering pause the display so the same population can be compared. These controls do not resample the optimizer.'
   captions=process.select('.mpc-process-content > .figure-caption')
   if captions:
    captions[0].string='Candidates are selected as whole trajectories at each MPC update. A, B and C are time slices through those same trajectories, not separate sampling decisions. The XY dots are the candidate positions at the highlighted time.'

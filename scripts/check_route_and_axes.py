@@ -27,10 +27,15 @@ async def main():
     assert await canvas.get_attribute('data-axis-start')=='0'
     assert await canvas.get_attribute('data-axis-end')=='45'
    top=await panel.locator('canvas').nth(0).bounding_box();bottom=await panel.locator('canvas').nth(1).bounding_box();assert bottom['y']>=top['y']+top['height'] and abs(top['x']-bottom['x'])<1
-  before=await root.locator('canvas').evaluate_all('es=>es.map(e=>[e.dataset.axisStart,e.dataset.axisEnd,e.dataset.yMin,e.dataset.yMax,e.dataset.horizon,e.width,e.height])')
+  before=await root.locator('canvas').evaluate_all('es=>es.map(e=>[e.dataset.axisStart,e.dataset.axisEnd,e.dataset.yMin,e.dataset.yMax,e.dataset.horizon,e.dataset.recordedStart,e.dataset.recordedEnd,e.dataset.recordedPoints,e.width,e.height])')
   for t in [0,.1,.2,.5,.9,1]:
    await root.locator('input').evaluate('(e,t)=>{e.value=t;e.dispatchEvent(new Event("input"))}',t)
-   assert await root.locator('canvas').evaluate_all('es=>es.map(e=>[e.dataset.axisStart,e.dataset.axisEnd,e.dataset.yMin,e.dataset.yMax,e.dataset.horizon,e.width,e.height])')==before
+   assert await root.locator('canvas').evaluate_all('es=>es.map(e=>[e.dataset.axisStart,e.dataset.axisEnd,e.dataset.yMin,e.dataset.yMax,e.dataset.horizon,e.dataset.recordedStart,e.dataset.recordedEnd,e.dataset.recordedPoints,e.width,e.height])')==before
+   for name,r in data.items():
+    expected=min(t*40,r['observed'][-1][0]-r['updates'][0]['time'])
+    for canvas in await root.locator('[data-process='+name+'] canvas').all():
+     assert math.isclose(float(await canvas.get_attribute('data-observed-until')),expected,abs_tol=1e-7)
+     assert int(await canvas.get_attribute('data-recorded-points'))==len(r['observed'])
   await root.locator('input').evaluate('(e)=>{e.value=.2;e.dispatchEvent(new Event("input"))}');await root.screenshot(path='/tmp/fixed-palms.png')
   for width in [768,390]:
    await page.set_viewport_size({'width':width,'height':1050});await root.scroll_into_view_if_needed();await root.screenshot(path=f'/tmp/fixed-palms-{width}.png');await sample.scroll_into_view_if_needed();assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth');await sample.screenshot(path=f'/tmp/route-map-{width}.png')

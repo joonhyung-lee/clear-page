@@ -21,15 +21,15 @@
     function line(points,col,width=1,dash=[]){if(!points.length)return;ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=width;ctx.setLineDash(dash);points.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.stroke();ctx.setLineDash([]);}
     function dot(p,radius,fill,stroke=color){ctx.beginPath();ctx.arc(...p,radius,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}
     const initial=r.observed[0].slice(1+hand*3,4+hand*3),mainX=t=>62+t/axisEnd*470,mainY=v=>500-(v-travelBounds[0])/(travelBounds[1]-travelBounds[0])*446;
-    c.dataset.palm=String(hand);c.dataset.axisStart='0';c.dataset.axisEnd=String(axisEnd);c.dataset.yMin=String(travelBounds[0]);c.dataset.yMax=String(travelBounds[1]);c.dataset.horizon=String(r.horizon);c.dataset.windowStart=String(windowStart);c.dataset.windowEnd=String(windowEnd);
+    c.dataset.recordedStart='0';c.dataset.recordedEnd=String(end-start);c.dataset.recordedPoints=String(r.observed.length);c.dataset.observedUntil=String(time-start);c.dataset.palm=String(hand);c.dataset.axisStart='0';c.dataset.axisEnd=String(axisEnd);c.dataset.yMin=String(travelBounds[0]);c.dataset.yMax=String(travelBounds[1]);c.dataset.horizon=String(r.horizon);c.dataset.windowStart=String(windowStart);c.dataset.windowEnd=String(windowEnd);
     ctx.fillStyle='#435740';ctx.fillText((hand?'Right':'Left')+' palm · travel (m)',16,24);
     for(let v=travelBounds[0];v<=travelBounds[1];v++){line([[62,mainY(v)],[532,mainY(v)]],'#e5eae0');ctx.fillStyle='#6c7966';ctx.fillText(String(v),20,mainY(v)+4);}
     for(const t of [0,10,20,30,40,axisEnd].filter((t,i,all)=>t<=axisEnd&&all.indexOf(t)===i)){line([[mainX(t),54],[mainX(t),500]],'#eff2eb');ctx.fillText(t+' s',mainX(t)-10,520);}
     ctx.fillText('Full execution time',16,545);
-    line(r.observed.map(row=>[mainX(row[0]-start),mainY(along(row.slice(1+hand*3,4+hand*3),initial))]),'#cdd7c9',1.5,[3,4]);
-    const history=r.observed.filter(row=>row[0]<=time).map(row=>[mainX(row[0]-start),mainY(along(row.slice(1+hand*3,4+hand*3),initial))]);history.push([mainX(time-start),mainY(along(actual.slice(1+hand*3,4+hand*3),initial))]);line(history,'#3d4f41',2.6);
+    line(r.observed.map(row=>[mainX(row[0]-start),mainY(along(row.slice(1+hand*3,4+hand*3),initial))]),'rgba(130, 136, 134, 0.32)',2.4);
+    const history=r.observed.filter(row=>row[0]<=time).map(row=>[mainX(row[0]-start),mainY(along(row.slice(1+hand*3,4+hand*3),initial))]);history.push([mainX(time-start),mainY(along(actual.slice(1+hand*3,4+hand*3),initial))]);line(history,'#202421',2.8);
     for(let n=0;n<r.population;n++){if(retainedOnly&&!u.elites.includes(n))continue;line(u.paths[n].map((p,j)=>[mainX(windowStart+r.futureTimes[j]),mainY(along(p[hand],initial))]),u.elites.includes(n)?color:'#bdc8b6',u.elites.includes(n)?1.5:.8);}
-    line(selected.map((p,j)=>[mainX(windowStart+r.futureTimes[j]),mainY(along(p[hand],initial))]),dark,2.2);dot(history.at(-1),4.5,'#fff','#3d4f41');
+    line(selected.map((p,j)=>[mainX(windowStart+r.futureTimes[j]),mainY(along(p[hand],initial))]),dark,2.2);dot(history.at(-1),4.5,'#202421','#202421');ctx.fillStyle='#202421';ctx.fillText('Now',history.at(-1)[0]-32,history.at(-1)[1]+18);
     const values=u.paths.flatMap(path=>path.map(p=>along(p[hand],initial))),low=Math.min(...values),high=Math.max(...values),box=[mainX(windowStart),mainY(high)-5,Math.max(4,mainX(windowEnd)-mainX(windowStart)),Math.max(10,mainY(low)-mainY(high)+10)];
     ctx.strokeStyle=color;ctx.lineWidth=1.1;ctx.setLineDash([4,4]);ctx.strokeRect(...box);ctx.setLineDash([]);
     const forecast=[82,62,230,168],spatial=[330,62,204,168];
