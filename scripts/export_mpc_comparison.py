@@ -12,7 +12,7 @@ import numpy as np
 import torch
 import viser
 from PIL import Image
-from contact_surface import ContactSurface, smooth_scores
+from contact_surface import ContactSurface, smooth_scores, paired_palm_field
 from scene_annotations import outlined_anchors
 from clear.mj_util.contact_net import ContactNet, push_frame, K_PTS
 from clear.mj_util.pointcloud import intrinsics
@@ -56,6 +56,10 @@ for key,folder in [('mpc-baseline',args.baseline),('mpc-optimized',args.optimize
  ref3=np.column_stack([ref,np.full(len(ref),1.32)]).astype(np.float32)
  server.scene.add_line_segments('/tracking/reference-path',points=np.stack([ref3[:-1],ref3[1:]],axis=1),colors=tuple(tint),line_width=5)
  surface=ContactSurface(server,m,int(geoms[0]),target,f'/tracking/body-{target}/contact-field',tint)
+ paired_surface=ContactSurface(server,m,int(geoms[0]),target,f'/tracking/body-{target}/palm-contact-field',tint,offset=.004)
+ palm_sites=[mujoco.mj_name2id(m,mujoco.mjtObj.mjOBJ_SITE,'robot/'+side+'_palm') for side in ['left','right']]
+ assert min(palm_sites)>=0
+ palm_markers=outlined_anchors(server,'/tracking/palm-centers',np.zeros((2,3)),tuple(tint),.035)
  paths=[];shape=roll['eef_world'].shape;segments=(shape[2]-1)*2
  for n in range(shape[1]):paths.append(server.scene.add_line_segments(f'/tracking/candidate-{n}',points=np.zeros((segments,2,3),np.float32),colors=tuple(tint),line_width=1))
  chosen=server.scene.add_line_segments('/tracking/applied-candidate',points=np.zeros((segments,2,3),np.float32),colors=tuple(tint),line_width=4)
@@ -68,7 +72,7 @@ for key,folder in [('mpc-baseline',args.baseline),('mpc-optimized',args.optimize
   renderer.enable_segmentation_rendering();renderer.update_scene(data,camera='ego',scene_option=opt);seg=renderer.render().copy();renderer.disable_segmentation_rendering()
   mask=np.isin(seg[:,:,0],geoms)&(seg[:,:,1]==int(mujoco.mjtObj.mjOBJ_GEOM))&np.isfinite(depth)&(depth>1e-4)&(depth<12)
   flat=np.flatnonzero(mask.ravel())
-  if len(flat)<12:surface.hide();return rgb,False
+  if len(flat)<12:surface.hide();paired_surface.hide();return rgb,False
   local=(pixels[flat]@kinv.T)*depth.ravel()[flat,None];local*=np.array([1,-1,-1])
   world=local @ data.cam_xmat[cam].reshape(3,3).T+data.cam_xpos[cam]
   nearest=int(np.argmin(np.linalg.norm(ref-data.xpos[target,:2],axis=1)));direction=ref[min(nearest+1,len(ref)-1)]-data.xpos[target,:2]
@@ -80,8 +84,16 @@ for key,folder in [('mpc-baseline',args.baseline),('mpc-optimized',args.optimize
   # Display relative score per frame. No unobserved object surfaces are filled.
   intensity=prob/prob.max();heat=smooth_scores(world,world[selected],intensity)
   heat_image=np.zeros((height,width));heat_image.ravel()[flat]=heat
-  alpha=(.76*heat)[:,None];out=rgb.copy().reshape(-1,3);out[flat]=np.round((1-alpha)*out[flat]+alpha*tint).astype(np.uint8)
-  surface.update(data,cam,np.linalg.inv(kinv),depth,mask,heat_image)
+  palms=data.site_xpos[palm_sites].copy()
+  pairs,centers=paired_palm_field(world,palms,data.geom_xpos[geoms[0]],data.geom_xmat[geoms[0]].reshape(3,3),m.geom_size[geoms[0]])
+  pair_image=np.zeros((height,width));pair_image.ravel()[flat]=pairs
+  # The score field is faint. Two outlined regions locate the palm neighborhoods.
+  alpha=(.12*heat)[:,None];out=rgb.copy().reshape(-1,3);out[flat]=np.round((1-alpha)*out[flat]+alpha*tint).astype(np.uint8)
+  alpha=(.76*pairs)[:,None];out[flat]=np.round((1-alpha)*out[flat]+alpha*tint).astype(np.uint8)
+  ring=(pairs>.48)&(pairs<.64);out[flat[ring]]=(35,39,39)
+  surface.update(data,cam,np.linalg.inv(kinv),depth,mask,heat_image,alpha=30)
+  paired_surface.update(data,cam,np.linalg.inv(kinv),depth,mask,pair_image,alpha=205,outline=True)
+  for marker in palm_markers:marker.points=palms.astype(np.float32)
   return out.reshape(height,width,3),True
  def update(k):
   data.qpos[:]=a['qpos'][k];mujoco.mj_forward(m,data);anchor.position=(-float(data.qpos[0]),-float(data.qpos[1]),0)
@@ -112,6 +124,6 @@ for key,folder in [('mpc-baseline',args.baseline),('mpc-optimized',args.optimize
  finally:
   proc.stdin.close();code=proc.wait();renderer.close();server.stop()
  assert code==0;temp.replace(root/'assets/media'/f'{key}-ego.mp4')
- manifest.append({'scene':key,'controller':'Cartesian palm tracking' if ours else 'Direct joint CEM port','selector':meta['selector'],'searchCandidates':24,'executionPreviewRows':0 if ours else 1,'elites':roll['elite_indices'].shape[1],'horizon':meta['horizon_s'],'step':meta['step_s'],'seed':cfg['seed'],'duration':round(len(times)/10,2),'recordedPopulations':len(ids),'displayAnchors':5,'contactField':'Learned contact scores recomputed on segmented replayed ego RGB-D, normalized by the maximum score in each frame. Not archived controller telemetry.','contactVisibleFrames':visible_frames,'frames':len(times),'scope':'First object interaction from an archived development comparison. Controllers differ in their action representation and selection. This is not an isolated selector ablation.'})
+ manifest.append({'scene':key,'controller':'Cartesian palm tracking' if ours else 'Direct joint CEM port','selector':meta['selector'],'searchCandidates':24,'executionPreviewRows':0 if ours else 1,'elites':roll['elite_indices'].shape[1],'horizon':meta['horizon_s'],'step':meta['step_s'],'seed':cfg['seed'],'duration':round(len(times)/10,2),'recordedPopulations':len(ids),'displayAnchors':5,'palmContactRegions':2,'palmRegionScope':'Geometric neighborhoods centered at recorded palms projected onto the box. Not a learned bimanual prediction or a measured contact force.','contactField':'Learned contact scores recomputed on segmented replayed ego RGB-D, normalized by the maximum score in each frame. Not archived controller telemetry.','contactVisibleFrames':visible_frames,'frames':len(times),'scope':'First object interaction from an archived development comparison. Controllers differ in their action representation and selection. This is not an isolated selector ablation.'})
  print(key,'complete',len(times)/10,'seconds',visible_frames,'contact frames',flush=True)
 (root/'assets/mpc-comparison.json').write_text(json.dumps(manifest,indent=2)+'\n')

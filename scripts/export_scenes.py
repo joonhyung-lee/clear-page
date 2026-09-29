@@ -1,4 +1,5 @@
 from scene_annotations import outlined_anchors
+from object_motion import PALETTE, STARTS, ENDS, sample_object
 """Export anonymous, multi-embodiment Viser recordings from numeric archives.
 
 Structure: four individual translucent meshes with kinematic link graphs.
@@ -112,7 +113,7 @@ for mode in modes:
  bridge=mode=='scene-steps'
  if mode=='objects':
   server.initial_camera.position=(2.65,-3.45,2.85);server.initial_camera.look_at=(0,0,.18);server.initial_camera.fov=.66
-  handles=[];corners=[];palette=[(173,207,213),(232,197,173),(191,213,177),(208,191,218)]
+  handles=[];corners=[];arrows=[];palette=PALETTE
   for j in range(4):
    shape=trimesh.creation.box(extents=(.46,.42,.40)) if j%2==0 else trimesh.creation.cylinder(radius=.22,height=.46,sections=40)
    item=server.scene.add_frame(f'/object-{j}',show_axes=False)
@@ -132,24 +133,31 @@ for mode in modes:
       tangent=np.array([-.22*np.sin(angle),.22*np.cos(angle),0])*.28
       strokes.extend([[corner-tangent,corner+tangent],[corner,corner+np.array([0,0,-np.sign(z)*.07])]])
    corners.append(np.asarray(strokes,dtype=np.float32))
-   base=np.array([(j%2-.5)*1.45,(j//2-.5)*1.35,.20 if j%2==0 else .23]);delta=np.array([.36*(-1)**j,.32*(-1)**(j//2),0])
-   anchors=np.linspace(base-delta,base+delta,5);anchors[:,2]=.018
-   outlined_anchors(server,f'/waypoints-{j}',anchors,palette[j],.045 if j%2==0 else .075)
-   server.scene.add_line_segments(f'/lane-{j}',points=np.stack([anchors[:-1],anchors[1:]],axis=1).astype(np.float32),colors=palette[j],line_width=5)
+   anchors=np.linspace(STARTS[j],ENDS[j],5);anchors[:,2]=.026
+   outlined_anchors(server,f'/waypoints-{j}',anchors,palette[j],.045)
+   segments=np.stack([anchors[:-1],anchors[1:]],axis=1).astype(np.float32)
+   server.scene.add_line_segments(f'/lane-{j}-outline',points=segments,colors=(35,39,39),line_width=7)
+   server.scene.add_line_segments(f'/lane-{j}',points=segments+np.array([0,0,.003]),colors=palette[j],line_width=4)
+   arrow=server.scene.add_frame(f'/force-{j}',show_axes=False);arrows.append(arrow)
+   vertices=np.array([[0,-.028,0],[.28,-.028,0],[.28,-.09,0],[.46,0,0],[.28,.09,0],[.28,.028,0],[0,.028,0]],np.float32)
+   faces=np.array([[0,1,5],[0,5,6],[2,3,4]],np.uint32)
+   server.scene.add_mesh_simple(f'/force-{j}/fill',vertices=vertices,faces=faces,color=palette[j],side='double')
+   server.scene.add_line_segments(f'/force-{j}/outline',points=np.stack([vertices,np.roll(vertices,-1,axis=0)],axis=1),colors=(35,39,39),line_width=2)
   ghosts=[]
   for j in range(2):
-   base=np.array([(j%2-.5)*1.45,(j//2-.5)*1.35,.20 if j%2==0 else .23]);delta=np.array([.36*(-1)**j,.32*(-1)**(j//2),0])
-   ghosts.append(server.scene.add_line_segments(f'/future-{j}',points=corners[j],colors=palette[j],line_width=2,position=base+delta,wxyz=Rotation.from_euler('z',.32).as_quat(scalar_first=True)))
+   ghosts.append(server.scene.add_line_segments(f'/future-{j}',points=corners[j],colors=palette[j],line_width=2))
   server.scene.add_grid('/grid',width=5,height=5,cell_size=.5,section_size=1,cell_color=(241,241,241),section_color=(229,229,229))
   def object_pose(k):
-   # Overlapping continuous motions, not a turn-taking sequence.
+   # Ghosts switch to the next endpoint on both halves of the round trip.
    for j,item in enumerate(handles):
-    period=[6.,12.,6.,12.][j];phase=((k/60)/period+[0,.12,.25,.38][j])%1
-    progress=.5-.5*np.cos(2*np.pi*phase)
-    base=np.array([(j%2-.5)*1.45,(j//2-.5)*1.35,.20 if j%2==0 else .23]);delta=np.array([.36*(-1)**j,.32*(-1)**(j//2),0])
-    item.position=base-delta+2*delta*progress
-    item.wxyz=Rotation.from_euler('z',-.32+.64*progress).as_quat(scalar_first=True)
-    if j<2:ghosts[j].visible=phase<.5
+    state=sample_object(j,k/60)
+    item.position=state['position']
+    item.wxyz=Rotation.from_euler('z',state['yaw']).as_quat(scalar_first=True)
+    arrows[j].position=state['position']+np.array([-.12,0,.42])
+    arrows[j].wxyz=Rotation.from_euler('z',state['heading']).as_quat(scalar_first=True)
+    if j<2:
+     ghosts[j].position=state['target'];ghosts[j].wxyz=Rotation.from_euler('z',state['target_yaw']).as_quat(scalar_first=True)
+     ghosts[j].visible=state['ghost_visible']
   object_pose(0);recording=server.get_scene_serializer()
   for k in range(720):object_pose(k);recording.insert_sleep(1/60)
   (out/f'{mode}.viser').write_bytes(recording.serialize());server.stop();print(mode,flush=True);continue

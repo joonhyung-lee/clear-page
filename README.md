@@ -54,8 +54,10 @@ python scripts/check_scroll_loading.py
   or pressing Enter also opens it. Play in 3D loads the corresponding local
   Viser recording. Escape or the close button dismisses the expanded preview.
 - Object states shows four pastel objects with overlapping illustrative motions.
-  Five anchors mark each path. Two fixed corner outlines disappear when their
-  respective objects reach the marked pose and return on the next approach.
+  Five equally sized anchors and outlined lanes mark each path. Two corner ghosts
+  switch to the next endpoint on both halves of a round trip. Colored outlined
+  arrows above all four objects show illustrative force directions. Motion
+  headings are sampled with a fixed seed and do not converge on a common center.
 - Accessibility and Capability retain their explanatory videos and include
   buttons to inspect highlighted meshes. Capability highlights arm and
   gripper chains on G1 and Spot + arm. Accessibility highlights support and
@@ -114,6 +116,35 @@ only on visible object surfaces. Continuous RGBA textures follow the actual box
 faces, with segmentation and depth clipping. Learned point scores are smoothed
 for display using spatial interpolation. These are recomputed displays, not archived
 controller telemetry or aggregate benchmark results.
+
+Two dataset explorers show actual t-SNE projections of the inspected maze
+checkpoint. The grounding explorer contains 82 training and 44 validation
+mobility samples. The ordering explorer contains 34 training and 18 validation
+plan samples. Hover or keyboard focus selects a recorded robot and object
+rollout, its inputs, and its supervision targets. File hashes match the
+checkpoint training identity, and reference replay hashes match the training
+certificates. Grounding features come from the query-conditioned classifier
+input. Plan features average valid shared encoder tokens. These are projections
+of one checkpoint, not a training progression or evidence of generalization.
+
+The paired MPC surface display separates faint learned scores from two outlined
+geometric palm neighborhoods. Each region is centered at a recorded palm
+projected onto the box surface. Regions are clipped to observed surfaces.
+They are not learned bimanual predictions or measured contact-force maps.
+
+Below the physical replays, the optimization animation uses all 140 recorded
+updates from the first object interaction for palm tracking and 260 for the
+baseline. It draws the actual candidate palm displacements, costs, elite sets,
+and applied candidate or elite-mean preview. Time waypoints show the 0.6 s
+horizon and 0.1 s applied segment. Both panels share a displacement scale.
+Stage pacing is explanatory because inference timings and intermediate
+optimization iterations were not archived. Data packages load only near their
+sections, and animations pause offscreen and honor reduced motion.
+
+```sh
+python scripts/check_research_visuals.py
+python scripts/check_learning_explorers.py
+```
 
 Math rendering is self hosted in `assets/katex`, with its upstream license retained.
 

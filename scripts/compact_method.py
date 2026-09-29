@@ -46,3 +46,5 @@ import runpy
 runpy.run_path(str(root/'scripts/build_embodiment_gallery.py'))
 if (root/'assets/maze-method-trace.js').exists():runpy.run_path(str(root/'scripts/build_maze_method.py'))
 if (root/'assets/mpc-comparison.json').exists():runpy.run_path(str(root/'scripts/build_execution_section.py'))
+
+if (root/'assets/learning-explorer.js').exists():runpy.run_path(str(root/'scripts/build_learning_sections.py'))
