@@ -11,7 +11,7 @@
   svg.append(node('text',{x:16,y:24},'Object selection'),node('text',{x:170,y:24},'Priority distribution'),node('text',{x:460,y:24},trace?'Rank':'Target'));
   d.mu.forEach((mu,i)=>{
    const y=78+i*76,color=colors[i%colors.length],rank=trace?trace.rank[i]:d.rank[i];
-   const row=node('g',{'data-object':i});row.append(node('rect',{x:16,y:y-28,width:9,height:33,fill:color}),node('text',{x:34,y:y-12},'Object '+i),node('text',{x:34,y:y+8,class:'ordering-small'},(d.selection[i]<.001?'<0.1':d.selection[i]>.999?'>99.9':(d.selection[i]*100).toFixed(1))+'% selected'));
+   const row=node('g',{'data-object':i,tabindex:0,'aria-label':'Inspect Object '+i});row.append(node('rect',{x:16,y:y-28,width:9,height:33,fill:color}),node('text',{x:34,y:y-12},'Object '+i),node('text',{x:34,y:y+8,class:'ordering-small'},(d.selection[i]<.001?'<0.1':d.selection[i]>.999?'>99.9':(d.selection[i]*100).toFixed(1))+'% selected'));
    const points=Array.from({length:101},(_,j)=>{const value=low+span*j/100;return[x(value),y-33*Math.exp(-.5*((value-mu)/d.sigma[i])**2)];});
    row.append(node('path',{d:`M ${x(low)} ${y} `+points.map(p=>'L '+p.join(' ')).join(' ')+` L ${x(high)} ${y} Z`,fill:color,'fill-opacity':.18,stroke:color,'stroke-width':1.5}));
    const p=trace?trace.priority[i]:mu;

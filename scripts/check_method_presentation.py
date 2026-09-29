@@ -18,7 +18,7 @@ async def main():
   await sample.locator('.sample-play').click();await page.wait_for_timeout(700);assert await movie.evaluate('(e)=>e.currentTime')>.2
   await sample.screenshot(path='/tmp/learning-robot-mesh.png');await page.evaluate('scrollTo(0,0)');await page.wait_for_timeout(250);assert await movie.evaluate('(e)=>e.paused')
   context=page.locator('#context-formation');await context.scroll_into_view_if_needed();assert await context.locator('.context-token').count()==7;assert await context.locator('.context-token i').count()==84
-  await context.get_by_role('button',name='Training signal').click();assert await context.locator('.context-training').is_visible();await context.screenshot(path='/tmp/context-training.png')
+  await context.get_by_role('button',name='Training signal').click();assert await context.locator('.context-training').is_visible();assert await context.locator('.context-inference').is_hidden();await context.screenshot(path='/tmp/context-training.png')
   root=page.locator('#mpc-process');await root.scroll_into_view_if_needed();await root.locator('.mpc-process-content').wait_for();await root.locator('input').evaluate("e=>{e.value=.2;e.dispatchEvent(new Event('input'))}");await root.screenshot(path='/tmp/mpc-internal-insets.png')
   await page.emulate_media(reduced_motion='no-preference');overview=page.locator('#clear-overview');await overview.scroll_into_view_if_needed();assert await page.locator('#overview-execution>span').count()==0
   await page.locator('#overview-grounding').hover();await page.wait_for_timeout(800);assert await page.locator('#overview-preview>div:not([hidden]) video').first.evaluate('(e)=>e.currentTime')>0

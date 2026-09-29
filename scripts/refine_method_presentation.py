@@ -28,18 +28,23 @@ def refine(soup):
    if span.get_text(strip=True)=='→':span.decompose()
  process=soup.find(id='mpc-process')
  if process:
-  process.select_one('h4 + p').string='See all candidates from one saved forecast as the recorded motion progresses.'
+  process.select_one('h4 + p').string='Each recorded update reveals the complete candidate ensemble. Select an anchor to inspect its spatial spread.'
   for caption in process.select('.mpc-process-pair figcaption'):caption.decompose()
+  for canvas in process.select('canvas'):canvas['aria-label']='Recorded candidate palm deviations with a magnified spatial anchor'
   stages=process.select_one('.mpc-stages')
   if stages:stages.decompose()
   if not process.select_one('.mpc-display-options'):
    options=BeautifulSoup('<div class="mpc-display-options"><div class="mpc-hand" role="group" aria-label="Palm trajectory"><button data-palm="0" aria-pressed="true" type="button">Left palm</button><button data-palm="1" aria-pressed="false" type="button">Right palm</button></div><div class="mpc-legend"><span class="candidate">Candidates</span><span class="chosen">Selected</span><span class="observed">Observed</span></div></div>','html.parser')
    process.select_one('.mpc-process-controls').insert_after(options)
+  if not process.select_one('#mpc-process-speed'):
+   speed=BeautifulSoup('<label class="mpc-speed">Speed <select id="mpc-process-speed" aria-label="Search replay speed"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select></label>','html.parser');process.select_one('.mpc-process-controls').append(speed)
+  if not process.select_one('.mpc-anchor-controls'):
+   options=BeautifulSoup('<div class="mpc-anchor-controls" role="group" aria-label="Magnified forecast anchor"><span>Inspect anchor</span><button type="button" data-anchor="0" aria-pressed="false">Current</button><button type="button" data-anchor="1" aria-pressed="true">Midpoint</button><button type="button" data-anchor="2" aria-pressed="false">Endpoint</button></div>','html.parser');process.select_one('.mpc-display-options').insert_after(options)
   scope=process.select_one('.method-details p')
-  if scope:scope.string='A displayed forecast remains fixed for a forecast window so the recorded motion can be followed against it. The controller still replans at its original frequency. The inset shows candidate displacement relative to the nominal prediction, not extra noise or modified trajectories. Our controller searches bounded contact residuals while SUMO searches base commands. Candidate spread is not a measure of control quality.'
+  if scope:scope.string='The search replay advances through saved controller updates. Replay speed changes presentation time only. The physical execution videos retain their original timing. The inset shows candidate displacement relative to the nominal prediction, not extra noise or modified trajectories. Our controller searches bounded contact residuals while SUMO searches base commands. Candidate spread is not a measure of control quality.'
   captions=process.select('.mpc-process-content > .figure-caption')
   if captions:
-   captions[0].string='The full plots share time and travel axes. Faint traces show the complete recorded execution. Insets subtract the nominal forecast and use labeled local scales in millimetres. The outlined marker shows the observation, with off-scale values labeled.'
+   captions[0].string='The main plot shows every candidate over the full prediction horizon. Values are deviations from the nominal forecast in millimetres. The annotated anchor shows the same candidate points in the horizontal plane. Each panel labels its own scale.'
    for node in captions[1:]:
     details=soup.new_tag('details',attrs={'class':'method-details'});summary=soup.new_tag('summary');summary.string='Controller and replay scope';details.append(summary);node.replace_with(details);details.append(node)
  return soup
