@@ -11,7 +11,6 @@ async def main():
    await root.screenshot(path='/tmp/learning-'+kind+'.png')
    dot=root.locator('circle').nth(7);box=await dot.bounding_box();await page.mouse.move(box['x']+box['width']/2,box['y']+box['height']/2);assert 'Sample 8' in await root.locator('.sample-title').inner_text()
    await dot.focus();await page.keyboard.press('ArrowRight');assert 'Sample 9' in await root.locator('.sample-title').inner_text()
-   if kind=='ordering':await root.locator('.sample-reference-details summary').click()
    await root.locator('.sample-play').click();await page.wait_for_timeout(250);assert float(await root.locator('.sample-progress').input_value())>0
    await page.evaluate('window.scrollTo(0,0)');await page.wait_for_timeout(200)
    stopped=await root.locator('.sample-progress').input_value();await page.wait_for_timeout(250);assert await root.locator('.sample-progress').input_value()==stopped

@@ -20,11 +20,12 @@ async def main():
    direction=[r['reference'][-1][i]-r['reference'][0][i] for i in range(2)];norm=math.hypot(*direction);selected=u['paths'][u['applied']]
    delta=[1000*sum((point[0][i]-selected[j][0][i])*direction[i]/norm for i in range(2)) for path in u['paths'][:24] for j,point in enumerate(path)]
    limit=float(await panel.get_attribute('data-residual-limit'));assert max(map(abs,delta))<=limit+1e-8
-   assert limit<max(map(abs,delta))*2+1e-8
+   assert await panel.locator('canvas').count()==2
+   assert await panel.locator('canvas').evaluate_all('es=>es.every(e=>Number(e.dataset.residualLimit)===Number(e.parentElement.dataset.residualLimit))')
   await root.locator('#mpc-process-play').click();start=float(await root.get_attribute('data-elapsed'));await page.wait_for_timeout(400);assert float(await root.get_attribute('data-elapsed'))-start>.5;await root.locator('#mpc-process-play').click()
   for anchor in [0,2,1]:
-   await root.locator('[data-anchor="'+str(anchor)+'"]').click();assert await root.locator('[data-process=optimized]').get_attribute('data-anchor')==str(anchor)
-  await root.locator('[data-palm="1"]').click();assert await root.locator('[data-process=optimized]').get_attribute('data-palm')=='1';await root.screenshot(path='/tmp/candidate-final.png')
+   await root.locator('[data-anchor="'+str(anchor)+'"]').click();assert await root.locator('[data-process=optimized] canvas').evaluate_all('(es,a)=>es.every(e=>e.dataset.anchor===String(a))',anchor)
+  assert await root.locator('canvas[data-palm="1"]').count()==2;await root.screenshot(path='/tmp/candidate-final.png')
   order=page.locator('.ordering-main');await order.scroll_into_view_if_needed();assert await order.locator('svg g').count()==3;assert await page.locator('.ordering-spatial .viewer').is_hidden()
   assert await order.locator('.ordering-sequence strong').all_text_contents()==['Object 1','Object 2']
   a=await order.locator('svg').inner_html();await order.locator('#maze-order-next').click();assert a!=await order.locator('svg').inner_html();assert await order.get_attribute('data-sample')=='1'
@@ -32,5 +33,5 @@ async def main():
   button=page.locator('[data-mpc-seek="14.14"]');await button.click();video=page.locator('[data-scene=mpc-baseline] .preview-video');await page.wait_for_function('e=>e.currentTime>=14.14&&e.currentTime<16',arg=await video.element_handle());await video.evaluate('e=>e.pause()')
   for width in [768,390]:
    await page.set_viewport_size({'width':width,'height':1000});await root.scroll_into_view_if_needed();await root.screenshot(path=f'/tmp/candidate-final-{width}.png');await order.scroll_into_view_if_needed();assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth');await order.screenshot(path=f'/tmp/ordering-final-{width}.png')
-  assert not errors,errors;await browser.close();print('PASS rapid complete forecasts, recorded candidate spread, actual tracking, hand switch, probability draws, contact-event seek, responsive layouts')
+  assert not errors,errors;await browser.close();print('PASS rapid complete forecasts, recorded candidate spread, actual tracking, stacked hands, probability draws, contact-event seek, responsive layouts')
 asyncio.run(main())

@@ -11,10 +11,11 @@
   const movie=root.dataset.kind==='grounding'?document.createElement('video'):null;
   if(movie){movie.className='sample-video';movie.muted=true;movie.loop=true;movie.playsInline=true;movie.preload='metadata';movie.setAttribute('aria-label','Recorded physical robot attempt');canvas.before(movie);const map=document.createElement('details');map.className='sample-map-details';const title=document.createElement('summary');title.textContent='Trajectory map';map.append(title);canvas.after(map);map.append(canvas);movie.addEventListener('loadeddata',()=>{if(visible&&playing)movie.play().catch(()=>{});});}
 
-  let orderDiagram,sceneDetails;
+  let objectFocus=null;
   if(root.dataset.kind==='ordering'){
-   orderDiagram=document.createElement('div');orderDiagram.className='sample-ordering';canvas.before(orderDiagram);
-   const details=document.createElement('details');details.className='sample-reference-details';const summary=document.createElement('summary');summary.textContent='Inspect the recorded scene rollout';details.append(summary);canvas.after(details);details.append(canvas,root.querySelector('.sample-controls'));sceneDetails=details;details.addEventListener('toggle',()=>{if(details.open)schedule();else{cancelAnimationFrame(frame);frame=0;last=0;}});
+   const legend=document.createElement('p');legend.className='sample-map-legend';legend.textContent='Dashed green: recorded route · Colored objects: reference interactions';canvas.after(legend);
+   canvas.addEventListener('pointermove',event=>{const r=canvas.getBoundingClientRect(),x=(event.clientX-r.left)*canvas.width/r.width,y=(event.clientY-r.top)*canvas.height/r.height;const hit=(canvas._objectHits||[]).find(p=>Math.hypot(x-p.x,y-p.y)<24);objectFocus=hit?.i??null;render();});
+   canvas.addEventListener('pointerleave',()=>{objectFocus=null;render();});
   }
   const connector=element('svg',{'class':'sample-connector','aria-hidden':'true'}),leader=element('path',{'class':'sample-leader',fill:'none'}),outline=element('path',{'class':'sample-view-outline',fill:'none'});
   const defs=element('defs',{}),mask=element('mask',{id:'sample-reveal-'+root.dataset.kind}),reveal=element('path',{fill:'none',stroke:'white','stroke-width':7,pathLength:1});
@@ -23,7 +24,7 @@
   const phaseLabel=document.createElement('p');phaseLabel.className='sample-phase';canvas.after(phaseLabel);
   function connect(animate=false){
    if(!dots[index]||!visible)return;
-   const bounds=grid.getBoundingClientRect(),a=dots[index].getBoundingClientRect(),b=(movie||orderDiagram||canvas).getBoundingClientRect();
+   const bounds=grid.getBoundingClientRect(),a=dots[index].getBoundingClientRect(),b=(movie||canvas).getBoundingClientRect();
    connector.setAttribute('viewBox',`0 0 ${bounds.width} ${bounds.height}`);
    const x=a.x+a.width/2-bounds.x,y=a.y+a.height/2-bounds.y,l=b.x-bounds.x,t=b.y-bounds.y,r=l+b.width,bottom=t+b.height;
    const stacked=b.y>a.bottom+30,tx=stacked?r-24:l,ty=stacked?t:t+Math.min(70,b.height/3),lane=bounds.width+8;
@@ -32,12 +33,15 @@
    const n=14;outline.setAttribute('d',`M ${l} ${t+n} V ${t} H ${l+n} M ${r-n} ${t} H ${r} V ${t+n} M ${r} ${bottom-n} V ${bottom} H ${r-n} M ${l+n} ${bottom} H ${l} V ${bottom-n}`);
    if(animate&&!reduced.matches)reveal.animate([{strokeDashoffset:1},{strokeDashoffset:0}],{duration:650,easing:'ease-out'});
   }
-  new ResizeObserver(()=>connect()).observe(grid);
+  new ResizeObserver(()=>{connect();if(root.dataset.kind==='ordering')render();}).observe(grid);
   function matches(sample){return filter==='all'||sample.body===filter||(filter==='stairs'&&sample.scene.terrain.length>0)||(filter==='flat'&&!sample.scene.terrain.length)||(filter==='safe'&&sample.target===1)||(filter==='blocked'&&sample.target===0)||(filter==='interaction'&&sample.paths?.length>0);}
   function path(points,color,width=2,dash=[]){if(!points.length)return;ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);points.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.stroke();ctx.setLineDash([]);}
   function dot(x,y,r,color){ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#3d4746';ctx.lineWidth=1;ctx.stroke();}
   function render(){
    if(!samples.length)return;const sample=samples[index],scene=sample.scene,frames=sample.rollout;
+   if(root.dataset.kind==='ordering'){
+    const state=window.clearOrderingMap(canvas,sample,progress,objectFocus);range.value=progress;root.querySelector('.sample-time').textContent=state.time.toFixed(1)+' s';play.textContent=playing?'Pause route':'Play route';phaseLabel.textContent='';return;
+   }
    const minT=frames[0][0],maxT=frames.at(-1)[0],time=minT+progress*(maxT-minT);
    let k=frames.findIndex(f=>f[0]>=time);if(k<0)k=frames.length-1;
    const a=frames[Math.max(0,k-1)],b=frames[k],t=b[0]===a[0]?0:(time-a[0])/(b[0]-a[0]);
@@ -69,8 +73,8 @@
    phaseLabel.textContent=phase+(interval?` · label interval ${interval[0].toFixed(1)}–${interval[1].toFixed(1)} s`:'');
    range.value=progress;root.querySelector('.sample-time').textContent=time.toFixed(1)+' s';play.textContent=playing?'Pause rollout':'Play rollout';
   }
-  function tick(now){frame=0;if(!visible||!playing||!initialized||document.hidden||(orderDiagram&&!sceneDetails.open))return;const f=samples[index]?.rollout;if(!f)return;const duration=Math.max(3,Math.min(22,f.at(-1)[0]-f[0][0]));if(movie){if(movie.readyState>=2)progress=Math.min(1,movie.currentTime/(f.at(-1)[0]-f[0][0]||1));}else if(last)progress=(progress+(now-last)/(duration*1000))%1;last=now;render();frame=requestAnimationFrame(tick);}
-  function schedule(){if(!frame&&visible&&!document.hidden&&playing&&initialized&&(!orderDiagram||sceneDetails.open)){last=0;frame=requestAnimationFrame(tick);}}
+  function tick(now){frame=0;if(!visible||!playing||!initialized||document.hidden)return;const f=samples[index]?.rollout;if(!f)return;const duration=Math.max(3,Math.min(22,f.at(-1)[0]-f[0][0]));if(movie){if(movie.readyState>=2)progress=Math.min(1,movie.currentTime/(f.at(-1)[0]-f[0][0]||1));}else if(last)progress=(progress+(now-last)/(duration*1000))%1;last=now;render();frame=requestAnimationFrame(tick);}
+  function schedule(){if(!frame&&visible&&!document.hidden&&playing&&initialized){last=0;frame=requestAnimationFrame(tick);}}
   function select(i){
    index=(i+samples.length)%samples.length;progress=0;const sample=samples[index];
    if(movie){clearTimeout(mediaTimer);movie.pause();movie.removeAttribute('src');movie.load();const file='assets/media/attempts/attempt-'+String(index).padStart(3,'0');movie.poster=clearAssetURL(file+'.png');mediaTimer=setTimeout(()=>{movie.src=clearAssetURL(file+'.mp4');movie.load();},150);}
@@ -83,18 +87,20 @@
     const p=document.createElement('p');p.textContent=`Predicted safe crossing: ${(100*sample.prediction).toFixed(1)}%`;target.append(p);
     if(sample.outcome){const outcome=document.createElement('p');outcome.textContent='Observed: '+(sample.outcome.fell?'Fall':sample.outcome.collision?'Collision':sample.outcome.success?'Safe crossing':'Incomplete');target.append(outcome);}
    }else{
-    const p=document.createElement('p');p.textContent='Reference order: '+(sample.paths.length?sample.paths.map(p=>'Object '+p.object).join(' → '):'No object interaction');target.append(p);
-    const table=document.createElement('table');table.innerHTML='<thead><tr><th>Object</th><th>Target rank</th><th>Selection</th><th>Priority μ</th></tr></thead>';const body=document.createElement('tbody');
-    sample.rank.forEach((rank,j)=>{const row=document.createElement('tr');for(const value of [sample.scene.objects[j].object_id,rank<0?'Not selected':rank,(100*sample.selection[j]).toFixed(1)+'%',sample.mu[j].toFixed(2)]){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}body.append(row);});table.append(body);const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Targets and losses';details.append(summary,table);target.append(details);
-    const loss=document.createElement('p');loss.className='sample-loss-values';loss.textContent=`Checkpoint losses on this sample: selection ${sample.losses.selection.toFixed(3)}, rank ${sample.losses.order.toFixed(3)}, Gaussian regularization ${sample.losses.kl.toFixed(3)}.`;details.append(loss);
+    const sequence=document.createElement('div');sequence.className='sample-route-order';
+    const label=document.createElement('span');label.textContent=sample.paths.length?'Move along the route':'Route needs no object interaction';sequence.append(label);
+    sample.paths.forEach((path,j)=>{const button=document.createElement('button');button.type='button';button.textContent=(j+1)+'. Object '+path.object;button.onclick=()=>{objectFocus=path.object;let k=1;while(k<sample.rollout.length&&Math.hypot(sample.rollout[k][4][path.object][0]-sample.rollout[0][4][path.object][0],sample.rollout[k][4][path.object][1]-sample.rollout[0][4][path.object][1])<.025)k++;k=Math.min(k,sample.rollout.length-1);progress=(sample.rollout[k][0]-sample.rollout[0][0])/(sample.rollout.at(-1)[0]-sample.rollout[0][0]);playing=false;render();};sequence.append(button);});target.append(sequence);
+    const table=document.createElement('table');table.innerHTML='<thead><tr><th>Object</th><th>Selection probability</th><th>Priority μ ± σ</th></tr></thead>';const body=document.createElement('tbody');
+    sample.rank.forEach((rank,j)=>{const row=document.createElement('tr');for(const value of [sample.scene.objects[j].object_id,(sample.selection[j]<.001?'<0.1':sample.selection[j]>.999?'>99.9':(100*sample.selection[j]).toFixed(1))+'%',sample.mu[j].toFixed(2)+' ± '+sample.sigma[j].toFixed(2)]){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}body.append(row);});table.append(body);const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Model predictions';details.append(summary,table);target.append(details);
+
    }
-   if(orderDiagram&&window.clearOrderingPlot)window.clearOrderingPlot(orderDiagram,sample);
    render();connect(true);schedule();
   }
   async function initialize(){
    if(initialized)return;initialized=true;
    const status=root.querySelector('.learning-loading');status.textContent='Preparing recorded samples…';
    try{
+    if(root.dataset.kind==='ordering')await loadScript('assets/ordering-map.js',()=>!!window.clearOrderingMap);
     await loadScript('assets/learning-samples.js',()=>!!window.CLEAR_LEARNING_SAMPLES);
     const data=window.CLEAR_LEARNING_SAMPLES;samples=data[root.dataset.kind];
     const xs=samples.map(s=>s.xy[0]),ys=samples.map(s=>s.xy[1]),lo=[Math.min(...xs),Math.min(...ys)],hi=[Math.max(...xs),Math.max(...ys)];
