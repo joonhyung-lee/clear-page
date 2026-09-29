@@ -22,12 +22,13 @@ async def main():
   root=page.locator('#mpc-process');await root.scroll_into_view_if_needed();await root.locator('.mpc-process-content').wait_for();await root.locator('input').evaluate("e=>{e.value=.2;e.dispatchEvent(new Event('input'))}");await root.screenshot(path='/tmp/mpc-internal-insets.png')
   await page.emulate_media(reduced_motion='no-preference');overview=page.locator('#clear-overview');await overview.scroll_into_view_if_needed();assert await page.locator('#overview-execution>span').count()==0
   await page.locator('#overview-grounding').hover();await page.wait_for_timeout(800);assert await page.locator('#overview-preview>div:not([hidden]) video').first.evaluate('(e)=>e.currentTime')>0
-  for stage in ['ordering','generation','execution']:
+  await page.locator('#overview-ordering').hover();plot=page.locator('.overview-ordering .ordering-distribution');await plot.locator('svg').wait_for();before=await plot.get_attribute('data-sample');await page.wait_for_timeout(2300);assert await plot.get_attribute('data-sample')!=before
+  for stage in ['generation','execution']:
    await page.locator('#overview-'+stage).hover();v=page.locator('#overview-preview>div:not([hidden]) .viewer');await v.locator('iframe.scene-ready').wait_for(timeout=60000)
    f=await (await v.locator('iframe').element_handle()).content_frame();assert await f.evaluate(FIND)
    before=await f.locator('[role=slider]').get_attribute('aria-valuenow');await page.wait_for_timeout(500);after=await f.locator('[role=slider]').get_attribute('aria-valuenow');assert before!=after,(stage,before,after)
    await v.screenshot(path='/tmp/overview-live-'+stage+'.png')
-  order=page.locator('.maze-order-layout>.viewer');await order.scroll_into_view_if_needed();await order.locator('.launch').click(force=True);await order.locator('iframe.scene-ready').wait_for(timeout=60000)
+  await page.locator('.ordering-spatial>summary').click();order=page.locator('.ordering-spatial .viewer');await order.scroll_into_view_if_needed();await order.locator('.launch').click(force=True);await order.locator('iframe.scene-ready').wait_for(timeout=60000)
   f=await (await order.locator('iframe').element_handle()).content_frame();assert await f.evaluate(FIND)
   await page.locator('.context-output[data-object="1"]').hover();await page.wait_for_timeout(200)
   flags=await f.evaluate(r'()=>Object.entries(window.__testViewer.useSceneTree.getAll()).filter(([n])=>/^\/order\/sample-0\/uncertainty-\d-[123]$/.test(n)).map(([n,v])=>[n,v.visibility])')

@@ -20,7 +20,7 @@
   document.querySelector('#maze-flow-sample').value=String(sample);
   const scene='method-flow-'+sample+'-refined',active=!!viewer.querySelector('iframe');
   if(viewer.dataset.scene!==scene){viewer.dispatchEvent(new Event('reset-viewer'));viewer.dataset.scene=scene;viewer.querySelector('.preview-image').src=clearAssetURL('assets/media/'+scene+'.png');if(active&&reload)viewer.querySelector('.launch').click();}
-  updateOrder();
+  updateOrder();document.dispatchEvent(new Event('clear-order-draw'));
  }
  document.querySelector('#maze-order-next').addEventListener('click',()=>{sample=(sample+1)%d.traces.length;update(true);});
  document.querySelector('#maze-flow-sample').addEventListener('change',e=>{sample=+e.target.value;update(true);});

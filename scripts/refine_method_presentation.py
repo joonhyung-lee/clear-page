@@ -28,11 +28,18 @@ def refine(soup):
    if span.get_text(strip=True)=='→':span.decompose()
  process=soup.find(id='mpc-process')
  if process:
-  process.select_one('h4 + p').string='The complete execution stays in view. Each corner inset magnifies the current control segment.'
-  for caption in process.select('.mpc-process-pair figcaption'):caption.string='Observed motion is dark. Candidates are gray, selected paths are colored, and the white marker tracks the robot.'
+  process.select_one('h4 + p').string='See all candidates from one saved forecast as the recorded motion progresses.'
+  for caption in process.select('.mpc-process-pair figcaption'):caption.decompose()
+  stages=process.select_one('.mpc-stages')
+  if stages:stages.decompose()
+  if not process.select_one('.mpc-display-options'):
+   options=BeautifulSoup('<div class="mpc-display-options"><div class="mpc-hand" role="group" aria-label="Palm trajectory"><button data-palm="0" aria-pressed="true" type="button">Left palm</button><button data-palm="1" aria-pressed="false" type="button">Right palm</button></div><div class="mpc-legend"><span class="candidate">Candidates</span><span class="chosen">Selected</span><span class="observed">Observed</span></div></div>','html.parser')
+   process.select_one('.mpc-process-controls').insert_after(options)
+  scope=process.select_one('.method-details p')
+  if scope:scope.string='A displayed forecast remains fixed for a forecast window so the recorded motion can be followed against it. The controller still replans at its original frequency. The inset shows candidate displacement relative to the nominal prediction, not extra noise or modified trajectories. Our controller searches bounded contact residuals while SUMO searches base commands. Candidate spread is not a measure of control quality.'
   captions=process.select('.mpc-process-content > .figure-caption')
   if captions:
-   captions[0].string='Both plots use the same full time and displacement axes. Corner insets share a local scale. Traces and candidate populations come from recorded execution.'
+   captions[0].string='The full plots share time and travel axes. Faint traces show the complete recorded execution. Insets subtract the nominal forecast and use labeled local scales in millimetres. The outlined marker shows the observation, with off-scale values labeled.'
    for node in captions[1:]:
     details=soup.new_tag('details',attrs={'class':'method-details'});summary=soup.new_tag('summary');summary.string='Controller and replay scope';details.append(summary);node.replace_with(details);details.append(node)
  return soup

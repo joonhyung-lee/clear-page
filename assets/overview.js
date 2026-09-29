@@ -70,7 +70,7 @@
   }));
   const examples={
     grounding:[['structure-g1','G1'],['structure-spot','Spot'],['structure-spot_arm','Spot + arm'],['structure-husky','Husky']],
-    ordering:[['method-order-maze','Objects in a shared maze context']],
+    ordering:[['order-distribution','Selection and sampled priorities']],
     generation:[['method-flow-0-refined','Object motion within scene geometry']],
     execution:[['mpc-optimized','Recorded interaction and candidate motions']]
   };
@@ -104,7 +104,12 @@
       gallery=document.createElement('div');gallery.className=items.length>1?'overview-preview-grid':'';galleries.set(node,gallery);preview.append(gallery);
       items.forEach(([file,caption])=>{
         const figure=document.createElement('figure'),label=document.createElement('figcaption');label.textContent=caption;
-        if(file.startsWith('method-')||file==='mpc-optimized'){
+        if(file==='order-distribution'){
+          const plot=document.createElement('div');figure.classList.add('overview-ordering');figure.append(plot,label);gallery.append(figure);
+          let sample=0;window.clearOrderingPlot(plot,window.CLEAR_MAZE_TRACE,window.CLEAR_MAZE_TRACE.traces[sample]);
+          const timer=setInterval(()=>{const box=gallery.getBoundingClientRect();if(gallery.hidden||document.hidden||reducedMotion.matches||box.bottom<0||box.top>innerHeight)return;sample=(sample+1)%window.CLEAR_MAZE_TRACE.traces.length;plot.dataset.sample=sample;window.clearOrderingPlot(plot,window.CLEAR_MAZE_TRACE,window.CLEAR_MAZE_TRACE.traces[sample]);},2200);
+          window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
+        }else if(file.startsWith('method-')||file==='mpc-optimized'){
           const v=document.createElement('div');v.className='viewer overview-live-viewer';v.dataset.scene=file;v.dataset.title=caption;v.dataset.generation='true';
           if(file==='method-order-maze'){v.dataset.orderStage='supervision';label.textContent='Recorded reference interactions';}
           const poster=document.createElement(file==='mpc-optimized'?'video':'img');poster.className='preview-image';

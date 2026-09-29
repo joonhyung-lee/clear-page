@@ -11,6 +11,11 @@
   const movie=root.dataset.kind==='grounding'?document.createElement('video'):null;
   if(movie){movie.className='sample-video';movie.muted=true;movie.loop=true;movie.playsInline=true;movie.preload='metadata';movie.setAttribute('aria-label','Recorded physical robot attempt');canvas.before(movie);const map=document.createElement('details');map.className='sample-map-details';const title=document.createElement('summary');title.textContent='Trajectory map';map.append(title);canvas.after(map);map.append(canvas);movie.addEventListener('loadeddata',()=>{if(visible&&playing)movie.play().catch(()=>{});});}
 
+  let orderDiagram,sceneDetails;
+  if(root.dataset.kind==='ordering'){
+   orderDiagram=document.createElement('div');orderDiagram.className='sample-ordering';canvas.before(orderDiagram);
+   const details=document.createElement('details');details.className='sample-reference-details';const summary=document.createElement('summary');summary.textContent='Inspect the recorded scene rollout';details.append(summary);canvas.after(details);details.append(canvas,root.querySelector('.sample-controls'));sceneDetails=details;details.addEventListener('toggle',()=>{if(details.open)schedule();else{cancelAnimationFrame(frame);frame=0;last=0;}});
+  }
   const connector=element('svg',{'class':'sample-connector','aria-hidden':'true'}),leader=element('path',{'class':'sample-leader',fill:'none'}),outline=element('path',{'class':'sample-view-outline',fill:'none'});
   const defs=element('defs',{}),mask=element('mask',{id:'sample-reveal-'+root.dataset.kind}),reveal=element('path',{fill:'none',stroke:'white','stroke-width':7,pathLength:1});
   const arrow=element('marker',{id:'sample-arrow-'+root.dataset.kind,viewBox:'0 0 8 8',refX:7,refY:4,markerWidth:6,markerHeight:6,orient:'auto'});arrow.append(element('path',{d:'M 1 1 L 7 4 L 1 7',fill:'none',stroke:'#748d80','stroke-width':1.2}));
@@ -18,7 +23,7 @@
   const phaseLabel=document.createElement('p');phaseLabel.className='sample-phase';canvas.after(phaseLabel);
   function connect(animate=false){
    if(!dots[index]||!visible)return;
-   const bounds=grid.getBoundingClientRect(),a=dots[index].getBoundingClientRect(),b=(movie||canvas).getBoundingClientRect();
+   const bounds=grid.getBoundingClientRect(),a=dots[index].getBoundingClientRect(),b=(movie||orderDiagram||canvas).getBoundingClientRect();
    connector.setAttribute('viewBox',`0 0 ${bounds.width} ${bounds.height}`);
    const x=a.x+a.width/2-bounds.x,y=a.y+a.height/2-bounds.y,l=b.x-bounds.x,t=b.y-bounds.y,r=l+b.width,bottom=t+b.height;
    const stacked=b.y>a.bottom+30,tx=stacked?r-24:l,ty=stacked?t:t+Math.min(70,b.height/3),lane=bounds.width+8;
@@ -64,8 +69,8 @@
    phaseLabel.textContent=phase+(interval?` · label interval ${interval[0].toFixed(1)}–${interval[1].toFixed(1)} s`:'');
    range.value=progress;root.querySelector('.sample-time').textContent=time.toFixed(1)+' s';play.textContent=playing?'Pause rollout':'Play rollout';
   }
-  function tick(now){frame=0;if(!visible||!playing||!initialized||document.hidden)return;const f=samples[index]?.rollout;if(!f)return;const duration=Math.max(3,Math.min(22,f.at(-1)[0]-f[0][0]));if(movie){if(movie.readyState>=2)progress=Math.min(1,movie.currentTime/(f.at(-1)[0]-f[0][0]||1));}else if(last)progress=(progress+(now-last)/(duration*1000))%1;last=now;render();frame=requestAnimationFrame(tick);}
-  function schedule(){if(!frame&&visible&&!document.hidden&&playing&&initialized){last=0;frame=requestAnimationFrame(tick);}}
+  function tick(now){frame=0;if(!visible||!playing||!initialized||document.hidden||(orderDiagram&&!sceneDetails.open))return;const f=samples[index]?.rollout;if(!f)return;const duration=Math.max(3,Math.min(22,f.at(-1)[0]-f[0][0]));if(movie){if(movie.readyState>=2)progress=Math.min(1,movie.currentTime/(f.at(-1)[0]-f[0][0]||1));}else if(last)progress=(progress+(now-last)/(duration*1000))%1;last=now;render();frame=requestAnimationFrame(tick);}
+  function schedule(){if(!frame&&visible&&!document.hidden&&playing&&initialized&&(!orderDiagram||sceneDetails.open)){last=0;frame=requestAnimationFrame(tick);}}
   function select(i){
    index=(i+samples.length)%samples.length;progress=0;const sample=samples[index];
    if(movie){clearTimeout(mediaTimer);movie.pause();movie.removeAttribute('src');movie.load();const file='assets/media/attempts/attempt-'+String(index).padStart(3,'0');movie.poster=clearAssetURL(file+'.png');mediaTimer=setTimeout(()=>{movie.src=clearAssetURL(file+'.mp4');movie.load();},150);}
@@ -83,6 +88,7 @@
     sample.rank.forEach((rank,j)=>{const row=document.createElement('tr');for(const value of [sample.scene.objects[j].object_id,rank<0?'Not selected':rank,(100*sample.selection[j]).toFixed(1)+'%',sample.mu[j].toFixed(2)]){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}body.append(row);});table.append(body);const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Targets and losses';details.append(summary,table);target.append(details);
     const loss=document.createElement('p');loss.className='sample-loss-values';loss.textContent=`Checkpoint losses on this sample: selection ${sample.losses.selection.toFixed(3)}, rank ${sample.losses.order.toFixed(3)}, Gaussian regularization ${sample.losses.kl.toFixed(3)}.`;details.append(loss);
    }
+   if(orderDiagram&&window.clearOrderingPlot)window.clearOrderingPlot(orderDiagram,sample);
    render();connect(true);schedule();
   }
   async function initialize(){

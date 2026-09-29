@@ -410,3 +410,14 @@ for(const viewer of document.querySelectorAll('.mpc-comparison .viewer[data-ego]
  main.addEventListener('pause',()=>detail.pause());main.addEventListener('ended',()=>detail.pause());
  detail.addEventListener('loadeddata',()=>{synchronize();if(!main.paused&&!viewer.querySelector('iframe.scene-ready'))detail.play().catch(()=>{});});
 }
+
+// Inspect measured contact events in either the movie or the native replay.
+for(const button of document.querySelectorAll('[data-mpc-seek]')){
+ button.addEventListener('click',()=>{
+  const viewer=button.closest('article').querySelector('.viewer'),time=Number(button.dataset.mpcSeek),frame=viewer.querySelector('iframe.scene-ready');
+  if(frame){frame.contentWindow.postMessage({type:'clear-playback-command',time,playing:true},'*');return;}
+  const video=viewer.querySelector('.preview-video');
+  const seek=()=>{video.currentTime=time;video.play().catch(()=>{});};
+  if(video.readyState)seek();else{video.addEventListener('loadedmetadata',seek,{once:true});video.load();}
+ });
+}
