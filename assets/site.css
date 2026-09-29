@@ -190,3 +190,38 @@ video.media-ready{animation:media-dissolve .4s ease-out}
 .mpc-process canvas[hidden]{display:none}
 /* Keep the native canvas dimensions when toggled off so line widths survive reopening. */
 .mpc-process-pair>figure{position:relative}.mpc-context-viewer[hidden]{display:block;position:absolute;left:0;top:0;visibility:hidden;pointer-events:none}
+
+/* Each scene contains a side by side controller pair. */
+.mpc-scenes-grid>.mpc-scene-comparison{grid-row:span 3}
+.mpc-scenes-grid .mpc-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.mpc-scenes-grid .mpc-comparison>article{min-width:0;margin-bottom:0}
+.mpc-scenes-grid .mpc-comparison h5{min-height:2.8em}
+@media(max-width:600px){.mpc-scenes-grid .mpc-comparison{grid-template-columns:1fr;gap:28px}.mpc-scenes-grid .mpc-comparison h5{min-height:0}}
+
+/* Original CLEAR objective, followed by a single row of matching components. */
+#training-objective{width:85vw;max-width:none;margin-left:calc((100% - 85vw)/2);scroll-margin-top:24px;margin-top:40px}
+#training-objective>h4{font-size:21px;margin-bottom:18px}
+#training-losses .method-small-copy{max-width:900px}
+.training-loss-jump{font-size:12px;margin:12px 0 22px;color:#5a7052}.training-loss-jump a{text-decoration-color:#b9c6b2}
+.loss-objective-map{position:relative;max-width:100%;margin:26px 0 18px;overflow-x:auto}
+.loss-objective-map>div{display:flex;align-items:center;gap:12px;min-width:max-content;padding:10px 0}
+.loss-objective-map button{position:relative;border:0;border-bottom:2px solid transparent;background:transparent;padding:7px 10px;color:#3a4c35}
+.loss-objective-map button small{display:block;font-size:10px;color:#798271;margin-top:7px}
+.loss-objective-map .loss-term-active{border-color:#839b74;background:#f1f5ec}.loss-objective-map .katex{font-size:1.1em}
+.loss-scope{font-size:12px;color:#72796c;line-height:1.65;max-width:940px;margin:14px 0 24px}
+.training-loss-chart{position:relative;min-width:0;padding:16px 0 8px;border-top:1px solid #e0e6d9;scroll-margin-top:24px}
+.training-loss-chart.loss-term-active{background:#f5f8f0;box-shadow:inset 0 2px #91a87f}
+.training-loss-chart h5{font-size:14px;font-weight:500;margin:0 0 4px}
+.training-loss-chart figcaption p{font-size:11px;color:#7b8273;margin:0 0 14px}
+.training-loss-chart canvas{display:block;width:100%;height:200px;touch-action:pan-y}
+.training-loss-chart canvas:focus-visible{outline:1px solid #829775;outline-offset:3px}#loss-loss canvas{height:260px}
+.loss-chart-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px;margin-top:24px}
+.loss-tooltip{position:absolute;z-index:3;width:190px;max-width:100%;box-sizing:border-box;padding:10px;background:rgba(255,255,255,.97);border:1px solid #bfcdb4;pointer-events:none;font-size:11px;line-height:1.6;font-variant-numeric:tabular-nums}
+.loss-tooltip[hidden],.loss-content[hidden],.loss-loading[hidden]{display:none}
+.loss-tooltip strong{display:block;font-weight:500;margin-bottom:5px;color:#384932}.loss-tooltip-row{display:flex;justify-content:space-between;gap:8px}
+.loss-keyboard-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.loss-loading{font-size:13px;color:#748269;padding:24px 0}.loss-loading button{border:1px solid #dce3d7;background:#fff;padding:6px 10px;font-size:12px}
+@media(max-width:1100px){.loss-chart-grid{gap:12px}.loss-chart-grid figcaption{min-height:64px}.loss-chart-grid h5{font-size:12px}.loss-chart-grid figcaption p{font-size:10px}}
+@media(max-width:900px){.loss-chart-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.loss-chart-grid figcaption{min-height:0}.loss-chart-grid h5{font-size:14px}.loss-chart-grid figcaption p{font-size:11px}}
+@media(max-width:700px){#training-objective{width:calc(100vw - 40px);margin-left:calc((100% - 100vw + 40px)/2)}.loss-objective-map{font-size:14px}.loss-objective-map>div{gap:6px}.loss-objective-map button{padding:6px}}
+@media(max-width:500px){.loss-chart-grid{grid-template-columns:1fr;gap:18px}}

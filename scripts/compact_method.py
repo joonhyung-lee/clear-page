@@ -48,3 +48,5 @@ if (root/'assets/maze-method-trace.js').exists():runpy.run_path(str(root/'script
 if (root/'assets/mpc-comparison.json').exists():runpy.run_path(str(root/'scripts/build_execution_section.py'))
 
 if (root/'assets/learning-explorer.js').exists():runpy.run_path(str(root/'scripts/build_learning_sections.py'))
+
+if (root/'assets/training-loss-data.js').exists():runpy.run_path(str(root/'scripts/build_training_losses.py'))
