@@ -7,16 +7,7 @@
  };
  // Start one shared walking player per body when the gallery enters view.
  // Mode buttons then operate only on material and overlay properties.
- if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
-  const observer=new IntersectionObserver(entries=>{
-   if(!entries.some(e=>e.isIntersecting))return;
-   observer.disconnect();
-   root.querySelectorAll('.viewer').forEach(viewer=>{
-    if(!viewer.querySelector('iframe,.viewer-status'))viewer.querySelector('.launch').click();
-   });
-  },{rootMargin:'120px',threshold:0});
-  observer.observe(root);
- }
+ root.querySelectorAll('.viewer').forEach(observeAutomaticScene);
  root.querySelectorAll('[data-embodiment-mode]').forEach(button=>button.addEventListener('click',()=>{
   const mode=button.dataset.embodimentMode;
   root.querySelectorAll('[data-embodiment-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
@@ -28,7 +19,10 @@
    const preview=viewer.querySelector('.preview-image');preview.src=clearAssetURL(`assets/media/${mode==='structure'?'structure':`affordance-${mode}`}-${name}.png`);preview.alt=`${viewer.dataset.title}: ${mode}`;
    const iframe=viewer.querySelector('iframe');
    if(iframe)iframe.contentWindow.postMessage({type:'clear-embodiment-mode',mode},'*');
-   else if(!viewer.querySelector('.viewer-status'))viewer.querySelector('.launch').click();
+   else if(!viewer.querySelector('.viewer-status')) {
+    if(reduced.matches)viewer.querySelector('.launch').click();
+    else {autoScenes.add(viewer);drainScenes();}
+   }
 
   });
   root.querySelector('.embodiment-explanation').textContent=descriptions[mode];

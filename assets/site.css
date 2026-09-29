@@ -47,3 +47,12 @@
 @media(max-width:700px){.ego-inset{right:6px;top:6px;width:32%}.ego-inset figcaption{font-size:9px;padding:3px}}
 .viewer[data-ego] .viewer-tools{left:8px;right:auto;z-index:3}
 .order-stages{display:flex;flex-wrap:wrap;gap:10px 24px;margin:26px 0 18px}.order-stages button{border:0;border-bottom:1px solid transparent;background:none;padding:8px 0;font-size:14px;color:#777}.order-stages button span{font-size:11px;margin-right:5px;color:#888}.order-stages button[aria-pressed=true]{color:#303d34;border-color:#78977a}.training-loss-flow{white-space:pre-line;border-top:1px solid #ddd;padding-top:16px;margin-top:20px!important;font-size:13px!important}.generation-progress{display:flex;align-items:center;gap:12px;margin:18px 0;font-size:13px}.generation-progress button{background:#fff;border:1px solid #ccc;padding:6px 10px;font-size:12px}.generation-progress progress{flex:1;min-width:50px;height:5px;accent-color:#8fae91}.generation-progress output{font-variant-numeric:tabular-nums;min-width:3em}.generation-progress span{white-space:nowrap}@media(max-width:600px){.order-stages{gap:8px 16px}.order-stages button{font-size:12px}.generation-progress{flex-wrap:wrap}.generation-progress progress{min-width:80px}}
+
+/* Keep the decoded preview underneath until the native scene reports readiness. */
+.viewer>iframe.scene-pending,.viewer>iframe.scene-ready{position:absolute;inset:0;transition:opacity .35s ease}
+.viewer>iframe.scene-pending{opacity:0;pointer-events:none}
+.viewer>iframe.scene-ready{opacity:1}
+.viewer-tools,.viewer-status,.viewer>.launch{z-index:2}
+video.media-ready{animation:media-dissolve .4s ease-out}
+@keyframes media-dissolve{from{opacity:.65}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){video.media-ready{animation:none}.viewer>iframe{transition:none}}

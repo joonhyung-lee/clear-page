@@ -33,6 +33,6 @@
   if(pending){command(pending);pending=null;}playing=event.data.playing;controls(Math.max(0,Math.min(1,event.data.time/(359/60))));
  });
  viewer.addEventListener('reset-viewer',()=>{playing=false;controls();});
- if(!matchMedia('(prefers-reduced-motion: reduce)').matches){const observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){observer.disconnect();if(!viewer.querySelector('iframe,.viewer-status'))viewer.querySelector('.launch').click();}},{rootMargin:'80px'});observer.observe(viewer);}
+ observeAutomaticScene(viewer);
  update();controls();
 })();

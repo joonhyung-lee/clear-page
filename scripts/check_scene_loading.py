@@ -12,7 +12,7 @@ FIXTURE = '''<!doctype html><link rel="stylesheet" href="/assets/site.css">
 <article><h3>Scene</h3><div class="viewer" data-scene="objects">
 <img class="preview-image" alt="Preview"><button class="launch">Play in 3D</button>
 </div></article><script src="/assets/site.js"></script>'''
-RUNTIME = '<!doctype html><head></head><body><input aria-label="Playback"></body>'.encode().hex()
+RUNTIME = '<!doctype html><head></head><body><canvas></canvas><input aria-label="Playback"></body>'.encode().hex()
 
 async def scenario(browser, fault):
     page = await browser.new_page(reduced_motion='reduce')
@@ -54,7 +54,7 @@ async def scenario(browser, fault):
             # A real click catches overlays that cover the recovery control.
             await page.get_by_role('button', name='Retry 3D', exact=True).click()
         await viewer.frame_locator('iframe').locator('input').wait_for(timeout=10000)
-        assert await viewer.locator('.viewer-status').count() == 0
+        await page.wait_for_function("!document.querySelector('.viewer-status')")
         assert counts['runtime'] == 1, counts
         assert counts['recording'] == (4 if fault == 'exhausted' else 2), counts
         await viewer.locator('.viewer-tools').click()
