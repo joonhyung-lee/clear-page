@@ -14,7 +14,7 @@ import viser
 from replay_geometry import mesh, add
 from scene_annotations import outlined_anchors, path_anchors
 
-p=argparse.ArgumentParser(description=__doc__);p.add_argument('recording',type=Path);args=p.parse_args()
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('recording',type=Path);p.add_argument('--scene',default='mpc-baseline');args=p.parse_args();key=args.scene
 root=Path(__file__).resolve().parents[1];folder=args.recording
 states=dict(np.load(folder/'task.npz'));roll=dict(np.load(folder/'task.rollouts.npz'));meta=json.loads(str(roll['metadata']))
 assert meta['runtime']=='SUMO native G1 C++ and Judo CEM' and meta['task']=='g1_box'
@@ -85,17 +85,17 @@ try:
   picture=Image.fromarray(renderer.render().copy())
   if points:visible_frames+=1
   if frame==0:
-   record=server.get_scene_serializer();picture.save(root/'assets/media/mpc-baseline-ego.png')
+   record=server.get_scene_serializer();picture.save(root/f'assets/media/{key}-ego.png')
   proc.stdin.write(np.asarray(picture).tobytes())
   if frame%200==0:print('Native SUMO export',frame,'/',len(states['time']),flush=True)
  record.insert_sleep(.02)
- (root/'assets/recordings/mpc-baseline.viser').write_bytes(record.serialize())
+ (root/f'assets/recordings/{key}.viser').write_bytes(record.serialize())
 finally:
  proc.stdin.close();code=proc.wait();renderer.close();server.stop()
-assert code==0;temporary.replace(root/'assets/media/mpc-baseline-ego.mp4')
+assert code==0;temporary.replace(root/f'assets/media/{key}-ego.mp4')
 manifest=json.loads((root/'assets/mpc-comparison.json').read_text())
 outcome=json.loads((folder/'result.json').read_text())
-entry=dict(scene='mpc-baseline',controller='SUMO native G1 box MPC',selector='topk',searchCandidates=24,executionPreviewRows=1,elites=2,horizon=meta['horizon_s'],step=meta['step_s'],seed=outcome['seed'],duration=float(states['time'][-1]+.02),recordedPopulations=len(roll['time_s']),displayAnchors=5,frames=len(states['time']),contactVisibleFrames=visible_frames,candidateDisplayHz=10,candidateFutureSamples=len(future_ids),objectDisplacement=outcome['displacement_m'],goalError=outcome['goal_error_m'],goalReached=outcome['goal_reached'],contactField='Contact locations reconstructed from recorded physical states. Whole-body target contacts are permitted.',scope=meta['scope'])
-manifest=[entry if row['scene']=='mpc-baseline' else row for row in manifest]
+entry=dict(scene=key,controller='SUMO native G1 box MPC',selector='topk',searchCandidates=24,executionPreviewRows=1,elites=2,horizon=meta['horizon_s'],step=meta['step_s'],seed=outcome['seed'],duration=float(states['time'][-1]+.02),recordedPopulations=len(roll['time_s']),displayAnchors=5,frames=len(states['time']),contactVisibleFrames=visible_frames,candidateDisplayHz=10,candidateFutureSamples=len(future_ids),objectDisplacement=outcome['displacement_m'],goalError=outcome['goal_error_m'],goalReached=outcome['goal_reached'],contactField='Contact locations reconstructed from recorded physical states. Whole-body target contacts are permitted.',scope=meta['scope'])
+manifest=[row for row in manifest if row['scene']!=key]+[entry]
 entry['insetView']='A reconstructed side view follows body contact. Walls are hidden in this detail view for visibility.'
 (root/'assets/mpc-comparison.json').write_text(json.dumps(manifest,indent=2)+'\n');print('Native SUMO export complete',entry['duration'],flush=True)

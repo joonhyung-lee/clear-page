@@ -3,7 +3,7 @@ import argparse,json
 from pathlib import Path
 import numpy as np
 import mujoco
-p=argparse.ArgumentParser();p.add_argument('baseline',type=Path);p.add_argument('optimized',type=Path);args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('baseline',type=Path);p.add_argument('optimized',type=Path);p.add_argument('--baseline-observed',type=Path);p.add_argument('--optimized-observed',type=Path);args=p.parse_args()
 result={}
 for key,folder in [('baseline',args.baseline),('optimized',args.optimized)]:
  roll=dict(np.load(folder/'task.rollouts.npz',allow_pickle=False));states=dict(np.load(folder/'task.npz',allow_pickle=False));meta=json.loads(str(roll['metadata']))
@@ -28,6 +28,7 @@ for key,folder in [('baseline',args.baseline),('optimized',args.optimized)]:
    elites=roll['elite_indices'][i].tolist(),applied=int(roll['applied_candidate'][i]),
    object=states['qpos'][k,object_address:object_address+3].round(5).tolist(),robot=states['qpos'][k,:3].round(5).tolist()))
  result[key]=dict(updates=updates,sourceUpdates=source_count,objectSize=size,reference=ref,horizon=meta['horizon_s'],step=meta['step_s'],population=24,
+  observed=np.load(getattr(args,key+'_observed'))['observed'].round(5).tolist() if getattr(args,key+'_observed') else [],
   executionPreview=0 if key=='optimized' else 1,selector=meta['selector'],futureTimes=list(future_times))
 def rounded(value):
  if isinstance(value,float):return round(value,5)

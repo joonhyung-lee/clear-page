@@ -56,21 +56,19 @@ for i,o in enumerate(scene['objects']):
   if rank>=0:
    ring=trimesh.creation.annulus(r_min=.48,r_max=.57,height=.015,sections=48)
    server.scene.add_mesh_simple(f'/order/sample-{sample}/ring-{i}',vertices=ring.vertices,faces=ring.faces,position=(*o['pose'][:2],.05),color=palette[i])
-# A common priority axis connects the learned Gaussians to actual saved draws.
+# Object-centered contours encode scalar priority uncertainty, not a spatial
+# probability field. The contour offset is proportional to 1, 2 and 3 sigma.
 for group,draw in [('prediction',None)]+[(f'sample-{j}',trace) for j,trace in enumerate(d['traces'])]:
  prefix='/order/'+group
- server.scene.add_line_segments(prefix+'/priority-axis',points=np.array([[[2,6.2,1.5],[10,6.2,1.5]]],np.float32),colors=(100,110,103),line_width=2)
- server.scene.add_label(prefix+'/axis-title',text='Priority distributions · lower comes first',position=(2,5.55,1.5))
- for value in [-8,0,8]:server.scene.add_label(prefix+'/tick-'+str(value),text=str(value),position=(2+(value+8)/2,5.95,1.5))
- for i,(mu,sigma) in enumerate(zip(d['mu'],d['sigma'])):
-  values=np.linspace(mu-3.5*sigma,mu+3.5*sigma,80);density=np.exp(-.5*((values-mu)/sigma)**2)
-  curve=np.column_stack([2+(values+8)/2,6.2+1.15*density,np.full(len(values),1.5)]).astype(np.float32)
-  server.scene.add_line_segments(prefix+f'/distribution-{i}',points=np.stack([curve[:-1],curve[1:]],axis=1),colors=palette[i],line_width=4)
-  server.scene.add_label(prefix+f'/distribution-label-{i}',text=f'Object {i}',position=(2+(mu+8)/2-.4,7.65,1.5))
-  if draw is not None:
-   x=2+(draw['priority'][i]+8)/2
-   server.scene.add_line_segments(prefix+f'/draw-{i}',points=np.array([[[x,6.15,1.5],[x,7.35,1.5]]],np.float32),colors=palette[i],line_width=2)
-   outlined_anchors(server,prefix+f'/draw-anchor-{i}',[[x,6.2,1.51]],palette[i],.10)
+ for i,(obj,mu,sigma) in enumerate(zip(scene['objects'],d['mu'],d['sigma'])):
+  radius=np.linalg.norm(obj['size'][:2])/2+.08
+  theta=np.linspace(0,2*np.pi,97)
+  for k in [1,2,3]:
+   r=radius+.65*k*sigma
+   curve=np.column_stack([obj['pose'][0]+r*np.cos(theta),obj['pose'][1]+r*np.sin(theta),np.full(len(theta),.06)]).astype(np.float32)
+   color=tuple(np.round(np.asarray(palette[i])*(1-.12*(k-1))+245*.12*(k-1)).astype(int))
+   server.scene.add_line_segments(prefix+f'/uncertainty-{i}-{k}',points=np.stack([curve[:-1],curve[1:]],axis=1),colors=color,line_width=3 if k==1 else 1.5)
+  server.scene.add_label(prefix+f'/uncertainty-label-{i}',text=f'Priority μ {mu:.2f} · σ {sigma:.2f}',position=(obj['pose'][0],obj['pose'][1]-.85,obj['size'][2]+.8))
 teachers=[]
 for path in d['supervision']['paths']:
  i=path['object'];poses=np.asarray(path['poses']);points=np.column_stack([poses[:,:2],np.full(len(poses),.08)]).astype(np.float32)

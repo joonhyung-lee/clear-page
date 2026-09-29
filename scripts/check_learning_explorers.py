@@ -17,7 +17,7 @@ async def main():
    await root.scroll_into_view_if_needed();await page.wait_for_timeout(200);assert await root.locator('.sample-progress').input_value()!=stopped
    await root.locator('.sample-play').click()
   root=page.locator('#mpc-process');await root.scroll_into_view_if_needed();await root.locator('.mpc-process-content').wait_for()
-  await root.locator('#mpc-process-play').click();await page.wait_for_timeout(4000);assert 'Apply' in await root.locator('.mpc-stages .active').inner_text()
+  await root.locator('#mpc-process-play').click();await page.wait_for_timeout(1500);assert float(await root.get_attribute('data-elapsed'))>1;assert int(await root.locator('[data-process=optimized]').get_attribute('data-update'))>1
   await page.evaluate('window.scrollTo(0,0)');await page.wait_for_timeout(200)
   stopped=await root.locator('canvas').first.evaluate('c=>c.toDataURL()');await page.wait_for_timeout(250);assert await root.locator('canvas').first.evaluate('c=>c.toDataURL()')==stopped
   await root.scroll_into_view_if_needed();await root.locator('#mpc-process-play').click();await root.screenshot(path='/tmp/mpc-process.png')

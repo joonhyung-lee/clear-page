@@ -18,12 +18,14 @@ from clear.mj_util.contact_net import ContactNet, push_frame, K_PTS
 from clear.mj_util.pointcloud import intrinsics
 from replay_geometry import mesh, add
 
-p=argparse.ArgumentParser();p.add_argument('baseline',type=Path);p.add_argument('optimized',type=Path);p.add_argument('contact_checkpoint',type=Path);args=p.parse_args()
-root=Path(__file__).resolve().parents[1];manifest=[];torch.set_num_threads(2)
+p=argparse.ArgumentParser();p.add_argument('baseline',type=Path);p.add_argument('optimized',type=Path);p.add_argument('contact_checkpoint',type=Path);p.add_argument('--scene-prefix',default='mpc');p.add_argument('--only',choices=['optimized','baseline']);args=p.parse_args()
+root=Path(__file__).resolve().parents[1];manifest=json.loads((root/'assets/mpc-comparison.json').read_text());torch.set_num_threads(2)
 net=ContactNet();net.load_state_dict(torch.load(args.contact_checkpoint,map_location='cpu',weights_only=False)['state_dict']);net.eval()
 width,height=480,360
-for key,folder in [('mpc-baseline',args.baseline),('mpc-optimized',args.optimized)]:
- ours=key=='mpc-optimized';tint=np.array((146,187,145) if ours else (207,154,151),dtype=np.uint8)
+for kind,folder in [('baseline',args.baseline),('optimized',args.optimized)]:
+ if args.only and kind!=args.only:continue
+ key=args.scene_prefix+'-'+kind;manifest=[row for row in manifest if row['scene']!=key]
+ ours=kind=='optimized';tint=np.array((146,187,145) if ours else (207,154,151),dtype=np.uint8)
  a=dict(np.load(folder/'task.npz',allow_pickle=False));roll=dict(np.load(folder/'task.rollouts.npz',allow_pickle=False));meta=json.loads(str(roll['metadata']));cfg=json.loads((folder/'config.json').read_text())
  assert meta['executed'] and not meta['fixed_palms'] and bool(meta['contact_palms'])==ours
  assert meta['selector']==('laqdpp' if ours else 'topk') and np.isfinite(roll['eef_world']).all()
@@ -43,6 +45,7 @@ for key,folder in [('mpc-baseline',args.baseline),('mpc-optimized',args.optimize
  renderer=mujoco.Renderer(m,height=height,width=width);opt=mujoco.MjvOption();opt.geomgroup[5]=1;opt.sitegroup[:]=0
  server=viser.ViserServer(host='127.0.0.1',port=8101,verbose=False);server.gui.configure_theme(show_logo=False,show_share_button=False);server.scene.world_axes.visible=False
  server.initial_camera.position=(2.25,-2.7,2.5);server.initial_camera.look_at=(0,.7,.75);server.initial_camera.fov=.85
+ if args.scene_prefix=='mpc-stock':server.initial_camera.position=(2.7,-2.2,2.4);server.initial_camera.look_at=(.7,0,.7)
  anchor=server.scene.add_frame('/tracking',show_axes=False)
  bodies={i:server.scene.add_frame(f'/tracking/body-{i}',show_axes=False) for i in range(m.nbody)}
  for i in range(m.ngeom):
@@ -125,5 +128,8 @@ for key,folder in [('mpc-baseline',args.baseline),('mpc-optimized',args.optimize
   proc.stdin.close();code=proc.wait();renderer.close();server.stop()
  assert code==0;temp.replace(root/'assets/media'/f'{key}-ego.mp4')
  manifest.append({'scene':key,'controller':'Cartesian palm tracking' if ours else 'Direct joint CEM port','selector':meta['selector'],'searchCandidates':24,'executionPreviewRows':0 if ours else 1,'elites':roll['elite_indices'].shape[1],'horizon':meta['horizon_s'],'step':meta['step_s'],'seed':cfg['seed'],'duration':round(len(times)/10,2),'recordedPopulations':len(ids),'displayAnchors':5,'palmContactRegions':2,'palmRegionScope':'Geometric neighborhoods centered at recorded palms projected onto the box. Not a learned bimanual prediction or a measured contact force.','contactField':'Learned contact scores recomputed on segmented replayed ego RGB-D, normalized by the maximum score in each frame. Not archived controller telemetry.','contactVisibleFrames':visible_frames,'frames':len(times),'scope':'First object interaction from an archived development comparison. Controllers differ in their action representation and selection. This is not an isolated selector ablation.'})
+ if args.scene_prefix=='mpc-stock':
+  address=int(m.jnt_qposadr[m.body_jntadr[target]]);xy=a['qpos'][:,address:address+2]
+  manifest[-1].update(objectDisplacement=float(np.linalg.norm(xy[-1]-xy[0])),goalError=float(np.linalg.norm(xy[-1]-ref[-1])),goalReached=bool(json.loads((folder/'result.json').read_text())['result']['success']),scope=cfg['scope'])
  print(key,'complete',len(times)/10,'seconds',visible_frames,'contact frames',flush=True)
 (root/'assets/mpc-comparison.json').write_text(json.dumps(manifest,indent=2)+'\n')

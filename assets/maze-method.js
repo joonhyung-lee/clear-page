@@ -8,11 +8,11 @@
  }
  function update(reload=false){
   const trace=d.traces[sample],rows=document.querySelector('#maze-selection-rows');rows.replaceChildren();
-  root.querySelector('.maze-selection-table thead tr').lastElementChild.textContent='Sampled priority';
+  root.querySelector('.maze-selection-table thead tr').innerHTML='<th>Object</th><th>Selection</th><th>Mean ± σ</th><th>Sampled priority</th>';
   d.scene.objects.forEach((object,i)=>{
    const tr=document.createElement('tr');tr.dataset.selected=String(trace.selected[i]);
    const priority=trace.selected[i]?trace.priority[i].toFixed(2):'Not selected';
-   [object.object_id+' · '+object.mass_kg+' kg',(100*d.selection[i]).toFixed(3)+'%',priority].forEach((text,j)=>{const cell=document.createElement(j===0?'th':'td');if(j===0)cell.scope='row';cell.textContent=text;tr.append(cell);});rows.append(tr);
+   [object.object_id+' · '+object.mass_kg+' kg',(100*d.selection[i]).toFixed(3)+'%',d.mu[i].toFixed(2)+' ± '+d.sigma[i].toFixed(2),priority].forEach((text,j)=>{const cell=document.createElement(j===0?'th':'td');if(j===0)cell.scope='row';cell.textContent=text;tr.append(cell);});rows.append(tr);
   });
   const order=trace.rank.map((rank,i)=>({rank,i})).filter(o=>o.rank>=0).sort((a,b)=>a.rank-b.rank);
   document.querySelector('#maze-order-result').textContent=order.map(o=>'Object '+o.i).join(' → ');

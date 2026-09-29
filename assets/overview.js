@@ -74,45 +74,54 @@
     generation:[['method-flow-0-refined','Object motion within scene geometry']],
     execution:[['mpc-optimized','Recorded interaction and candidate motions']]
   };
-  // One shared preview prevents pointer and retained click focus from opening
-  // separate overlays. Pointer previews end when the pointer leaves the node.
-  const preview=document.createElement('div');preview.id='overview-preview';preview.className='overview-preview-layer';preview.setAttribute('role','tooltip');preview.hidden=true;document.body.append(preview);
+  // Inline inspection keeps the complete pipeline visible above the example.
+  const preview=document.createElement('div');preview.id='overview-preview';preview.className='overview-preview-inline';preview.setAttribute('role','region');preview.setAttribute('aria-label','Component example');flow.after(preview);
+  const leaders=document.createElementNS(ns,'svg');leaders.classList.add('overview-detail-leaders');leaders.setAttribute('aria-hidden','true');root.append(leaders);
   let previewOwner=null;
-  function hidePreview(){preview.hidden=true;previewOwner=null;}
+  function drawPreview(){
+    if(!previewOwner)return;
+    const r=root.getBoundingClientRect(),a=previewOwner.getBoundingClientRect(),b=preview.getBoundingClientRect();
+    leaders.setAttribute('viewBox',`0 0 ${r.width} ${r.height}`);leaders.replaceChildren();
+    const top=b.top-r.top,ay=a.bottom-r.top;
+    for(const [sx,dx] of [[a.left-r.left,b.left-r.left],[a.right-r.left,b.right-r.left]]){
+      const p=document.createElementNS(ns,'path');p.setAttribute('d',`M ${sx} ${ay} C ${sx} ${top-28}, ${dx} ${top-28}, ${dx} ${top}`);leaders.append(p);
+    }
+  }
+  function hidePreview(){root.querySelectorAll('.overview-inspectable').forEach(n=>n.classList.remove('inspecting'));}
   function showPreview(node,items){
-    previewOwner=node;preview.replaceChildren();
+    previewOwner=node;preview.replaceChildren();hidePreview();node.classList.add('inspecting');
+    const stage=node.id.replace('overview-','');
+    if(stages[stage]){
+      const [title,copy,target]=stages[stage];root.dataset.active=stage;
+      buttons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.overviewStage===stage)));
+      root.querySelector('.overview-explanation strong').textContent=title;root.querySelector('.overview-explanation p').textContent=copy;
+      const link=root.querySelector('.overview-explanation a');link.href='#'+target;link.textContent='Explore '+stage;
+    }
     const gallery=document.createElement('div');gallery.className=items.length>1?'overview-preview-grid':'';
     items.forEach(([file,caption])=>{
       const figure=document.createElement('figure'),img=document.createElement('img'),label=document.createElement('figcaption');
       img.src=clearAssetURL('assets/media/'+file+'.png');img.alt=caption;label.textContent=caption;figure.append(img,label);gallery.append(figure);
     });
-    preview.append(gallery);preview.hidden=false;
-    const bounds=flow.getBoundingClientRect(),width=Math.min(680,innerWidth-32);
-    preview.style.width=width+'px';
-    preview.style.left=Math.max(16,Math.min(innerWidth-width-16,bounds.x+bounds.width/2-width/2))+'px';
-    const height=preview.getBoundingClientRect().height;
-    preview.style.top=Math.max(16,Math.min(innerHeight-height-16,bounds.y+bounds.height/2-height/2))+'px';
+    preview.append(gallery);drawPreview();
   }
   function addPreview(node,items,label){
-    node.tabIndex=0;node.setAttribute('aria-describedby',preview.id);node.classList.add('overview-inspectable');
+    node.tabIndex=0;node.setAttribute('aria-controls',preview.id);node.classList.add('overview-inspectable');
     node.addEventListener('pointerenter',event=>{if(event.pointerType!=='touch')showPreview(node,items);});
-    node.addEventListener('pointerleave',()=>{if(previewOwner===node)hidePreview();});
-    node.addEventListener('focus',()=>{if(node.matches(':focus-visible'))showPreview(node,items);});
-    node.addEventListener('blur',()=>{if(previewOwner===node)hidePreview();});
+    node.addEventListener('focus',()=>showPreview(node,items));
+    node.addEventListener('click',()=>showPreview(node,items));
   }
-  root.addEventListener('pointerleave',hidePreview);
   document.addEventListener('keydown',event=>{if(event.key==='Escape')hidePreview();});
-  document.addEventListener('pointerdown',event=>{if(!root.contains(event.target))hidePreview();});
-  window.addEventListener('scroll',hidePreview,{passive:true});
-  window.addEventListener('resize',hidePreview);
+  new ResizeObserver(drawPreview).observe(preview);
   Object.entries(examples).forEach(([stage,items])=>{
     const node=root.querySelector('#overview-'+stage);addPreview(node,items,stage);node.setAttribute('role','button');node.setAttribute('aria-label','Explore '+stage);
     node.addEventListener('click',()=>buttons.find(b=>b.dataset.overviewStage===stage).click());
     node.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();node.click();}if(event.key==='Escape')node.blur();});
   });
+  buttons.forEach(button=>button.addEventListener('click',()=>showPreview(root.querySelector('#overview-'+button.dataset.overviewStage),examples[button.dataset.overviewStage])));
   const inputExamples=[['structure-g1','Robot structure'],['objects','Object states and next states'],['scene-maze','Scene geometry']];
   root.querySelectorAll('#overview-inputs>div').forEach((node,i)=>addPreview(node,[inputExamples[i]],'input-'+i));
   reducedMotion.addEventListener('change',draw);
-  new ResizeObserver(draw).observe(flow);
+  new ResizeObserver(()=>{draw();drawPreview();}).observe(flow);
+  showPreview(root.querySelector('#overview-grounding'),examples.grounding);
   document.fonts.ready.then(draw);
 })();
