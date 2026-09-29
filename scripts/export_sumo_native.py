@@ -38,6 +38,9 @@ path=np.column_stack([reference,np.full(len(reference),1.32)])
 server.scene.add_line_segments('/tracking/reference-path',points=np.stack([path[:-1],path[1:]],axis=1),colors=tuple(color),line_width=4)
 candidates=[server.scene.add_line_segments(f'/tracking/candidate-{i}',points=np.zeros((2,2,3),np.float32),colors=tuple(color),line_width=1) for i in range(roll['eef_world'].shape[1])]
 selected=server.scene.add_line_segments('/tracking/applied-candidate',points=np.zeros((2,2,3),np.float32),colors=tuple(color),line_width=4)
+# Hand markers are measured site positions, not hand targets or contact claims.
+for side in ['left','right']:
+ site=m.site(side+'_palm');outlined_anchors(server,f'/tracking/body-{int(site.bodyid[0])}/palm-centers-{side}',site.pos[None,:],tuple(color),.055)
 contact_markers=outlined_anchors(server,'/tracking/body-contacts',np.zeros((1,3)),tuple(color),.045)
 width,height=480,360
 # A side view exposes thigh and torso contacts that an onboard camera cannot
@@ -97,5 +100,7 @@ manifest=json.loads((root/'assets/mpc-comparison.json').read_text())
 outcome=json.loads((folder/'result.json').read_text())
 entry=dict(scene=key,controller='SUMO native G1 box MPC',selector='topk',searchCandidates=24,executionPreviewRows=1,elites=2,horizon=meta['horizon_s'],step=meta['step_s'],seed=outcome['seed'],duration=float(states['time'][-1]+.02),recordedPopulations=len(roll['time_s']),displayAnchors=5,frames=len(states['time']),contactVisibleFrames=visible_frames,candidateDisplayHz=10,candidateFutureSamples=len(future_ids),objectDisplacement=outcome['displacement_m'],goalError=outcome['goal_error_m'],goalReached=outcome['goal_reached'],contactField='Contact locations reconstructed from recorded physical states. Whole-body target contacts are permitted.',scope=meta['scope'])
 manifest=[row for row in manifest if row['scene']!=key]+[entry]
+entry['palmAnchors']=2
+entry['palmAnchorScope']='Light red markers follow the two recorded palm sites. They are not commanded hand targets or evidence of palm contact.'
 entry['insetView']='A reconstructed side view follows body contact. Walls are hidden in this detail view for visibility.'
 (root/'assets/mpc-comparison.json').write_text(json.dumps(manifest,indent=2)+'\n');print('Native SUMO export complete',entry['duration'],flush=True)

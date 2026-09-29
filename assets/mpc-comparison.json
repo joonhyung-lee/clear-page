@@ -21,7 +21,9 @@
     "goalReached": false,
     "contactField": "Contact locations reconstructed from recorded physical states. Whole-body target contacts are permitted.",
     "scope": "SUMO G1 box reward and native G1 dynamics adapted to the shared box scene in a goal-centered rigid coordinate frame. Population 24, complete offline rollouts, and whole-body target contact. Different runtime and action representation from the optimized controller. Not an isolated selector ablation.",
-    "insetView": "A rear oblique camera follows the recorded robot pose. This is a chase view, not an onboard camera."
+    "insetView": "A rear oblique camera follows the recorded robot pose. This is a chase view, not an onboard camera.",
+    "palmAnchors": 2,
+    "palmAnchorScope": "Light red markers follow the two recorded palm sites. They are not commanded hand targets or evidence of palm contact."
   },
   {
     "scene": "mpc-optimized",
@@ -65,7 +67,9 @@
     "goalReached": true,
     "contactField": "Contact locations reconstructed from recorded physical states. Whole-body target contacts are permitted.",
     "scope": "Unmodified upstream G1 box scene, reset, reward, arm settings and success condition. Native runtime with 24 candidates and complete offline rollouts.",
-    "insetView": "A rear oblique camera follows the recorded robot pose. This is a chase view, not an onboard camera."
+    "insetView": "A rear oblique camera follows the recorded robot pose. This is a chase view, not an onboard camera.",
+    "palmAnchors": 2,
+    "palmAnchorScope": "Light red markers follow the two recorded palm sites. They are not commanded hand targets or evidence of palm contact."
   },
   {
     "scene": "mpc-stock-optimized",

@@ -31,42 +31,20 @@ def refine(soup):
    if span.get_text(strip=True)=='→':span.decompose()
  process=soup.find(id='mpc-process')
  if process:
-  process.select_one('h4 + p').string='Every saved candidate remains visible as a gray ghost across the full timeline. Three coordinate traces separate forward, lateral and vertical motion. Black follows the recorded execution.'
-  for caption in process.select('.mpc-process-pair figcaption'):caption.decompose()
+  process.select_one('h4 + p').string='Both palms move in a shared XYZ frame. Gray paths show the saved candidates. Dark lines follow the recorded execution.'
+  for node in process.select('.mpc-display-options,.mpc-anchor-controls,.mpc-coordinate-controls,.mpc-process-readout,.mpc-view-controls'):
+   node.decompose()
+  controls=process.select_one('.mpc-process-controls');controls.clear()
+  controls.append(BeautifulSoup('<div class="mpc-view-controls" role="group" aria-label="Trajectory view"><button type="button" data-mpc-view="2d" aria-pressed="false">2D View</button><button type="button" data-mpc-view="3d" aria-pressed="true">3D View</button></div><button id="mpc-process-play" type="button">Pause</button><input aria-label="Replay time" id="mpc-process-update" type="range" min="0" max="1" step="0.0001" value="0"/><span id="mpc-process-counter">0.0 / 40.0 s</span>','html.parser'))
   for figure in process.select('[data-process]'):
-   if len(figure.select('canvas'))==1:
-    second=soup.new_tag('canvas',attrs={'width':'560','height':'440'});figure.select_one('canvas').insert_after(second)
-   for hand,canvas in enumerate(figure.select('canvas')):
-    canvas['aria-label']=('Left' if hand==0 else 'Right')+' palm X Y Z displacement and all saved candidate trajectories with magnified forecast and XY anchor'
-    canvas['data-palm']=str(hand)
-    canvas['height']='700'
+   for canvas in figure.select('canvas')[1:]:canvas.decompose()
+   canvas=figure.select_one('canvas');canvas['width']='560';canvas['height']='560';canvas['aria-label']='Both palm trajectories in a shared XYZ coordinate frame';canvas.attrs.pop('data-palm',None)
    if not figure.select_one('.mpc-recording-status'):
-    status=soup.new_tag('p',attrs={'class':'mpc-recording-status'});status.string='Recorded duration';figure.select_one('canvas').insert_before(status)
-  hand_picker=process.select_one('.mpc-hand')
-  if hand_picker:hand_picker.decompose()
-  stages=process.select_one('.mpc-stages')
-  if stages:stages.decompose()
-  if not process.select_one('.mpc-display-options'):
-   options=BeautifulSoup('<div class="mpc-display-options"><div class="mpc-legend"><span class="candidate">Candidates</span><span class="chosen">Selected</span><span class="future">All forecast ghosts</span><span class="observed">Observed</span></div></div>','html.parser')
-   process.select_one('.mpc-process-controls').insert_after(options)
-  if not process.select_one('#mpc-process-speed'):
-   speed=BeautifulSoup('<label class="mpc-speed">Speed <select id="mpc-process-speed" aria-label="Search replay speed"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select></label>','html.parser');process.select_one('.mpc-process-controls').append(speed)
-  if not process.select_one('.mpc-anchor-controls'):
-   options=BeautifulSoup('<div class="mpc-anchor-controls" role="group" aria-label="Magnified forecast anchor"><span>Inspect anchor</span><button type="button" data-anchor="0" aria-pressed="false">Current</button><button type="button" data-anchor="1" aria-pressed="true">Midpoint</button><button type="button" data-anchor="2" aria-pressed="false">Endpoint</button></div>','html.parser');process.select_one('.mpc-display-options').insert_after(options)
-  for b,label in zip(process.select('[data-anchor]'),['A · Now','B · Midpoint','C · End']):b.string=label
-  if not process.select_one('.mpc-candidate-controls'):
-   options=BeautifulSoup('<div class="mpc-candidate-controls" role="group" aria-label="Candidate selection display"><button type="button" data-candidates="all" aria-pressed="true">All candidates</button><button type="button" data-candidates="retained" aria-pressed="false">Retained only</button></div>','html.parser');process.select_one('.mpc-anchor-controls').append(options)
-  if not process.select_one('.mpc-coordinate-controls'):
-   controls=BeautifulSoup('<div class="mpc-coordinate-controls"><div role="group" aria-label="Forecast detail coordinate"><span>Forecast detail</span><button type="button" data-detail-axis="0" aria-pressed="true">X</button><button type="button" data-detail-axis="1" aria-pressed="false">Y</button><button type="button" data-detail-axis="2" aria-pressed="false">Z</button></div><label>Inspect candidate <select id="mpc-candidate-inspect"><option value="-1">All 24</option>'+''.join(f'<option value="{i}">#{i+1}</option>' for i in range(24))+'</select></label></div>','html.parser');process.select_one('.mpc-anchor-controls').insert_after(controls)
-  legend=process.select_one('.mpc-legend')
-  if legend:legend.clear();legend.append(BeautifulSoup('<span class="candidate">Candidates</span><span class="chosen">Retained</span><span class="applied">Applied</span><span class="future">All forecast ghosts</span><span class="observed">Observed</span>','html.parser'))
+    status=soup.new_tag('p',attrs={'class':'mpc-recording-status'});figure.select_one('canvas').insert_before(status)
+  for caption in process.select('.mpc-process-content > .figure-caption'):caption.decompose()
   scope=process.select_one('.method-details p')
-  if scope:scope.string='Every gray line is one saved candidate trajectory, not an averaged envelope. Ghosts include all recorded updates. X measures displacement along the reference push direction, Y measures lateral displacement, and Z measures height change, relative to each palm at the beginning of its recording. Coordinate scales are fixed and shared by both controllers. The inset magnifies the selected coordinate relative to the applied prediction in millimetres. Inspect candidate highlights one member of the current population in blue. CLEAR applies a retained candidate. SUMO applies the command formed from two elites, whose rollout is shown separately from the 24 candidates. The recordings end at 14 s and 40 s. These markers indicate recording duration, not a measured speedup or a shared success criterion. Gray future execution and forecasts are replay context, not information available to the controller at that time.'
-  captions=process.select('.mpc-process-content > .figure-caption')
-  if captions:
-   captions[0].string='Candidates are selected as whole trajectories at each MPC update. A, B and C are time slices through those same trajectories, not separate sampling decisions. The XY dots are the candidate positions at the highlighted time.'
-   for node in captions[1:]:
-    details=soup.new_tag('details',attrs={'class':'method-details'});summary=soup.new_tag('summary');summary.string='Controller and replay scope';details.append(summary);node.replace_with(details);details.append(node)
+  if scope:scope.string='L and R identify the recorded left and right palms. X follows the reference push direction, Y is lateral, and Z is height. Both hands share an origin at their initial horizontal midpoint. Gray paths include every saved candidate from all recorded updates and the complete recorded execution. They provide replay context and were not available to the controller in advance. Colored paths show the current candidates and applied forecast. The 2D and 3D views preserve the same source positions and replay time. Recordings end at 14 s and 40 s. These are recording durations, not a measured speedup.'
+
  return soup
 
 if __name__=='__main__':

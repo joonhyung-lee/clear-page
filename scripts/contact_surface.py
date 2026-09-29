@@ -20,7 +20,9 @@ class ContactSurface:
     ru=half[(axis+1)%3];rv=half[(axis+2)%3]
     xx,yy=np.meshgrid(np.linspace(-ru,ru,resolution),np.linspace(rv,-rv,resolution))
     local=center+xx[:,:,None]*u+yy[:,:,None]*v
-    handle=server.scene.add_image(prefix+f'/surface-{axis}-{sign}',np.zeros((resolution,resolution,4),np.uint8),2*ru,2*rv,format='png',cast_shadow=False,receive_shadow=False,position=local_rotation.apply(center)+model.geom_pos[geom],wxyz=(local_rotation*Rotation.from_matrix(rotation)).as_quat(scalar_first=True),visible=False)
+    # ViserImage rotates its XY mesh by Rx(pi). Cancel that rotation so
+    # texture row zero lands on the +v samples above, rather than mirroring them.
+    handle=server.scene.add_image(prefix+f'/surface-{axis}-{sign}',np.zeros((resolution,resolution,4),np.uint8),2*ru,2*rv,format='png',cast_shadow=False,receive_shadow=False,position=local_rotation.apply(center)+model.geom_pos[geom],wxyz=(local_rotation*Rotation.from_matrix(rotation)*Rotation.from_euler('x',np.pi)).as_quat(scalar_first=True),visible=False)
     self.faces.append((handle,local.reshape(-1,3),n))
  def hide(self):
   for handle,_,_ in self.faces:handle.visible=False
