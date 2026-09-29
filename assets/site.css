@@ -94,3 +94,17 @@ video.media-ready{animation:media-dissolve .4s ease-out}
 @media(prefers-reduced-motion:reduce){.learning-dataflow span:before{animation:none;display:none}.sample-scatter circle{transition:none}}
 
 .learning-explorer h4,.mpc-process h4{text-wrap:balance}
+
+/* Sample-to-rollout annotation stays within its own figure. */
+.sample-explorer-grid{position:relative}
+.sample-connector{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
+.sample-leader{stroke:#748d80;stroke-width:1.5;stroke-dasharray:7 6;animation:sample-dashes 1.4s linear infinite;animation-play-state:paused}
+.is-visible .sample-leader{animation-play-state:running}
+.sample-view-outline{stroke:#748d80;stroke-width:1.5}
+.sample-filters{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 12px}
+.sample-filters button{border:1px solid #dbe1d9;background:#fff;padding:4px 8px;font:inherit;font-size:11px;color:#566359;cursor:pointer}
+.sample-filters button[aria-pressed=true]{background:#e7eee7;border-color:#8d9f90;color:#283b2e}
+.sample-scatter circle.filtered{opacity:.12;pointer-events:none}
+.sample-phase{font-size:11px;color:#607363;margin:8px 0 0;min-height:18px;font-variant-numeric:tabular-nums}
+@keyframes sample-dashes{to{stroke-dashoffset:-26}}
+@media(prefers-reduced-motion:reduce){.sample-leader{animation:none}}

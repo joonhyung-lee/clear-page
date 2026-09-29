@@ -60,7 +60,7 @@ def replay(raw,scene,interval=None,limit=160):
   objects=[]
   for obj in scene['objects']:
    offset=joints[obj['object_id']];q=qpos[i,offset:offset+7];objects.append([float(q[0]),float(q[1]),yaw(q[3:7])])
-  frames.append([float(times[i]),float(qpos[i,0]),float(qpos[i,1]),yaw(qpos[i,3:7]),objects])
+  frames.append([float(times[i]),float(qpos[i,0]),float(qpos[i,1]),yaw(qpos[i,3:7]),objects,float(qpos[i,2])])
  return frames
 probes=rows['probes'];probe_output=[]
 for i,row in enumerate(probes):
@@ -68,9 +68,13 @@ for i,row in enumerate(probes):
  evidence=row['execution_evidence'];interval=evidence.get('interval',evidence.get('outcome',{}).get('interval'))
  expected=evidence.get('files',{}).get('task.npz')
  if expected:assert hashlib.sha256(source(physics_folder(row['recording'])/'task.npz').read_bytes()).hexdigest()==expected
+ # A local edge can last only 0.24 s. Retain its exact label interval, but
+ # show the surrounding recorded approach and exit so the attempt is legible.
+ context=None if interval is None else [max(0,interval[0]-3),interval[1]+3]
  probe_output.append(dict(id=i,body=row['body_id'],split=row['split'],scene=clean_scene(scene),links=len(row['structure_rows']),
    target=int(row['success'] and not row['collision'] and not row['fell']),query=[evidence['start'],evidence['end']],
-   rollout=replay(row['recording'],scene,interval,60)))
+   evidenceInterval=interval,outcome=dict(success=bool(row['success']),collision=bool(row['collision']),fell=bool(row['fell'])),
+   rollout=replay(row['recording'],scene,context,120)))
 attach_probe_scenes(probes,model.config['scene_dim']);batch=collate_probes(probes)
 features=[]
 hook=model.traversal_affordance.classifier.register_forward_pre_hook(lambda module,inputs:features.append(inputs[0].detach().numpy()))
