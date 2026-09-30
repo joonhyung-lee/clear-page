@@ -30,7 +30,10 @@ async def main():
             assert await root.locator('.factor-match').count() == 0
             assert await root.locator('details').count() == 0
         assert await page.locator('.context-mode, .context-training').count() == 0
-        assert await page.locator('#ordering-context .context-token').count() > 3
+        assert await page.locator('#ordering-context .selection-object').count() == 5
+        assert await page.locator('#ordering-context .ordering-context-flow>section').count() == 2
+        assert await page.locator('#ordering-context .ordering-scene-slot .viewer').count() == 1
+        assert await page.locator('#ordering-context .selection-probability').count() == 0
         assert await page.locator('#ordering-context .ordering-main').count() == 1
         await page.locator('#grounding-samples').screenshot(path='/tmp/grounding-inputs.png')
         assert not errors, errors

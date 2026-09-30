@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-label="Recorded scene with three objects, start and goal"><rect width="720" height="480" fill="#f5f7f1"/>
+<rect x="165" y="45" width="6.5" height="390" fill="#aeb7a7"/>
+<rect x="548.5" y="45" width="6.499999999999977" height="390" fill="#aeb7a7"/>
+<rect x="171.5" y="428.5" width="377.00000000000006" height="6.5" fill="#aeb7a7"/>
+<rect x="171.5" y="45" width="377.00000000000006" height="6.499999999999977" fill="#aeb7a7"/>
+<rect x="230" y="233.5" width="260" height="13.00000000000001" fill="#aeb7a7"/>
+<rect x="273.6353631031324" y="366.2838283521592" width="13.00000000000001" height="62.21617164784077" fill="#aeb7a7"/>
+<rect x="273.6353631031324" y="246.5" width="13.00000000000001" height="54.78382835215923" fill="#aeb7a7"/>
+<rect x="433.36463689686764" y="366.2838283521592" width="12.999999999999954" height="62.21617164784077" fill="#aeb7a7"/>
+<rect x="433.36463689686764" y="246.5" width="12.999999999999954" height="54.78382835215923" fill="#aeb7a7"/>
+<rect x="358.1353631031324" y="168.15367164784078" width="30.875000000000007" height="65.3463283521592" fill="#aeb7a7"/>
+<rect x="358.1353631031324" y="51.5" width="30.875000000000007" height="72.77867164784077" fill="#aeb7a7"/>
+<rect x="351.6353631031324" y="133.21617164784078" width="26" height="26" transform="rotate(0 364.6353631031324 146.21617164784078)" fill="#80a3af" stroke="#52644b"/><text x="364.6353631031324" y="181.21617164784078" text-anchor="middle" font-family="Arial" font-size="15" fill="#33422e">Object 0</text>
+<rect x="267.1353631031324" y="320.7838283521592" width="26" height="26" transform="rotate(0 280.1353631031324 333.7838283521592)" fill="#c99e7c" stroke="#52644b"/><text x="280.1353631031324" y="368.7838283521592" text-anchor="middle" font-family="Arial" font-size="15" fill="#33422e">Object 1</text>
+<rect x="426.8646368968676" y="320.7838283521592" width="26" height="26" transform="rotate(0 439.8646368968676 333.7838283521592)" fill="#91ae80" stroke="#52644b"/><text x="439.8646368968676" y="368.7838283521592" text-anchor="middle" font-family="Arial" font-size="15" fill="#33422e">Object 2</text>
+<circle cx="204" cy="146.21617164784078" r="6" fill="#426b49" stroke="#426b49" stroke-width="2"/><text x="204" y="132.21617164784078" text-anchor="middle" font-family="Arial" font-size="14" fill="#33422e">Start</text>
+<circle cx="516" cy="146.21617164784078" r="6" fill="white" stroke="#426b49" stroke-width="2"/><text x="516" y="132.21617164784078" text-anchor="middle" font-family="Arial" font-size="14" fill="#33422e">Goal</text>
+</svg>

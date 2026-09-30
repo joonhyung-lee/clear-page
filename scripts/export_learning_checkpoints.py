@@ -7,10 +7,12 @@ import trimesh
 import viser
 from scipy.spatial.transform import Rotation
 from recording_io import read_recording, write_recording
+from style_learning_checkpoints import style_recording
 
 p = argparse.ArgumentParser()
 p.add_argument('source', type=Path)
 p.add_argument('--body', choices=['g1', 'spot', 'spot_arm'], required=True)
+p.add_argument('--scene', help='Distinct public scene name for a new training lineage')
 a = p.parse_args()
 root = Path(__file__).resolve().parents[1]
 g = dict(np.load(a.source / (a.body + '-geometry.npz')))
@@ -23,8 +25,6 @@ def geometry(i):
         v, n = g['mesh_vertadr'][mid], g['mesh_vertnum'][mid]
         f, m = g['mesh_faceadr'][mid], g['mesh_facenum'][mid]
         mesh = trimesh.Trimesh(g['mesh_vert'][v:v+n], g['mesh_face'][f:f+m], process=False)
-        if len(mesh.faces) > 2500:
-            mesh = mesh.simplify_quadric_decimation(face_count=2500)
     elif typ == 6:
         mesh = trimesh.creation.box(extents=size * 2)
     elif typ == 2:
@@ -104,10 +104,11 @@ for stage in range(len(audit['stages'])):
             handle.batched_positions = s['positions'][stage, frame, :, body]
             handle.batched_wxyzs = s['quaternions'][stage, frame, :, body]
         recording.insert_sleep(float(s['dt']))
-out = root / 'assets/recordings' / ('learning-'+a.body+'.viser')
+out = root / 'assets/recordings' / ((a.scene or 'learning-'+a.body)+'.viser')
 out.write_bytes(recording.serialize())
 server.stop()
 record, buffers = read_recording(out)
+record, buffers = style_recording(record, buffers, a.source, a.body)
 write_recording(out, record, buffers)
 out.unlink()  # Only the packed, self-contained browser asset is published.
 print(a.body, 'batches', len(handles), 'size', out.with_suffix('.hex.js').stat().st_size, flush=True)

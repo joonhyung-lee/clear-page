@@ -2,7 +2,7 @@
 (() => {
  const root=document.querySelector('#mpc-process');if(!root)return;
  const play=root.querySelector('#mpc-process-play'),slider=root.querySelector('#mpc-process-update'),panels=[...root.querySelectorAll('[data-process]')];
- const W=560,H=560,cache=new Map();let data=null,loading=false,visible=false,playing=!reduced.matches,elapsed=0,duration=0,axisEnd=45,mode='3d',last=0,frame=0,bounds=[],screenBounds=[],playLimit=15;
+ const W=560,H=560,cache=new Map();let data=null,loading=false,visible=false,playing=!reduced.matches,elapsed=0,duration=0,axisEnd=45,mode='3d',last=0,frame=0,bounds=[],screenBounds=[],playEnd=15;
  const camera={yaw:Math.PI/6,pitch:.6,zoom:1,pan:[0,0]},pointers=new Map();let baseScale=1,paintPending=false,robotOverlay=false,lastContextTime=-1;
  const rotate=p=>[Math.cos(camera.yaw)*p[0]+Math.sin(camera.yaw)*p[1],Math.sin(camera.pitch)*(Math.sin(camera.yaw)*p[0]-Math.cos(camera.yaw)*p[1])-Math.cos(camera.pitch)*p[2]];
  const format=n=>String(Number(n.toPrecision(2)));
@@ -65,7 +65,7 @@
   ctx.font='10px Arial';const triad=[350,150];for(let a=0;a<3;a++){const v=[0,0,0];v[a]=15;const q=rotate(v);stroke(ctx,[triad,[triad[0]+q[0],triad[1]+q[1]]],'#65795a',1);ctx.fillText(['X','Y','Z'][a],triad[0]+q[0]+2,triad[1]+q[1]-2);}const metric=scale*.1<70?.1:.05,bar=Math.min(75,metric*scale);stroke(ctx,[[450,153],[450+bar,153]],'#65795a',1.5);ctx.fillText(metric+' m',452,146);
   c.dataset.detailTime=String(time-r.updates[0].time);c.dataset.detailBox=JSON.stringify(box);c.dataset.detailScale=String(scale);c.dataset.detailApplied=String(u.applied);
  }
- function render(){if(!data)return;play.textContent=playing?'Pause':'Play';slider.value=elapsed/playLimit;root.dataset.playLimit=String(playLimit);root.querySelector(".mpc-time-pin").style.left=(14/playLimit*100)+"%";root.dataset.elapsed=elapsed.toFixed(3);root.dataset.view=mode;root.querySelector('#mpc-process-counter').textContent=elapsed.toFixed(1)+' / '+playLimit.toFixed(1)+' s';
+ function render(){if(!data)return;play.textContent=playing?'Pause':'Play';slider.value=elapsed/playEnd;root.setAttribute('data-play-limit',String(playEnd));root.querySelector(".mpc-time-pin").style.left=(14/playEnd*100)+"%";root.dataset.elapsed=elapsed.toFixed(3);root.dataset.view=mode;root.querySelector('#mpc-process-counter').textContent=elapsed.toFixed(1)+' / '+playEnd.toFixed(1)+' s';
   for(const panel of panels){const name=panel.dataset.process,r=data[name],start=r.updates[0].time,end=r.observed.at(-1)[0],interactionEnd=r.interactionEnd??end,time=Math.min(start+elapsed,end),done=elapsed>=interactionEnd-start;let index=0;while(index+1<r.updates.length&&r.updates[index+1].time<=time)index++;
    const u=r.updates[index],forecastValid=time<=interactionEnd+1e-6,actual=at(r.observed,time),c=panel.querySelector('canvas'),ctx=c.getContext('2d'),ghost=ghosts(name,r),colors=name==='optimized'?['#537d59','#739b97']:['#b97773','#bd9891'];
    panel.dataset.update=String(u.sourceIndex);panel.dataset.time=String(time);panel.dataset.complete=String(done);panel.dataset.retained=u.elites.join(',');panel.dataset.candidateCount=String(r.population);
@@ -93,7 +93,7 @@
    canvas.hidden=robotOverlay;if(viewer){viewer.hidden=!robotOverlay;viewer.querySelector('iframe')?.contentWindow.postMessage({type:'clear-scene-visible',visible:robotOverlay&&visible},'*');}
   }syncContext(true);
  }
- function tick(now){frame=0;if(!visible||!playing||!data||document.hidden)return;if(last)elapsed=Math.min(playLimit,elapsed+2*(now-last)/1000);last=now;if(elapsed>=playLimit)playing=false;render();if(playing)frame=requestAnimationFrame(tick);}
+ function tick(now){frame=0;if(!visible||!playing||!data||document.hidden)return;if(last)elapsed=Math.min(playEnd,elapsed+2*(now-last)/1000);last=now;if(elapsed>=playEnd)playing=false;render();if(playing)frame=requestAnimationFrame(tick);}
  function schedule(){if(!frame&&visible&&playing&&data&&!document.hidden){last=0;frame=requestAnimationFrame(tick);}}
  async function initialize(){if(data||loading)return;loading=true;const status=root.querySelector('.mpc-process-loading');status.textContent='Preparing recorded trajectories…';
   try{await loadScript('assets/mpc-process-data.js',()=>!!window.CLEAR_MPC_PROCESS);data=window.CLEAR_MPC_PROCESS;duration=Math.max(...Object.values(data).map(r=>r.observed.at(-1)[0]-r.updates[0].time));axisEnd=Math.ceil((duration+Math.max(...Object.values(data).map(r=>r.horizon)))/5)*5;
@@ -110,11 +110,11 @@
   }catch(error){data=null;status.textContent='Trajectories are taking longer to load. ';const b=document.createElement('button');b.textContent='Retry';b.onclick=initialize;status.append(b);}finally{loading=false;}
  }
  new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible){initialize();schedule();}else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:'0px'}).observe(root);
- play.onclick=()=>{playing=!playing;if(playing&&elapsed>=playLimit)elapsed=0;render();schedule();};slider.oninput=()=>{elapsed=+slider.value*playLimit;render();};
+ play.onclick=()=>{playing=!playing;if(playing&&elapsed>=playEnd)elapsed=0;render();schedule();};slider.oninput=()=>{elapsed=+slider.value*playEnd;render();};
  root.querySelectorAll('[data-mpc-view]').forEach(button=>button.onclick=()=>{mode=button.dataset.mpcView;if(mode==='2d'&&robotOverlay){robotOverlay=false;showContext();}root.querySelectorAll('[data-mpc-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();});
  root.querySelector('#mpc-robot-context').onclick=()=>{if(mode==='2d')root.querySelector('[data-mpc-view="3d"]').click();robotOverlay=!robotOverlay;showContext();};
  root.querySelector('.mpc-time-pin').onclick=()=>{elapsed=14;playing=false;render();};
- root.querySelector('#mpc-full-rollout').onchange=e=>{playLimit=e.target.checked?duration:15;elapsed=Math.min(elapsed,playLimit);if(elapsed>=playLimit)playing=false;render();};
+ root.querySelector('#mpc-full-rollout').onchange=e=>{playEnd=e.target.checked?duration:15;elapsed=Math.min(elapsed,playEnd);if(elapsed>=playEnd)playing=false;render();};
  for(const canvas of root.querySelectorAll('canvas')){
   canvas.tabIndex=0;canvas.setAttribute('aria-label','Interactive bimanual trajectories. Drag to orbit, shift drag to pan, wheel or pinch to zoom. Arrow keys rotate, plus and minus zoom, Home resets.');
   const point=e=>[e.clientX,e.clientY];

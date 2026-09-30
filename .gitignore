@@ -219,3 +219,6 @@ __marimo__/
 
 # Local source video; publish only the sanitized web copy.
 /clear_video_final.mp4
+
+# Local simulator diagnostics
+MUJOCO_LOG.TXT

@@ -9,14 +9,16 @@
 .loco-rollout{min-width:0}.loco-rollout video{display:block;width:100%;aspect-ratio:8/5;background:#f3f5ef}
 .loco-rollout figcaption{font-size:12px;margin:10px 0 0}
 .loco-body-note{font-size:12px;line-height:1.6;color:#7d8576;margin:5px 0 0}
+.loco-terrain-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin:10px 0;font-size:10px;color:#5c6659}
+.loco-terrain-legend span:before{content:'';display:inline-block;width:9px;height:9px;background:var(--terrain);margin-right:5px;vertical-align:middle}
 .loco-evidence{min-width:0;min-height:455px}.loco-metrics{margin-bottom:14px}.loco-metrics button{padding:4px 9px;font-size:11px}
 .loco-chart{position:relative;margin:0 0 9px;min-width:0}.loco-chart figcaption{font-size:11px;margin:0 0 2px;color:#63705c}
-.loco-chart canvas{display:block;width:100%;height:104px;touch-action:pan-y}
+.loco-chart canvas{display:block;width:100%;height:148px;touch-action:pan-y}
 .loco-chart canvas:focus-visible{outline:1px solid #829775;outline-offset:2px}
 .loco-tooltip{position:absolute;z-index:2;max-width:100%;width:195px;padding:8px 10px;background:#fffffff5;border:1px solid #c1cdb6;pointer-events:none;font-size:11px;line-height:1.5;font-variant-numeric:tabular-nums}
 .loco-tooltip strong{display:block;font-weight:500}.loco-tooltip span{display:block;color:#718069}
 .loco-phases{display:flex;gap:6px 14px;flex-wrap:wrap;margin:7px 0;font-size:10px;color:#748168}
-.loco-phases span:before{content:'';display:inline-block;width:12px;height:2px;vertical-align:middle;background:var(--phase);margin-right:5px}
+.loco-phases span:before{content:'';display:inline-block;width:12px;height:7px;vertical-align:middle;background:var(--phase);margin-right:5px}
 .loco-loading{font-size:12px;color:#738369;min-height:280px;padding-top:60px}
 .loco-status{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
 .loco-evidence-note{font-size:11px;color:#7a8272;line-height:1.65;margin:12px 0}
@@ -31,3 +33,23 @@
 .loco-toolbar{align-items:start}.loco-checkpoint{max-width:50%;text-align:right;line-height:1.6}
 
 .loco-viewer{width:100%;height:auto;min-height:0}
+
+#spot-curriculum{margin:20px 0 0}
+.policy-controls{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.policy-controls button{font:inherit;font-size:12px;padding:7px 12px;background:#fff;border:1px solid #dce3d5;color:#52604e}
+.policy-controls button[aria-pressed=true]{background:#e9f0e5;border-color:#9faf94;color:#334e2b}
+.policy-controls [hidden],[data-policy-recorded][hidden],#spot-curriculum[hidden]{display:none!important}
+.policy-sources{display:flex;gap:5px}
+.scratch-layout{align-items:start}
+.scratch-layout>*{min-width:0}
+.scratch-viewer{height:auto;aspect-ratio:1;min-height:0;width:100%;background:#f2f4ee}
+.scratch-viewer .preview-image{width:100%;height:100%;object-fit:cover}
+.scratch-description,.scratch-status{font-size:12px;line-height:1.7;color:#677260}
+.scratch-pending{padding:32px;background:#f6f7f3;font-size:13px;line-height:1.7;color:#677260}
+.scratch-description [data-curriculum-caption]{font-variant-numeric:tabular-nums;color:#35443d}
+
+.scratch-curves{display:block;margin:0}.loco-metrics button{display:inline-flex;align-items:center;gap:5px}.loco-metrics svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+
+.curriculum-checkpoint{position:absolute;width:16px;height:16px;padding:0;border:0;border-radius:50%;font:10px Arial;background:#e8ece7;color:#495548;cursor:pointer;z-index:1}.curriculum-checkpoint[aria-pressed=true]{background:#35443d;color:#fff}.curriculum-checkpoint:focus-visible{outline:2px solid #829775;outline-offset:2px}
+
+.curriculum-comparison{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 10px;margin:2px 0 12px;font-size:10px;line-height:1.5;color:#63705c;font-variant-numeric:tabular-nums}.curriculum-comparison span:last-child{color:#35443d}.curriculum-baseline-note{margin:0 0 12px}

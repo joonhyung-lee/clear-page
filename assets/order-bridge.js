@@ -7,13 +7,15 @@ window.CLEAR_ORDER_BRIDGE=function(){
   const active=stage==='sampling'?'sample-'+sample:stage;
   for(const [name,node] of Object.entries(viewer.useSceneTree.getAll())){
    const contour=name.match(/^\/order\/(?:prediction|sample-\d+)\/uncertainty-(\d+)-[123]$/);
-   if(contour){const visible=focus===null||Number(contour[1])===focus;if(node.visibility!==visible)viewer.sceneTreeActions.updateNodeAttributes(name,{visibility:visible});continue;}
-   if(/^\/label-\d+$/.test(name)){const visible=stage==='context';if(node.visibility!==visible)viewer.sceneTreeActions.updateNodeAttributes(name,{visibility:visible});continue;}
+   // Scores and uncertainty are read in the adjacent 2D sampling view. Keep
+   // only short object IDs in 3D, avoiding stacked text at each object.
+   if(contour||node.message?.type==='LabelMessage'&&name.startsWith('/order/')){if(node.visibility!==false)viewer.sceneTreeActions.updateNodeAttributes(name,{visibility:false});continue;}
+   if(/^\/label-\d+$/.test(name)){if(node.visibility!==true)viewer.sceneTreeActions.updateNodeAttributes(name,{visibility:true});continue;}
    if(!/^\/order\/(context|supervision|prediction|sample-\d+)$/.test(name))continue;
    const visible=name==='/order/'+active;if(node.visibility!==visible)viewer.sceneTreeActions.updateNodeAttributes(name,{visibility:visible});
   }
  }
  window.addEventListener('message',e=>{if(e.source!==parent||e.data?.type!=='clear-order-stage')return;if(!['context','supervision','prediction','sampling'].includes(e.data.stage))return;stage=e.data.stage;sample=Math.max(0,Math.min(3,Number(e.data.sample)||0));apply();});
- window.addEventListener('message',e=>{if(e.source!==parent||e.data?.type!=='clear-order-focus')return;focus=Number.isInteger(e.data.object)&&e.data.object>=0&&e.data.object<3?e.data.object:null;apply();});
+ window.addEventListener('message',e=>{if(e.source!==parent||e.data?.type!=='clear-order-focus')return;focus=Number.isInteger(e.data.object)&&e.data.object>=0?e.data.object:null;apply();});
  const timer=setInterval(apply,100);window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
 };

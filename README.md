@@ -24,6 +24,12 @@ without discarding the camera or playhead. A visible player that loses its
 WebGL context gets one local restart using already loaded assets.
 Reduced motion disables automatic gallery preparation, playback, and transitions.
 
+The packaged Viser client preserves mounted node references when a rewind
+resends the same scene message. `scripts/patch_viser_rewind.py` applies this
+small upstream compatibility fix and regenerates the runtime package.
+`check_teaser_replay.py` checks repeated rewinds against both ghost poses and
+all 148 observed meshes, including consecutive seeks to time zero.
+
 Browser regressions, with the preview server running:
 
 ```sh
@@ -66,7 +72,7 @@ python scripts/check_scroll_loading.py
 - Explanatory paragraphs follow their media and use restrained academic prose.
   Text wrapping is balanced on desktop and adapts naturally on small screens.
 
-No new physics simulation or learning result is asserted by these visualizations.
+These introductory illustrations do not assert a new learning result.
 The scene clips use 12-second resampled replays. Structure clips use a root-following coordinate frame and translate the world
 grid to retain the visual displacement of the recorded motion. Mobile preserves each 2 by 2 grid and stacks
 the three main components. Reduced motion disables autoplay and hover animation.
@@ -80,17 +86,17 @@ The embodiment gallery preserves each walking player's camera and playback time
 when Structure, Traversability, or Manipulation affordance is selected. These
 modes change only mesh colors and explanatory geometric regions.
 
-Maze ordering combines learned distributions and sampled priorities in one
-native viewer, with a short explanation of how reference plans provide training targets. A recorded plan
-illustrates selection and pairwise rank targets without being presented as
-training-set evidence or an optimization history. Learned Gaussian curves and
-saved draws share a priority axis inside the scene. Four saved random draws feed
-rank causal motion generation. Generation automatically plays from normalized
-time zero to one, with pause and replay controls. Four black outlined anchors
-mark each path above the object tops. Exactly two box ghosts show targets.
-The integrated generation display includes geometry refinement that checks entire path segments against walls,
-other objects, and the observed robot footprint. It is a separate geometric
-visualization, not a learned collision guarantee or a dynamics simulation.
+The main method example uses the original teaser's 10 by 17 metre course:
+five boxes, two stair lanes, one slope, and the staggered upper maze. Native
+geometry comes from its archived meshes. Four actual checkpoint draws select
+no object interaction in this query. The ordering view displays that result.
+The separate flow example conditions the original flow head on the designated
+Object 0 reference interaction. That reference is supplied, not predicted by
+OrderNet or claimed as a training sample. Waypoint anchors and two corner
+ghosts show the generated midpoint and endpoint. The display interpolates the
+30 saved Euler steps and then checks geometric clearance. None of these draws
+produces a valid refined path, which is stated beside the viewer. These
+unexecuted predictions are distinct from the teaser's physical demonstrations.
 
 Experiments include 30 discrete grid replays, six ordered manipulation replays,
 15 maze comparisons, and four long horizon examples. Physical replays retain
@@ -100,7 +106,18 @@ transferred-plan demonstrations and are not presented as aggregate evaluation
 trials. Source filenames, XML names, provenance, and checkpoint paths are not
 included in the public replay payloads.
 
-The MPC comparison shows physically executed development records with 24
+The pushing gallery contains one row of G1 and Spot + arm on each controller
+side. The four clips retain their physical timing and exclude later navigation.
+Spot + arm uses two new recordings of the original controllers on the same
+box task. Their model geometry, mass, inertia, friction, seed and initial qpos
+match. Both use 16 candidates and a one second horizon. The optimized package
+uses LA-QDPP and the frozen arm controller settings; the naive package uses the
+archived top-k settings. Both reported successful, collision-free interactions
+without a fall. Video and Viser playback use the same complete visual meshes,
+body poses and fixed camera. These qualitative runs are not paper benchmark
+results or an isolated optimization ablation.
+
+The separate G1 trajectory explanation shows development records with 24
 search candidates and a 0.6 second rollout horizon. Ours uses Cartesian palm
 tracking and LA-QDPP. The baseline uses a direct joint CEM port and executes
 its elite mean, with an extra rollout showing that mean. They share the scene
@@ -120,8 +137,12 @@ controller telemetry or aggregate benchmark results.
 Two dataset explorers show actual t-SNE projections of the inspected maze
 checkpoint. The grounding explorer contains 82 training and 44 validation
 mobility samples. The ordering explorer contains 34 training and 18 validation
-plan samples. Hover or keyboard focus selects a recorded robot and object
-rollout, its inputs, and its supervision targets. File hashes match the
+plan samples, three evaluation replays, and twelve unexecuted scene queries.
+The new queries vary passage layout, terrain, object mass, and embodiment.
+Their paths are checkpoint predictions, and their execution-frame arrays are
+empty. They carry no success or supervision labels. Hover or keyboard focus
+selects the scene inputs and predictions. Recorded samples also provide the
+measured robot and object rollout and supervision targets. File hashes match the
 checkpoint training identity, and reference replay hashes match the training
 certificates. Grounding features come from the query-conditioned classifier
 input. Plan features average valid shared encoder tokens. These are projections
@@ -184,11 +205,82 @@ Playwright and its Chromium browser. Run `python scripts/build_asset_revisions.p
 after finishing asset generation.
 
 Preparation dependencies: Python, Pillow, imageio-ffmpeg, numpy, trimesh,
-fast-simplification, viser. Dense meshes are reduced to 6,000 faces per part
-for web playback; recorded poses are unchanged.
+fast-simplification, viser. Introductory previews reduce dense meshes to 6,000
+faces per part. Learning checkpoints, the teaser method scene, and Spot + arm
+pushing replays retain complete visual meshes. Recorded poses are unchanged.
 The audit also uses zstandard. The checked-in viewer and recordings are a
 matched pair and should be updated together if the Viser version changes.
 
 The page was independently implemented with layout inspiration from
 [UMI on Legs](https://umi-on-legs.github.io/) and the local playback interaction
 shown in [Robot whips](https://krishnasuresh.org/blog/2026/robot-whips/).
+
+### Independent low-level training records
+
+The Spot tab uses an arm-free physical model with 12 actuators and a separate
+48-input policy. `scripts/bare_spot.py` removes the entire arm subtree before
+physics compilation. The Spot + arm tab uses its own 84-input policy and keeps
+the arm in the physical model throughout training. Its arm stage changes arm
+commands while training the leg policy to maintain balance. It is not a learned
+manipulation policy. G1 has a new random-initialization lineage and a separately
+selectable archived controller. Their replays, losses and evaluations are kept
+separate.
+
+New runs require an explicit `--body spot` or `--body spot_arm` when invoking
+`scripts/train_spot_curriculum.py`. Spot uses the locomotion and terrain budgets;
+Spot + arm additionally uses the arm adaptation budget. Private run directories
+must remain outside this repository. The watcher also requires the matching
+`--body`, publishes separate data files, and evaluates each body's own physics.
+Curves contain actual logged values, numbered by completed PPO updates.
+Initialization replays precede the first optimizer update and first action.
+
+`scripts/train_progressive_policy.py` additionally supports G1 from random
+initialization. `scripts/watch_progressive_evaluation.py` evaluates saved
+milestones using the same fixed protocol and publishes partial measurements
+as they become available. The new G1 panel refreshes these measurements while
+visible. Pending checkpoints have no fabricated values.
+
+The private armed-body trial changes only the torso reward weight to test
+whether its stance reward contributes to stationary behavior.
+`scripts/continue_armed_trial.py` advances it only after at least 8 of 12 fixed
+flat-ground episodes reach the goal. A failed gate stops advancement and requests
+review. This is a diagnostic experiment, not an established improvement, and
+does not replace the original armed-body measurements.
+
+### Fixed-protocol policy evaluation
+
+The three main evaluation plots use separate deterministic checkpoint rollouts,
+not PPO training losses. The suite has five shared terrain templates, four
+difficulty levels and three initial condition seeds per tile: 60 episodes per
+checkpoint. All checkpoints of a body receive identical initial states. The
+archived G1 begins from a warm start. The new G1 and both new Spot lineages begin
+from random policies in their distinct physical models.
+
+The command is 0.5 m/s in world +X. Success requires 3 m of forward progress
+with at most 0.75 m lateral displacement at the goal before a fall or 20 seconds.
+A fall is tilt above 70 degrees. Episodes stop contributing at their first goal,
+fall or timeout. Tracking is mean episode planar velocity RMSE, with one episode
+standard deviation shaded. Success and fall rates use 95% Wilson intervals.
+These are repeated evaluations of one training lineage, not multiple training
+seeds. Low fall rate alone does not show successful locomotion. The armed body
+uses its nominal arm pose for every checkpoint, so this is not an arm motion
+robustness benchmark.
+
+`scripts/evaluate_policy_progress.py` accepts a private manifest with per-body
+`update`, `phase` and checkpoint `path` records. It writes individual episodes,
+initial-state hashes and checkpoint provenance outside the repository.
+`scripts/export_policy_evaluation.py` verifies these against the manifest and
+publishes only numeric aggregates and protocol metadata. It rejects incomplete
+evaluations unless explicitly passed `--allow-partial`.
+`scripts/build_policy_evaluation.py` preserves the panel when the training
+section is rebuilt. `scripts/check_policy_evaluation.py` checks exact measured
+values, uncertainty bands, synchronized inspection and lineage separation.
+The archived armed controller remains unmeasured rather than borrowing the
+new run's results.
+
+The teaser flow panel is an unsuccessful transfer diagnostic. Its supplied
+three-object order is not an OrderNet prediction. The checkpoint selects no
+objects on this query, and conditional raw paths fail to form a feasible plan.
+Displayed lengths come directly from generated waypoints. The checkpoint's
+noise standard deviation remains unchanged. Similar predictions are not
+artificially varied or presented as successful physical executions.

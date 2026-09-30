@@ -1,10 +1,15 @@
 /* Recorded samples and checkpoint features, loaded once for both explorers. */
 (() => {
- const colors={g1:'#83aeb8',spot_arm:'#c8ab8d'},objects=['#adcfd5','#e8c5ad','#bfd5b1','#d0bfda'];
+ const colors={g1:'#347b92',spot_arm:'#a76c38'},objects=['#adcfd5','#e8c5ad','#bfd5b1','#d0bfda'];
  const ns='http://www.w3.org/2000/svg';
+ const terrainColors={flat:'#728f9e',stairs:'#bf8c69',mixed:'#8e81aa',ramp:'#769a7d',slalom:'#a48b67',branch:'#6f9b86'};
+ const terrainLabel={flat:'Flat maze',stairs:'Stair terrain',mixed:'Mixed terrain',ramp:'Ramp terrain',slalom:'Alternating passages',branch:'Branching maze'};
+ function terrainGroup(sample){if(sample.layout==='Alternating passages')return 'slalom';if(sample.layout==='Branching maze')return 'branch';const kinds=new Set(sample.scene.terrain.map(t=>t.kind).filter(k=>k!=='flat'));return kinds.size>1?'mixed':kinds.has('ramp')?'ramp':kinds.size?'stairs':'flat';}
+
+ const splitLabel=sample=>sample.queryOnly?'Scene query':sample.split==='train'?'Training':sample.split==='evaluation'?'Evaluation replay':'Validation';
  function element(name,attrs){const el=document.createElementNS(ns,name);for(const [key,value]of Object.entries(attrs))el.setAttribute(key,value);return el;}
  for(const root of document.querySelectorAll('.learning-explorer')){
-  let initialized=false,visible=false,playing=!reduced.matches,index=0,progress=0,last=0,frame=0,samples=[],dots=[],filter='all';
+  let initialized=false,visible=false,playing=!reduced.matches,index=0,progress=0,last=0,frame=0,samples=[],dots=[],filter='all',colorBy='terrain';
   const canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d'),range=root.querySelector('.sample-progress'),play=root.querySelector('.sample-play');
   const grid=root.querySelector('.sample-explorer-grid');
   let mediaTimer, movieVisible=false;
@@ -20,7 +25,7 @@
    root.dataset.factor=key||'';let count=0;
    dots.forEach((dot,i)=>{const same=!!key&&signature(samples[i],key)===signature(sample,key);if(same)count++;dot.classList.toggle('factor-match',same);dot.classList.toggle('factor-unmatched',!!key&&!same);});
    root.dataset.factorMatches=String(count);
-   factorNote.textContent=key?count+' recorded samples share this '+({body:'body structure',objects:'object configuration',scene:'scene geometry',query:'query'}[key])+'.': 'Hover or focus an input to outline matching samples. Each point encodes the combined inputs. The t-SNE axes do not represent individual factors.';
+   factorNote.textContent=key?count+' points share this '+({body:'body structure',objects:'object configuration',scene:'scene geometry',query:'query'}[key])+'.': 'Hover or focus an input to outline matching samples. Each point encodes the combined inputs. The t-SNE axes do not represent individual factors.';
   }
   function inputFactors(sample){
    factors.replaceChildren();
@@ -55,13 +60,13 @@
    if(animate&&!reduced.matches)reveal.animate([{strokeDashoffset:1},{strokeDashoffset:0}],{duration:650,easing:'ease-out'});
   }
   new ResizeObserver(()=>{connect();if(root.dataset.kind==='ordering')render();}).observe(grid);
-  function matches(sample){return filter==='all'||sample.body===filter||(filter==='stairs'&&sample.scene.terrain.length>0)||(filter==='flat'&&!sample.scene.terrain.length)||(filter==='safe'&&sample.target===1)||(filter==='blocked'&&sample.target===0)||(filter==='interaction'&&sample.paths?.length>0);}
+  function matches(sample){return filter==='all'||sample.body===filter||(filter==='query'&&sample.queryOnly)||(filter==='evaluation'&&sample.split==='evaluation')||(filter==='stairs'&&sample.scene.terrain.length>0)||(filter==='flat'&&!sample.scene.terrain.length)||(filter==='safe'&&sample.target===1)||(filter==='blocked'&&sample.target===0)||(filter==='interaction'&&sample.paths?.length>0);}
   function path(points,color,width=2,dash=[]){if(!points.length)return;ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);points.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.stroke();ctx.setLineDash([]);}
   function dot(x,y,r,color){ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='#3d4746';ctx.lineWidth=1;ctx.stroke();}
   function render(){
    if(!samples.length)return;const sample=samples[index],scene=sample.scene,frames=sample.rollout;
    if(root.dataset.kind==='ordering'){
-    const state=window.clearOrderingMap(canvas,sample,progress,objectFocus);range.value=progress;root.querySelector('.sample-time').textContent=state.time.toFixed(1)+' s';play.textContent=playing?'Pause route':'Play route';phaseLabel.textContent='';return;
+    const state=window.clearOrderingMap(canvas,sample,progress,objectFocus);range.value=progress;root.querySelector('.sample-time').textContent=sample.queryOnly?'Not executed':state.time.toFixed(1)+' s';play.textContent=sample.queryOnly?'Static query':playing?'Pause route':'Play route';phaseLabel.textContent=sample.queryOnly?'Predicted object paths. No execution outcome is available.':'';return;
    }
    const minT=frames[0][0],maxT=frames.at(-1)[0],time=minT+progress*(maxT-minT);
    let k=frames.findIndex(f=>f[0]>=time);if(k<0)k=frames.length-1;
@@ -94,15 +99,16 @@
    phaseLabel.textContent=phase+(interval?` · label interval ${interval[0].toFixed(1)}–${interval[1].toFixed(1)} s`:'');
    range.value=progress;root.querySelector('.sample-time').textContent=time.toFixed(1)+' s';play.textContent=playing?'Pause rollout':'Play rollout';
   }
-  function tick(now){frame=0;if(!visible||!playing||!initialized||document.hidden)return;const f=samples[index]?.rollout;if(!f)return;const duration=Math.max(3,Math.min(22,f.at(-1)[0]-f[0][0]));if(movie){if(movie.readyState>=2)progress=Math.min(1,movie.currentTime/(f.at(-1)[0]-f[0][0]||1));}else if(last)progress=(progress+(now-last)/(duration*1000))%1;last=now;render();frame=requestAnimationFrame(tick);}
-  function schedule(){if(!frame&&visible&&!document.hidden&&playing&&initialized){last=0;frame=requestAnimationFrame(tick);}}
+  function tick(now){frame=0;if(!visible||!playing||!initialized||document.hidden||samples[index]?.queryOnly)return;const f=samples[index]?.rollout;if(!f)return;const duration=Math.max(3,Math.min(22,f.at(-1)[0]-f[0][0]));if(movie){if(movie.readyState>=2)progress=Math.min(1,movie.currentTime/(f.at(-1)[0]-f[0][0]||1));}else if(last)progress=(progress+(now-last)/(duration*1000))%1;last=now;render();frame=requestAnimationFrame(tick);}
+  function schedule(){if(!frame&&visible&&!document.hidden&&playing&&initialized&&!samples[index]?.queryOnly){last=0;frame=requestAnimationFrame(tick);}}
   function select(i){
-   index=(i+samples.length)%samples.length;progress=0;const sample=samples[index];
+   index=(i+samples.length)%samples.length;progress=0;const sample=samples[index];play.disabled=range.disabled=!!sample.queryOnly;
+   if(root.dataset.kind==='ordering')root.querySelector('.sample-map-legend').textContent=sample.queryOnly?'Colored paths: model predictions · Objects remain at their observed positions':'Dashed green: recorded route · Colored objects: reference interactions';
    if(movie){clearTimeout(mediaTimer);movie.pause();movie.removeAttribute('src');movie.load();const file='assets/media/attempts/attempt-'+String(index).padStart(3,'0');movie.poster=clearAssetURL(file+'.png');mediaTimer=setTimeout(()=>{movie.src=clearAssetURL(file+'.mp4');movie.load();},150);}
 
    dots.forEach((dot,j)=>{dot.classList.toggle('selected',j===index);dot.setAttribute('tabindex',j===index?'0':'-1');dot.setAttribute('aria-pressed',String(j===index));});
-   root.querySelector('.sample-title').textContent=`Sample ${index+1} · ${sample.body==='g1'?'G1':'Spot + arm'} · ${sample.split==='train'?'Training':'Validation'}`;
-   root.querySelector('.sample-inputs').textContent=`${sample.links} body links · ${sample.scene.objects.length} objects`;
+   root.querySelector('.sample-title').textContent=`Sample ${index+1} · ${sample.body==='g1'?'G1':'Spot + arm'} · ${splitLabel(sample)}`;
+   root.querySelector('.sample-inputs').textContent=`${terrainLabel[terrainGroup(sample)]} · ${sample.links} body links · ${sample.scene.objects.length} objects`+(sample.scope?' · '+sample.scope:'');
    inputFactors(sample);
    const target=root.querySelector('.sample-target');target.replaceChildren();
    if(root.dataset.kind==='grounding'){
@@ -110,8 +116,8 @@
     if(sample.outcome){const outcome=document.createElement('p');outcome.textContent='Observed: '+(sample.outcome.fell?'Fall':sample.outcome.collision?'Collision':sample.outcome.success?'Safe crossing':'Incomplete');target.append(outcome);}
    }else{
     const sequence=document.createElement('div');sequence.className='sample-route-order';
-    const label=document.createElement('span');label.textContent=sample.paths.length?'Move along the route':'Route needs no object interaction';sequence.append(label);
-    sample.paths.forEach((path,j)=>{const button=document.createElement('button');button.type='button';button.textContent=(j+1)+'. Object '+path.object;button.onclick=()=>{objectFocus=path.object;let k=1;while(k<sample.rollout.length&&Math.hypot(sample.rollout[k][4][path.object][0]-sample.rollout[0][4][path.object][0],sample.rollout[k][4][path.object][1]-sample.rollout[0][4][path.object][1])<.025)k++;k=Math.min(k,sample.rollout.length-1);progress=(sample.rollout[k][0]-sample.rollout[0][0])/(sample.rollout.at(-1)[0]-sample.rollout[0][0]);playing=false;render();};sequence.append(button);});target.append(sequence);
+    const label=document.createElement('span');label.textContent=sample.queryOnly?(sample.paths.length?'Predicted interaction order':'No interaction sampled'):sample.paths.length?'Move along the route':'Route needs no object interaction';sequence.append(label);
+    sample.paths.forEach((path,j)=>{const button=document.createElement('button');button.type='button';button.textContent=(j+1)+'. Object '+path.object;button.onclick=()=>{objectFocus=path.object;if(sample.queryOnly){render();return;}let k=1;while(k<sample.rollout.length&&Math.hypot(sample.rollout[k][4][path.object][0]-sample.rollout[0][4][path.object][0],sample.rollout[k][4][path.object][1]-sample.rollout[0][4][path.object][1])<.025)k++;k=Math.min(k,sample.rollout.length-1);progress=(sample.rollout[k][0]-sample.rollout[0][0])/(sample.rollout.at(-1)[0]-sample.rollout[0][0]);playing=false;render();};sequence.append(button);});target.append(sequence);
     const table=document.createElement('table');table.innerHTML='<thead><tr><th>Object</th><th>Selection probability</th><th>Priority μ ± σ</th></tr></thead>';const body=document.createElement('tbody');
     sample.rank.forEach((rank,j)=>{const row=document.createElement('tr');for(const value of [sample.scene.objects[j].object_id,(sample.selection[j]<.001?'<0.1':sample.selection[j]>.999?'>99.9':(100*sample.selection[j]).toFixed(1))+'%',sample.mu[j].toFixed(2)+' ± '+sample.sigma[j].toFixed(2)]){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}body.append(row);});table.append(body);const details=document.createElement('div'),summary=document.createElement('h5');summary.textContent='Model predictions';details.append(summary,table);target.append(details);
 
@@ -120,15 +126,41 @@
   }
   async function initialize(){
    if(initialized)return;initialized=true;
-   const status=root.querySelector('.learning-loading');status.textContent='Preparing recorded samples…';
+   const status=root.querySelector('.learning-loading');status.textContent='Preparing scene samples…';
    try{
     if(root.dataset.kind==='ordering')await loadScript('assets/ordering-map.js',()=>!!window.clearOrderingMap);
     await loadScript('assets/learning-samples.js',()=>!!window.CLEAR_LEARNING_SAMPLES);
     const data=window.CLEAR_LEARNING_SAMPLES;samples=data[root.dataset.kind];
     const xs=samples.map(s=>s.xy[0]),ys=samples.map(s=>s.xy[1]),lo=[Math.min(...xs),Math.min(...ys)],hi=[Math.max(...xs),Math.max(...ys)];
     const svg=root.querySelector('.sample-scatter');
-    dots=samples.map((sample,i)=>{const dot=element('circle',{cx:28+(sample.xy[0]-lo[0])/(hi[0]-lo[0]||1)*424,cy:28+(sample.xy[1]-lo[1])/(hi[1]-lo[1]||1)*294,r:5.5,fill:sample.split==='train'?colors[sample.body]:'#fff',stroke:colors[sample.body],'stroke-width':2,role:'button','aria-label':`Sample ${i+1}, ${sample.body==='g1'?'G1':'Spot plus arm'}, ${sample.split==='train'?'training':'validation'}`});
-     dot.addEventListener('focus',()=>select(i));dot.addEventListener('click',()=>select(i));dot.addEventListener('keydown',e=>{if(['ArrowRight','ArrowDown','ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();advance(e.key==='ArrowRight'||e.key==='ArrowDown'?1:-1);dots[index].focus();}if(e.key==='Enter'||e.key===' '){e.preventDefault();select(i);}});svg.append(dot);return dot;});
+    const colorControls=document.createElement('div');colorControls.className='sample-color-controls';
+    const colorLabel=document.createElement('label');colorLabel.textContent='Color by ';
+    const colorSelect=document.createElement('select');colorSelect.setAttribute('aria-label','Color embedding points by');
+    for(const [key,label]of [['terrain','Scene type'],['body','Robot body']]){const option=document.createElement('option');option.value=key;option.textContent=label;colorSelect.append(option);}
+    colorLabel.append(colorSelect);const legend=document.createElement('div');legend.className='sample-color-legend';
+    const meaning=document.createElement('p');meaning.className='sample-embedding-note';meaning.textContent='Each point is one '+(root.dataset.kind==='grounding'?'recorded crossing query':'planning query')+'. Nearby points have similar learned features. Filled: training. Outlined: validation. Dashed: evaluation.'+(root.dataset.kind==='ordering'?' Dotted: new scene query without execution.':'');
+    colorControls.append(colorLabel,legend);svg.before(colorControls);svg.after(meaning);
+    function recolor(){
+     const palette=colorBy==='terrain'?terrainColors:colors;
+     const key=sample=>colorBy==='terrain'?terrainGroup(sample):sample.body;
+     dots.forEach((dot,i)=>{const color=palette[key(samples[i])];dot.setAttribute('stroke',color);dot.setAttribute('fill',samples[i].split==='train'?color:'#fff');});
+     legend.replaceChildren();
+     for(const group of [...new Set(samples.map(key))]){const item=document.createElement('span'),swatch=document.createElement('i');swatch.style.backgroundColor=palette[group];item.append(swatch,document.createTextNode((colorBy==='terrain'?terrainLabel[group]:group==='g1'?'G1':'Spot + arm')+' · '+samples.filter(s=>key(s)===group).length));legend.append(item);}
+    }
+    colorSelect.onchange=()=>{colorBy=colorSelect.value;recolor();};
+    svg.setAttribute('viewBox','0 0 480 350');
+    const axis=element('g',{'aria-hidden':'true','pointer-events':'none'});
+    for(let i=0;i<=4;i++){
+     const x=52+i*98,y=300-i*67;
+     axis.append(element('line',{x1:x,x2:x,y1:32,y2:300,class:'sample-axis-grid'}),element('line',{x1:52,x2:444,y1:y,y2:y,class:'sample-axis-grid'}));
+     const tx=element('text',{x,y:317,'text-anchor':'middle',class:'sample-axis-tick'}),ty=element('text',{x:43,y:y+3,'text-anchor':'end',class:'sample-axis-tick'});
+     tx.textContent=(lo[0]+i*(hi[0]-lo[0])/4).toFixed(1);ty.textContent=(lo[1]+i*(hi[1]-lo[1])/4).toFixed(1);axis.append(tx,ty);
+    }
+    const xlabel=element('text',{x:248,y:340,'text-anchor':'middle',class:'sample-axis-label'}),ylabel=element('text',{x:16,y:166,transform:'rotate(-90 16 166)','text-anchor':'middle',class:'sample-axis-label'});
+    xlabel.textContent='t-SNE dimension 1';ylabel.textContent='t-SNE dimension 2';axis.append(xlabel,ylabel);svg.append(axis);
+    dots=samples.map((sample,i)=>{const dot=element('circle',{cx:52+(sample.xy[0]-lo[0])/(hi[0]-lo[0]||1)*392,cy:300-(sample.xy[1]-lo[1])/(hi[1]-lo[1]||1)*268,r:5.5,fill:sample.split==='train'?colors[sample.body]:'#fff',stroke:colors[sample.body],'stroke-width':2,'stroke-dasharray':sample.queryOnly?'1 3':sample.split==='evaluation'?'2 2':'none',role:'button','aria-label':`Sample ${i+1}, ${sample.body==='g1'?'G1':'Spot plus arm'}, ${splitLabel(sample).toLowerCase()}`});
+     const title=element('title',{});title.textContent=`Sample ${i+1} · ${sample.layout||terrainLabel[terrainGroup(sample)]} · ${sample.body==='g1'?'G1':'Spot + arm'} · ${sample.scene.objects.length} objects · ${splitLabel(sample)}`;dot.append(title);dot.setAttribute('aria-label',title.textContent);dot.addEventListener('focus',()=>select(i));dot.addEventListener('click',()=>select(i));dot.addEventListener('keydown',e=>{if(['ArrowRight','ArrowDown','ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();advance(e.key==='ArrowRight'||e.key==='ArrowDown'?1:-1);dots[index].focus();}if(e.key==='Enter'||e.key===' '){e.preventDefault();select(i);}});svg.append(dot);return dot;});
+    recolor();
     svg.addEventListener('pointermove',event=>{
      const point=new DOMPoint(event.clientX,event.clientY).matrixTransform(svg.getScreenCTM().inverse());
      let closest=-1,distance=18;
@@ -136,13 +168,11 @@
      if(closest>=0&&closest!==index)select(closest);
     });
     const layouts=new Set(samples.map(s=>JSON.stringify([s.scene.walls,s.scene.terrain,s.scene.objects]))).size,heights=samples.flatMap(s=>s.scene.terrain.map(t=>t.height_m??t.end_height_m??0));
-    root.querySelector('.sample-count').textContent=`${samples.length} samples · ${layouts} scene layouts`;
-    const filters=document.createElement('div');filters.className='sample-filters';filters.setAttribute('role','group');filters.setAttribute('aria-label','Filter recorded samples');
-    const options=[['all','All samples'],['g1','G1'],['spot_arm','Spot + arm'],['stairs','Stair scenes'],['flat','Flat scenes'],...(root.dataset.kind==='grounding'?[['safe','Safe'],['blocked','Failed crossing']]:[['interaction','Object interaction']])];
+    const queryCount=samples.filter(s=>s.queryOnly).length;root.querySelector('.sample-count').textContent=queryCount?`${samples.length-queryCount} recorded samples + ${queryCount} scene queries · ${layouts} scene layouts`:`${samples.length} samples · ${layouts} scene layouts`;
+    const filters=document.createElement('div');filters.className='sample-filters';filters.setAttribute('role','group');filters.setAttribute('aria-label','Filter scene samples');
+    const options=[['all','All samples'],['g1','G1'],['spot_arm','Spot + arm'],['stairs','Terrain scenes'],['flat','Flat scenes'],...(root.dataset.kind==='grounding'?[['safe','Safe'],['blocked','Failed crossing']]:[['interaction','Object interaction'],['evaluation','Evaluation replay'],['query','Scene queries']])];
     for(const [key,label]of options){const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('aria-pressed',String(key===filter));button.onclick=()=>{filter=key;filters.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));dots.forEach((dot,i)=>{dot.classList.toggle('filtered',!matches(samples[i]));dot.setAttribute('aria-disabled',String(!matches(samples[i])));});const next=samples.findIndex(matches);if(next>=0)select(next);};filters.append(button);}
     svg.before(filters);
-    root.querySelector('.sample-projection-note').textContent=`t-SNE of ${data.projection[root.dataset.kind].toLowerCase()}. Each point is an actual dataset sample. The projection shows one checkpoint and does not establish generalization. Rollouts use recorded poses with display interpolation.`;
-    root.querySelector('.learning-loss').textContent=root.dataset.kind==='grounding'?'The crossing label is 1 only when the attempt succeeds without collision or a fall. Binary cross entropy compares this target with the predicted probability. Affordance warmup precedes joint updates with plan supervision.':'Binary cross entropy supervises participation. A pairwise ranking loss supervises relative priorities, with Gaussian regularization. The same shared representation also receives motion generation gradients. The displayed losses are checkpoint evaluations, not an optimization history.';
     status.hidden=true;root.querySelector('.learning-content').hidden=false;const preferred=samples.findIndex(s=>s.split==='train'&&(root.dataset.kind==='ordering'?s.paths.length>1:s.target===1&&Math.max(...s.rollout.map(f=>f[5]))-Math.min(...s.rollout.map(f=>f[5]))>.3));select(preferred<0?0:preferred);
    }catch{initialized=false;status.textContent='Samples are taking longer to load. ';const button=document.createElement('button');button.type='button';button.textContent='Retry samples';button.onclick=initialize;status.append(button);}
   }

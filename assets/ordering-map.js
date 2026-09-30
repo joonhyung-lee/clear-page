@@ -1,6 +1,7 @@
 /* Recorded geometry and route. Selection comes from the reference plan. */
 window.clearOrderingMap=function(canvas,sample,progress,focus=null){
- const ctx=canvas.getContext('2d'),scene=sample.scene,frames=sample.rollout,W=560,H=420;
+ const ctx=canvas.getContext('2d'),scene=sample.scene,W=560,H=420;
+ const frames=sample.queryOnly?[[0,scene.start[0],scene.start[1],scene.start[2]||0,scene.objects.map(o=>o.pose),0]]:sample.rollout;
  if(canvas.height!==H)canvas.height=H;
  const time=frames[0][0]+progress*(frames.at(-1)[0]-frames[0][0]);let k=frames.findIndex(f=>f[0]>=time);if(k<0)k=frames.length-1;
  const a=frames[Math.max(0,k-1)],b=frames[k],u=(time-a[0])/(b[0]-a[0]||1),mix=(x,y)=>x+(y-x)*u;
@@ -12,7 +13,7 @@ window.clearOrderingMap=function(canvas,sample,progress,focus=null){
  const label=(text,p,color='#3f5545')=>{ctx.font=Math.max(13,10.5*W/(canvas.clientWidth||W))+'px Arial';const width=ctx.measureText(text).width;ctx.fillStyle='#fafbf8ed';ctx.fillRect(p[0]-3,p[1]-13,width+6,18);ctx.fillStyle=color;ctx.fillText(text,...p);};
  for(const t of scene.terrain){const[l,b,r,t0]=t.bounds;ctx.fillStyle='#ecebe0';ctx.fillRect(ox+l*scale,oy-t0*scale,(r-l)*scale,(t0-b)*scale);}
  for(const[l,b,r,t]of scene.walls){ctx.fillStyle='#bdc3bd';ctx.fillRect(ox+l*scale,oy-t*scale,(r-l)*scale,(t-b)*scale);}
- const route=frames.map(f=>xy(f.slice(1,3)));line(route,'#91a692',2.3,[5,4]);line([...route.slice(0,k),xy([mix(a[1],b[1]),mix(a[2],b[2])])],'#3c6347',3);
+ const route=sample.queryOnly?[]:frames.map(f=>xy(f.slice(1,3)));line(route,'#91a692',2.3,[5,4]);if(!sample.queryOnly)line([...route.slice(0,k),xy([mix(a[1],b[1]),mix(a[2],b[2])])],'#3c6347',3);
  for(let j=20;j<route.length;j+=35){const prev=route[j-3],p=route[j],angle=Math.atan2(p[1]-prev[1],p[0]-prev[0]);line([[p[0]-6*Math.cos(angle-.5),p[1]-6*Math.sin(angle-.5)],p,[p[0]-6*Math.cos(angle+.5),p[1]-6*Math.sin(angle+.5)]],'#829a83',1.6);}
  const order=sample.rank.map((rank,i)=>({rank,i})).filter(o=>o.rank>=0).sort((a,b)=>a.rank-b.rank),palette=['#c4936a','#83a47e','#8e9faf'];
  let active=null;
@@ -34,6 +35,6 @@ window.clearOrderingMap=function(canvas,sample,progress,focus=null){
  label('Start',[start[0]-16,start[1]-13]);label('Goal',[goal[0]-12,goal[1]-14]);
  const robot=xy([mix(a[1],b[1]),mix(a[2],b[2])]);circle(robot,5,'#fff','#2e533b');
  canvas.dataset.selected=order.map(o=>scene.objects[o.i].object_id).join(',');canvas.dataset.active=active===null?'':String(active);canvas.dataset.time=time.toFixed(3);canvas._objectHits=hits;
- canvas.setAttribute('aria-label','Top-down recorded route from start to goal. '+(order.length?'Selected objects in order: '+order.map(o=>scene.objects[o.i].object_id).join(', '):'No object interaction needed.'));
+ canvas.setAttribute('aria-label',(sample.queryOnly?'Top-down unexecuted scene query. Predicted object paths. ':'Top-down recorded route from start to goal. ')+(order.length?'Selected objects in order: '+order.map(o=>scene.objects[o.i].object_id).join(', '):(sample.queryOnly?'No interaction sampled.':'No object interaction in the recorded plan.')));
  return{time,active};
 };

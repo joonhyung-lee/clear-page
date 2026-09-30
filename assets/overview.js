@@ -71,7 +71,7 @@
   const examples={
     grounding:[['structure-g1','G1'],['structure-spot','Spot'],['structure-spot_arm','Spot + arm'],['structure-husky','Husky']],
     ordering:[['order-distribution','Selection and sampled priorities']],
-    generation:[['method-flow-0-refined','Object motion within scene geometry']],
+    generation:[['method-flow-0-pipeline','Reference conditioned motion in the teaser scene']],
     execution:[['mpc-optimized','Recorded interaction and candidate motions']]
   };
   // Inline inspection keeps the complete pipeline visible above the example.
@@ -111,7 +111,7 @@
           window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
         }else if(file.startsWith('method-')||file==='mpc-optimized'){
           const v=document.createElement('div');v.className='viewer overview-live-viewer';v.dataset.scene=file;v.dataset.title=caption;v.dataset.generation='true';
-          if(file==='method-order-maze'){v.dataset.orderStage='supervision';label.textContent='Recorded reference interactions';}
+          if(file==='method-order-maze'){v.dataset.orderStage='supervision';label.textContent='Designated teaser reference interaction';}
           const poster=document.createElement(file==='mpc-optimized'?'video':'img');poster.className='preview-image';
           if(poster.tagName==='VIDEO'){poster.muted=true;poster.loop=true;poster.playsInline=true;poster.poster=clearAssetURL('assets/media/'+file+'.png');poster.src=clearAssetURL('assets/media/'+file+'.mp4');}
           else{poster.src=clearAssetURL('assets/media/'+file+'.png');poster.alt=caption;}

@@ -1,0 +1,2 @@
+"""Native player scene probe shared by physical replay checks."""
+FIND='''() => {const r=document.querySelector('#root'),key=Object.keys(r).find(k=>k.startsWith('__reactContainer')),queue=[r[key],r[key]?.stateNode?.current],seen=new Set();while(queue.length){const f=queue.pop();if(!f||seen.has(f))continue;seen.add(f);const v=f.memoizedProps?.value;if(v?.useSceneTree?.getAll){window.testViewer=v;return Object.keys(v);}queue.push(f.child,f.sibling,f.alternate);}return [];}'''

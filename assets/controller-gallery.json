@@ -1,0 +1,38 @@
+[
+  {
+    "task": "G1",
+    "controller": "optimized",
+    "scene": "mpc-optimized",
+    "outcome": "1.97 m moved \u00b7 0.07 m goal error \u00b7 14.0 s",
+    "note": "Contact conditioned targets guide the arms along the object reference.",
+    "group": "primary",
+    "body": "g1"
+  },
+  {
+    "task": "Spot + arm",
+    "body": "spot_arm",
+    "controller": "optimized",
+    "scene": "mpc-spot-optimized",
+    "group": "primary",
+    "outcome": "1.94 m moved \u00b7 0.08 m goal error \u00b7 21.8 s",
+    "note": "Recorded object pushing interval. Subsequent arm stow and navigation are outside this clip. The controller reports completion of the interaction."
+  },
+  {
+    "task": "G1",
+    "controller": "baseline",
+    "scene": "mpc-baseline-push",
+    "outcome": "0.70 m moved \u00b7 1.33 m goal error \u00b7 12.6 s",
+    "note": "Recorded contact interval from 1.545 to 14.14 s. Contact is lost before reaching the goal.",
+    "group": "primary",
+    "body": "g1"
+  },
+  {
+    "task": "Spot + arm",
+    "body": "spot_arm",
+    "controller": "baseline",
+    "scene": "mpc-spot-baseline",
+    "group": "primary",
+    "outcome": "1.93 m moved \u00b7 0.08 m goal error \u00b7 22.5 s",
+    "note": "Recorded object pushing interval. Subsequent arm stow and navigation are outside this clip. The controller reports completion of the interaction."
+  }
+]

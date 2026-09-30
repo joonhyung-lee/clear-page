@@ -1,5 +1,5 @@
 /* A quiet reading rail keeps the chapter hierarchy visible without covering figures. */
-#page-contents{position:fixed;z-index:20;right:20px;top:42px;width:178px;max-height:calc(100dvh - 84px);overflow-y:auto;overscroll-behavior:contain;padding:4px 0 12px 14px;border-left:1px solid #e6e9e2;background:#fff;font-size:12px;line-height:1.45;scrollbar-width:thin}
+#page-contents{position:fixed;z-index:20;right:max(32px,3vw);top:42px;width:178px;max-height:calc(100dvh - 84px);overflow-y:auto;overscroll-behavior:contain;padding:4px 0 12px 14px;border-left:1px solid #e6e9e2;background:#fff;font-size:12px;line-height:1.45;scrollbar-width:thin}
 .contents-heading{font-size:11px;color:#777f70;margin:0 0 14px;padding-left:8px}
 #page-contents ol{list-style:none;padding:0;margin:0}#page-contents ol ol{padding-left:10px}#page-contents>ol>li{margin-bottom:12px}
 #page-contents a{display:block;text-decoration:none;color:#818679;padding:5px 8px;border-left:2px solid transparent}
@@ -21,14 +21,14 @@
 #method .method-part>.method-lead{margin-bottom:24px}
 #method-grounding .embodiment-gallery{margin-bottom:20px}
 .experiment>.experiment-claim{margin-bottom:12px}.experiment>.reading-detail{margin-top:14px}
-@media(min-width:1200px){
- #main{margin-right:216px}
+@media(min-width:1680px){
+ #main{margin-inline:0}
  #main .wrap{width:min(1120px,calc(100% - 64px))}
  #main .encoding>.wrap{width:calc(100% - 64px)}
  #method-execution,#training-objective{width:calc(100vw - 280px);margin-left:calc((100% - 100vw + 280px)/2)}
  body:not(.reading-started) #page-contents{opacity:0;pointer-events:none;visibility:hidden}
 }
-@media(max-width:1199px){
+@media(max-width:1679px){
  #contents-toggle{display:block;position:fixed;z-index:31;right:16px;top:14px;padding:8px 13px;background:#fffffff5;border:1px solid #d9e0d1;font-size:12px}
  #page-contents{display:none;z-index:30;right:16px;top:54px;width:245px;max-height:calc(100dvh - 78px);border:1px solid #d9e0d1;padding:16px;background:#fff;box-shadow:0 6px 20px #0000000a}
  #page-contents[data-open]{display:block}

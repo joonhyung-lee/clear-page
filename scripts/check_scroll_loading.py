@@ -9,7 +9,7 @@ from check_scene_loading import BASE, FIXTURE
 # Delay canvas creation to distinguish HTML load from native playback readiness.
 RUNTIME = '''<!doctype html><head></head><body><script>
 setTimeout(()=>{document.body.innerHTML='<div id=root></div><canvas></canvas><input value="0"><button><i class="tabler-icon-player-pause-filled"></i></button>';
-const view={useSceneTree:{getAll:()=>({root:1,axes:1,mesh:1})}};document.querySelector('#root').__reactContainerMock={memoizedProps:{value:view}};const button=document.querySelector('button');button.onclick=()=>{const playing=button.firstChild.classList.toggle('tabler-icon-player-pause-filled');button.firstChild.classList.toggle('tabler-icon-player-play-filled',!playing);};},500);
+const view={useSceneTree:{getAll:()=>({'/mesh':{message:{name:'/mesh',type:'MeshMessage'}}})},mutable:{current:{nodeRefFromName:{'/mesh':{traverse:f=>f({geometry:{attributes:{position:{count:3}}},visible:true})}}}}};document.querySelector('#root').__reactContainerMock={memoizedProps:{value:view}};const button=document.querySelector('button');button.onclick=()=>{const playing=button.firstChild.classList.toggle('tabler-icon-player-pause-filled');button.firstChild.classList.toggle('tabler-icon-player-play-filled',!playing);};},500);
 </script></body>'''.encode().hex()
 
 async def gallery(browser):

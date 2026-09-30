@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Learning to move · Evaluation design preview</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#26372f;background:#fafbf8;font-synthesis:none}*{box-sizing:border-box}body{margin:0}main{width:88%;max-width:1560px;margin:48px auto}header{border-bottom:1px solid #dce2d9;padding-bottom:24px}.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#677362}h1{font-size:clamp(26px,3vw,42px);font-weight:500;letter-spacing:-.04em;margin:12px 0}p{line-height:1.6;font-size:14px;color:#62705f;margin:8px 0}.notice{display:inline-block;color:#765929;background:#f4eddc;padding:7px 11px;font-size:12px;margin-top:14px}.toolbar{display:flex;justify-content:space-between;gap:24px;align-items:center;margin-top:30px}.tabs{display:flex;gap:5px}button{background:transparent;color:inherit;border:1px solid #d6ded2;border-radius:4px;padding:10px 20px;cursor:pointer;font:inherit;font-size:14px}button[aria-pressed=true]{background:#334a3d;color:white;border-color:#334a3d}button:focus-visible,input:focus-visible,svg:focus-visible{outline:3px solid #b0c9b8;outline-offset:3px}.step{font-size:14px;font-variant-numeric:tabular-nums}.body-note{min-height:44px;margin:15px 0 20px}.plots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}figure{margin:0;min-width:0;border-top:1px solid #d2dbce;padding-top:18px}figcaption{font-size:16px;display:flex;justify-content:space-between;gap:6px}.direction{font-size:11px;color:#778472;white-space:nowrap}.reading{display:flex;align-items:baseline;gap:8px;margin:20px 0 0;font-variant-numeric:tabular-nums}.value{font-size:34px;letter-spacing:-.04em}.unit{font-size:12px;color:#788273}.delta{font-size:12px;margin:6px 0 8px;color:#63775e;font-variant-numeric:tabular-nums;min-height:16px}svg{display:block;width:100%;height:auto;touch-action:pan-y}.explain{font-size:12px;min-height:40px}.legend{display:flex;gap:22px;flex-wrap:wrap;font-size:12px;color:#6b7664;margin:18px 0}.legend span{display:flex;align-items:center;gap:7px}.swatch{width:23px;height:9px;background:#dfe8dc;border-bottom:2px solid #56734d}.dash{width:23px;border-top:1px dashed #939c8d}.phases{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:#6d7868}.phase-dot{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px}.scrub{border-top:1px solid #dce2d9;margin-top:22px;padding-top:20px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:20px;font-size:12px}.scrub input{width:100%;accent-color:#506b48}.protocol{display:grid;grid-template-columns:1fr 1fr;gap:40px;border-top:1px solid #dce2d9;margin-top:32px;padding-top:20px}.protocol h2{font-size:13px;font-weight:600;margin:0 0 6px}.protocol p{font-size:12px}footer{margin-top:22px;font-size:11px;color:#798371}svg text{font-family:Arial,Helvetica,sans-serif} @media(max-width:850px){main{width:92%;margin:28px auto}.plots{grid-template-columns:1fr}.body-note{min-height:0}.protocol{grid-template-columns:1fr;gap:18px}.toolbar{align-items:flex-start;flex-direction:column;gap:14px}.reading{margin-top:12px}figure{max-width:640px;width:100%}.explain{min-height:0}.scrub{gap:10px}.tabs button{padding:9px 16px}}
+</style>
+<main>
+<header><div class="eyebrow">Controller training / Evaluation preview</div><h1>Learning to move, measured in motion.</h1><p>Three views of progress from the initial policy. Inspect the same checkpoint across all plots.</p><div class="notice">Illustrative data only · These curves are not measured robot performance.</div></header>
+<div class="toolbar"><div class="tabs" role="group" aria-label="Robot embodiment"><button data-body="g1" aria-pressed="true">G1</button><button data-body="spot" aria-pressed="false">Spot</button><button data-body="spot_arm" aria-pressed="false">Spot + arm</button></div><div class="step" aria-live="polite"></div></div>
+<p class="body-note"></p>
+<div class="plots"></div>
+<div class="legend"><span><i class="swatch"></i>Example mean and illustrative spread</span><span><i class="dash"></i>Example value at update 0</span><span>Hover, tap or use ← → to inspect</span></div>
+<div class="phases"></div>
+<label class="scrub"><span>Update 0</span><input type="range" min="0" max="20" value="20" aria-label="Inspect example checkpoint"><span class="last-step"></span></label>
+<div class="protocol"><section><h2>What the actual evaluation would measure</h2><p>Tracking uses planar velocity RMSE against a fixed command schedule. Traversal success requires reaching the goal within the time limit without falling. Fall rate is the fraction of evaluation episodes with a fall. Every checkpoint receives the same terrain and start conditions.</p></section><section><h2>How to read this preview</h2><p>The same synthetic curves are reused for all three bodies to demonstrate the layout, not rank their performance. The shaded bands are illustrative, not confidence intervals. Actual evaluation would include each saved initial policy and repeated episodes per checkpoint.</p></section></div>
+<footer>Private design preview. Existing training logs and the paper page are unchanged. Phase spans describe the training schedule, not evidence of mastery.</footer>
+</main>
+<script>
+const bodies={
+ g1:{name:'G1',end:22800,phases:[['Terrain adaptation',0,17100],['Action rate regularization',17100,22800]],note:'Archived G1 lineage. Update 0 refers to its warm start checkpoint and must not be presented as training from a random policy.'},
+ spot:{name:'Spot',end:9000,phases:[['Locomotion',0,3000],['Terrain adaptation',3000,9000]],note:'Independent training with the arm physically removed. The full scheduled range is shown here only to demonstrate the evaluation layout.'},
+ spot_arm:{name:'Spot + arm',end:13000,phases:[['Locomotion',0,3000],['Terrain adaptation',3000,9000],['Arm pose adaptation',9000,13000]],note:'Independent articulated body. Evaluation would repeat a fixed arm pose protocol across checkpoints. These example curves do not imply that the current policy learned successful walking.'}
+};
+const metrics=[
+ {key:'tracking',title:'Velocity tracking error',unit:'m/s',direction:'Lower is better ↓',max:1.2,color:'#57754f',values:[.92,.84,.75,.67,.59,.54,.50,.46,.43,.40,.38,.35,.33,.31,.29,.28,.26,.25,.24,.23,.22],spread:[.16,.05],description:'Planar velocity RMSE under the same commanded motion.'},
+ {key:'success',title:'Terrain traversal success',unit:'%',direction:'Higher is better ↑',max:100,color:'#668bab',values:[5,8,13,19,26,32,38,44,49,54,58,62,66,70,73,76,78,80,82,84,85],spread:[9,5],description:'Goal reached in time, without a fall. Standing still is not a success.'},
+ {key:'falls',title:'Fall rate',unit:'%',direction:'Lower is better ↓',max:100,color:'#af8467',values:[76,69,61,55,48,42,37,33,29,26,23,21,19,17,15,14,12,11,10,9,8],spread:[11,4],description:'Episodes ending in a fall, across the same evaluation suite.'}
+];
+const phaseColors=['#c2d4ba','#c0d3e4','#ddcbb9'];
+let body='g1',point=20;
+const host=document.querySelector('.plots'),slider=document.querySelector('input');
+const fmt=n=>n.toLocaleString('en-US');
+function selectPoint(i){point=Math.max(0,Math.min(20,i));slider.value=point;render();}
+metrics.forEach(m=>{const f=document.createElement('figure');f.dataset.metric=m.key;f.innerHTML=`<figcaption>${m.title}<span class="direction">${m.direction}</span></figcaption><div class="reading"><span class="value"></span><span class="unit">${m.unit} · example</span></div><div class="delta"></div><svg viewBox="0 0 440 280" tabindex="0" role="img" aria-label="${m.title}, illustrative data. Arrow keys inspect checkpoints."></svg><p class="explain">${m.description}</p>`;host.append(f);const s=f.querySelector('svg');s.addEventListener('pointermove',e=>{if(e.pointerType!=='touch')inspect(e,s)});s.addEventListener('pointerdown',e=>inspect(e,s));s.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();selectPoint(e.key==='Home'?0:e.key==='End'?20:point+(e.key==='ArrowLeft'?-1:1))}})});
+function inspect(e,s){const b=s.getBoundingClientRect();selectPoint(Math.round(((e.clientX-b.left)/b.width*440-43)/380*20));}
+function render(){
+ const b=bodies[body],update=Math.round(point/20*b.end);document.querySelector('.step').textContent=`Example checkpoint · Update ${fmt(update)}`;document.querySelector('.body-note').textContent=b.note;document.querySelector('.last-step').textContent=fmt(b.end);slider.setAttribute('aria-valuetext',`${b.name}, example update ${fmt(update)}`);
+ document.querySelector('.phases').innerHTML=b.phases.map((p,i)=>`<span><i class="phase-dot" style="background:${phaseColors[i]}"></i>${p[0]} · ${fmt(p[1])}–${fmt(p[2])}</span>`).join('');
+ metrics.forEach((m,k)=>{
+  const f=host.children[k],v=m.values[point],initial=m.values[0],delta=v-initial;f.querySelector('.value').textContent=m.key==='tracking'?v.toFixed(2):v.toFixed(0);f.querySelector('.delta').textContent=`From ${m.key==='tracking'?initial.toFixed(2):initial}${m.unit==='%'?'%':' m/s'} at update 0 · ${delta<0?'−':delta>0?'+':''}${Math.abs(delta).toFixed(m.key==='tracking'?2:0)} ${m.unit==='%'?'percentage points':'m/s'}`;
+  const x=i=>43+i/20*380,y=v=>233-v/m.max*180,phaseX=v=>43+v/b.end*380;
+  let svg='';
+  b.phases.forEach((p,i)=>{const a=phaseX(p[1]),z=phaseX(p[2]);svg+=`<rect x="${a}" y="53" width="${z-a}" height="180" fill="${phaseColors[i]}" opacity=".14"/><path d="M ${a+1} 33 v -7 H ${z-1} v 7" fill="none" stroke="${phaseColors[i]}" stroke-width="2"/><text x="${(a+z)/2}" y="17" text-anchor="middle" font-size="10" fill="#71806a">Phase ${i+1}</text>`;});
+  for(let j=0;j<=4;j++){const v=m.max*j/4;svg+=`<path d="M43 ${y(v)} H423" stroke="#e0e5dd"/><text x="34" y="${y(v)+4}" text-anchor="end" fill="#7c8875" font-size="10">${m.key==='tracking'?v.toFixed(1):v}</text>`;}
+  const spread=i=>m.spread[0]+(m.spread[1]-m.spread[0])*i/20;
+  const upper=m.values.map((v,i)=>`${x(i)},${y(Math.min(m.max,v+spread(i)))}`),lower=m.values.map((v,i)=>`${x(i)},${y(Math.max(0,v-spread(i)))}`).reverse();
+  svg+=`<polygon points="${upper.concat(lower).join(' ')}" fill="${m.color}" opacity=".14"/><path d="M43 ${y(initial)} H423" stroke="#919b8a" stroke-dasharray="4 4"/><polyline points="${m.values.map((v,i)=>`${x(i)},${y(v)}`).join(' ')}" fill="none" stroke="${m.color}" stroke-width="2.5" stroke-linejoin="round"/><path d="M${x(point)} 53 V233" stroke="${m.color}" opacity=".5" stroke-dasharray="3 3"/><circle cx="${x(point)}" cy="${y(v)}" r="5" fill="${m.color}" stroke="white" stroke-width="2"/>`;
+  [0,5,10,15,20].forEach(i=>svg+=`<text x="${x(i)}" y="253" text-anchor="${i===0?'start':i===20?'end':'middle'}" font-size="10" fill="#7c8875">${fmt(Math.round(i/20*b.end))}</text>`);svg+='<text x="233" y="276" text-anchor="middle" font-size="10" fill="#7c8875">Training update</text>';
+  f.querySelector('svg').innerHTML=svg;f.dataset.point=point;
+ });
+}
+document.querySelectorAll('[data-body]').forEach(btn=>btn.onclick=()=>{body=btn.dataset.body;document.querySelectorAll('[data-body]').forEach(n=>n.setAttribute('aria-pressed',n===btn));render()});slider.oninput=()=>selectPoint(Number(slider.value));render();
+</script>
+</html>

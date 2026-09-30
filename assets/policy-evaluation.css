@@ -1,0 +1,35 @@
+#policy-evaluation{margin:32px 0 0;padding-top:24px;border-top:1px solid #dce2d9;color:#34432e}
+#policy-evaluation [hidden]{display:none!important}
+#policy-evaluation .eval-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#policy-evaluation h5{font-size:17px;font-weight:500;margin:0}
+#policy-evaluation button{border:1px solid #d6ded2;background:white;color:#52604e;padding:7px 12px;font:inherit;font-size:12px;cursor:pointer}
+#policy-evaluation button[aria-pressed=true]{background:#f4eddc;border-color:#ddc9a7;color:#765929}
+#policy-evaluation p{font-size:12px;line-height:1.65;color:#6c7863}
+#policy-evaluation .eval-disclosure{padding:9px 12px;background:#f3f5ef;margin:15px 0 10px}
+#policy-evaluation[data-mode=illustrative] .eval-disclosure{background:#f4eddc;color:#765929}
+#policy-evaluation .step{font-size:12px;font-variant-numeric:tabular-nums;color:#576a4d}
+#policy-evaluation .body-note{margin:8px 0 22px}
+#policy-evaluation .plots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+#policy-evaluation figure{margin:0;min-width:0;border-top:1px solid #d2dbce;padding-top:15px}
+#policy-evaluation figcaption{font-size:13px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;line-height:1.4;color:#34432e}
+#policy-evaluation .direction{font-size:10px;color:#778472;white-space:nowrap}
+#policy-evaluation .reading{display:flex;align-items:baseline;gap:7px;margin-top:15px;font-variant-numeric:tabular-nums}
+#policy-evaluation .value{font-size:28px;letter-spacing:-.04em}
+#policy-evaluation .unit{font-size:10px;color:#788273}
+#policy-evaluation .delta{font-size:10px;margin:6px 0 8px;color:#63775e;font-variant-numeric:tabular-nums;min-height:28px}
+#policy-evaluation svg{display:block;width:100%;height:auto;touch-action:pan-y}
+#policy-evaluation svg text{font-family:Arial,Helvetica,sans-serif}
+#policy-evaluation :focus-visible{outline:2px solid #829775;outline-offset:3px}
+#policy-evaluation .explain{font-size:11px}
+#policy-evaluation .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:#6b7664;margin:18px 0}
+#policy-evaluation .legend span{display:flex;align-items:center;gap:7px}
+#policy-evaluation .swatch{width:23px;height:9px;background:#dfe8dc;border-bottom:2px solid #56734d}
+#policy-evaluation .dash{width:23px;border-top:1px dashed #939c8d}
+#policy-evaluation .phases{display:flex;gap:14px;flex-wrap:wrap;font-size:10px;color:#6d7868;margin:14px 0}
+#policy-evaluation .phase-dot{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px}
+#policy-evaluation .scrub{border-top:1px solid #dce2d9;margin-top:20px;padding-top:16px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;font-size:11px}
+#policy-evaluation input{width:100%;accent-color:#506b48}
+#policy-evaluation details{margin-top:18px;font-size:11px;color:#6c7863}
+#policy-evaluation summary{cursor:pointer}
+#policy-evaluation details p{font-size:11px}
+@media(max-width:800px){#policy-evaluation .plots{grid-template-columns:1fr;gap:22px}#policy-evaluation .delta{min-height:0}#policy-evaluation .scrub{gap:8px}#policy-evaluation .eval-heading{align-items:flex-start}}

@@ -10,15 +10,7 @@ if objective.parent.name == 'details':
     objective.parent.insert_after(objective.extract())
 objective.clear()
 
-def term(key, tex, label):
-    return f'<button type="button" data-loss-term="{key}" aria-label="Inspect {label} loss"><span data-tex="{tex}"></span><small>{label}</small></button>'
-
-formula = term('loss', r'\mathcal L', 'Total') + '<span>=</span>' + '<span>+</span>'.join([
-    term('selection', r'\mathcal L_{\rm sel}', 'Selection'),
-    term('order', r'\mathcal L_{\rm rank}', 'Ranking'),
-    term('kl', r'\lambda_{\rm KL}\mathcal L_{\rm KL}', 'Regularization'),
-    term('flow', r'\mathcal L_{\rm flow}', 'Generation'),
-    term('affordance', r'\lambda_{\rm aff}\mathcal L_{\rm aff}', 'Affordance')])
+formula = r'\mathcal{L}(\theta)=\mathcal{L}_{\mathrm{order}}+\lambda_{\mathrm{flow}}\mathcal{L}_{\mathrm{flow}}+\lambda_{\mathrm{aff}}\mathcal{L}_{\mathrm{aff}}+\lambda_{\mathrm{avail}}\mathcal{L}_{\mathrm{avail}}'
 
 def plot(key, title, copy):
     return f'<figure class="training-loss-chart" id="loss-{key}" data-loss="{key}"><figcaption><h5>{title}</h5><p>{copy}</p></figcaption><canvas role="img" tabindex="0" aria-label="{title}. Use left and right arrows to inspect recorded steps. Home and End select the endpoints."></canvas><div class="loss-tooltip" hidden></div></figure>'
@@ -32,12 +24,12 @@ components = ''.join(plot(*p) for p in [
 html = f'''<h4>The full training objective</h4>
 <section id="training-losses" aria-label="Interactive training losses">
 <p class="method-small-copy">CLEAR jointly learns object selection, interaction order, conditional targets and embodiment conditioned affordances.</p>
-<div class="loss-objective-map" aria-label="Objective to component mapping"><div>{formula}</div></div>
-<p class="loss-scope">In this run, λ<sub>KL</sub> = 0.001 and λ<sub>aff</sub> = 1. Select a term to inspect its corresponding curve.</p>
+<div class="paper-equation-row"><div class="equation" data-tex="{formula}" data-objective-annotations="true"></div></div>
+<p class="loss-scope">The plotted run uses λflow = 1, λKL = 0.001, λaff = 1 and λavail = 0. The availability term is inactive in this run. Hover a curve to inspect its recorded values.</p>
 <div class="loss-loading" role="status">Loading recorded losses…</div>
 <div class="loss-content" hidden>
 {plot('loss', 'Full objective loss', 'Original CLEAR objective · 100,000 training steps')}
-<div class="loss-chart-grid">{components}</div>
+<div class="loss-chart-grid" tabindex="0" role="region" aria-label="Five component loss plots, scroll horizontally">{components}</div>
 <p class="loss-scope loss-band-note">One training run. The line shows a local mean over 21 logged samples. Shading shows ±1 standard deviation within that window, not variation across seeds. Windows are shortened at the endpoints. Hover or tap to inspect the raw loss and local statistics. Training loss does not measure task performance.</p>
 <p class="loss-keyboard-status" aria-live="polite"></p></div></section>'''
 objective.append(BeautifulSoup(html, 'html.parser'))

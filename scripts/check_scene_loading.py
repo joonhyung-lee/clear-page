@@ -12,7 +12,7 @@ FIXTURE = '''<!doctype html><link rel="stylesheet" href="/assets/site.css">
 <article><h3>Scene</h3><div class="viewer" data-scene="objects">
 <img class="preview-image" alt="Preview"><button class="launch">Play in 3D</button>
 </div></article><script src="/assets/site.js"></script>'''
-RUNTIME = """<!doctype html><head></head><body><div id="root"></div><canvas></canvas><input aria-label="Playback"><script>const view={useSceneTree:{getAll:()=>({root:1,axes:1,mesh:1})}};document.querySelector('#root').__reactContainerMock={memoizedProps:{value:view}};</script></body>""".encode().hex()
+RUNTIME = """<!doctype html><head></head><body><div id="root"></div><canvas></canvas><input aria-label="Playback"><script>const view={useSceneTree:{getAll:()=>({'/mesh':{message:{name:'/mesh',type:'MeshMessage'}}})},mutable:{current:{nodeRefFromName:{'/mesh':{traverse:f=>f({geometry:{attributes:{position:{count:3}}},visible:true})}}}}};document.querySelector('#root').__reactContainerMock={memoizedProps:{value:view}};</script></body>""".encode().hex()
 
 async def scenario(browser, fault):
     page = await browser.new_page(reduced_motion='reduce')

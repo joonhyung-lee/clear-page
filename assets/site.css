@@ -9,6 +9,8 @@
 .grid-focus{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:98%;height:98%;z-index:2;background:#fff;border:1px solid #d6d6d6;box-shadow:0 4px 20px #00000012;animation:preview-in .16s ease-out}
 .focus-viewer{height:100%;border:0}.focus-viewer>video{padding-bottom:24px}.focus-title{position:absolute;left:12px;top:10px;font-size:12px;background:#ffffffdc;padding:2px 5px;pointer-events:none}
 .focus-close{position:absolute;top:8px;right:8px;border:1px solid #ddd;background:#fff;width:28px;height:28px;font-size:20px;line-height:20px;z-index:3}
+/* The enlarged area belongs to the hover target, including its overhang. */
+.grid-focus[data-pinned="false"]{pointer-events:auto}
 .focus-viewer .viewer-tools{right:44px}.focus-viewer .launch{bottom:12px}
 .has-focus>.media-tile{opacity:.42}.media-tile:hover{border-color:#aaa}
 .affordance-viewer{height:auto;aspect-ratio:19/12}.affordance-viewer .launch{top:12px;bottom:auto;left:auto;right:12px;transform:none}

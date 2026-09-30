@@ -100,7 +100,19 @@
       const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = 'Retry'; retry.onclick = initialize; node.append(retry);
     }
   }
-  function highlight(key) { key ??= pinnedTerm; charts.forEach(chart => chart.classList.toggle('loss-term-active', chart.dataset.loss === key)); root.querySelectorAll('[data-loss-term]').forEach(button => button.classList.toggle('loss-term-active', button.dataset.lossTerm === key)); }
+  function highlight(key) { key ??= pinnedTerm; const keys=Array.isArray(key)?key:[key]; charts.forEach(chart => chart.classList.toggle('loss-term-active', keys.includes(chart.dataset.loss))); root.querySelectorAll('[data-loss-term]').forEach(button => button.classList.toggle('loss-term-active', keys.includes(button.dataset.lossTerm))); }
+  const termKeys=term=>term.classList.contains('term-order')?['selection','order','kl']:term.classList.contains('term-flow')?['flow']:term.classList.contains('term-affordance')?['affordance']:['loss'];
+  function inspectTerm(term){
+    const keys=termKeys(term);highlight(keys);
+    const chart=charts.find(c=>c.dataset.loss===keys[0]),strip=root.querySelector('.loss-chart-grid');
+    if(chart&&strip.contains(chart))strip.scrollTo({left:chart.getBoundingClientRect().left-strip.getBoundingClientRect().left+strip.scrollLeft,behavior:reduced.matches?'instant':'smooth'});
+  }
+  root.addEventListener('pointerover',e=>{const term=e.target.closest('.objective-term');if(term&&!term.contains(e.relatedTarget))inspectTerm(term);});
+  root.addEventListener('pointerout',e=>{const term=e.target.closest('.objective-term');if(term&&!term.contains(e.relatedTarget))highlight(null);});
+  root.addEventListener('focusin',e=>{const term=e.target.closest('.objective-term');if(term)inspectTerm(term);});
+  root.addEventListener('focusout',e=>{if(e.target.closest('.objective-term'))highlight(null);});
+  root.addEventListener('click',e=>{const term=e.target.closest('.objective-term');if(term)inspectTerm(term);});
+  root.addEventListener('keydown',e=>{const term=e.target.closest('.objective-term');if(term&&['Enter',' '].includes(e.key)){e.preventDefault();inspectTerm(term);}});
   root.querySelectorAll('[data-loss-term]').forEach(button => {
     button.addEventListener('pointerenter', () => highlight(button.dataset.lossTerm)); button.addEventListener('pointerleave', () => highlight(null));
     button.addEventListener('focus', () => highlight(button.dataset.lossTerm)); button.addEventListener('blur', () => highlight(null));

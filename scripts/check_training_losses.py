@@ -44,9 +44,14 @@ async def main():
             for chart in await root.locator('[data-loss]').all():
                 verify(json.loads(await chart.get_attribute('data-inspected')), await chart.get_attribute('data-loss'))
         assert await root.locator('#loss-loss').get_attribute('data-inspected-step') == '100000'
-        term = root.locator('[data-loss-term=flow]')
-        await term.click()
+        for name, keys in [('order',['selection','order','kl']),('flow',['flow']),('affordance',['affordance']),('availability',['loss'])]:
+            term = root.locator('.term-'+name)
+            await term.hover()
+            await page.wait_for_timeout(100)
+            for key in keys:
+                assert 'loss-term-active' in await root.locator('#loss-'+key).get_attribute('class')
         flow = root.locator('#loss-flow')
+        await flow.locator('canvas').focus()
         await page.wait_for_timeout(100)
         assert 'loss-term-active' in await flow.get_attribute('class')
         assert await flow.locator('canvas').evaluate('e=>e===document.activeElement')
@@ -66,14 +71,12 @@ async def main():
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), width
             if width > 900:
                 plots = await root.locator('.loss-chart-grid canvas').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().top)')
+                assert abs(plots[0] - plots[1]) < 1, (width, plots)
                 assert max(plots) - min(plots) < 1, (width, plots)
-                videos = await page.locator('.mpc-scenes-grid .experiment-viewer').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().top)')
-                assert len(videos) == 4 and max(videos) - min(videos) < 1, (width, videos)
-                w = (await page.locator('#training-objective').bounding_box())['width']
-                expected = width - 280 if width >= 1200 else width * .85
-                assert abs(w - expected) < 1
+                assert await root.locator('.loss-chart-grid').evaluate('e=>e.scrollWidth>e.clientWidth'), width
+                box = await page.locator('#training-objective').bounding_box()
+                assert abs(box['x'] + box['width']/2 - width/2) < 2, (width, box)
             if width in [1440, 390]:
-                await page.locator('.mpc-scenes-grid').screenshot(path=f'/tmp/comparison-layout-{width}.png')
                 await page.locator('#training-objective').screenshot(path=f'/tmp/training-losses-{width}.png')
         await canvas.focus()
         await canvas.press('Home')
@@ -87,6 +90,6 @@ async def main():
         assert await flow.locator('.loss-tooltip').is_visible()
         assert not errors, errors
         await browser.close()
-        print('PASS original objective, exact raw values and local deviation, synchronized hover, formula links, keyboard/touch, five component and four video rows, responsive layout')
+        print('PASS original objective, exact raw values and local deviation, synchronized hover, keyboard/touch, horizontal component plots, centered content, responsive layout')
 
 asyncio.run(main())

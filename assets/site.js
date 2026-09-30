@@ -149,7 +149,7 @@ document.addEventListener('visibilitychange', drainScenes);
 
 // Runs inside each native player, including opaque-origin anonymous embeds.
 function sceneLifecycle() {
-  let ready = false, visible = false, resume = false, initialized = false;
+  let ready = false, visible = false, resume = false, initialized = false, initialMotionApplied = false;
   // The native player applies time-zero messages on its first tick. Pausing
   // before those messages arrive leaves an empty canvas at time zero.
   function hasScene() {
@@ -160,7 +160,29 @@ function sceneLifecycle() {
     while (queue.length) {
       const f = queue.pop(); if (!f || seen.has(f)) continue; seen.add(f);
       const viewer = f.memoizedProps?.value;
-      if (viewer?.useSceneTree?.getAll) return Object.keys(viewer.useSceneTree.getAll()).length > 2;
+      if (viewer?.useSceneTree?.getAll) {
+        const nodes = Object.values(viewer.useSceneTree.getAll());
+        const geometry = nodes.filter(n => n.message?.name && !['FrameMessage','LabelMessage','Gui3DMessage','TransformControlsMessage'].includes(n.message.type));
+        if (!geometry.length) { queue.push(f.child, f.sibling, f.alternate); continue; }
+        // Scene messages can precede React's actual geometry by several frames.
+        // Keep the preview until the native meshes, rather than just empty
+        // coordinate frames or labels, have mounted in the renderer.
+        const mounted = node => {
+          let drawable = false;
+          viewer.mutable?.current?.nodeRefFromName?.[node.message.name]?.traverse?.(object => {
+            if (object.geometry?.attributes?.position?.count > 0 && object.visible !== false) drawable = true;
+          });
+          return drawable;
+        };
+        if (window.__CLEAR_CHECKPOINT_REPLAY__) {
+          const shown = geometry.filter(n => n.effectiveVisibility !== false);
+          const robots = shown.filter(n => n.message.name.startsWith('/agents/'));
+          const terrain = shown.filter(n => n.message.name.startsWith('/terrain/'));
+          // Reveal real scene content progressively. Waiting for every mesh
+          // keeps a usable renderer hidden when a part is deferred or invisible.
+          if (robots.some(mounted) && terrain.some(mounted)) return true;
+        } else if (geometry.some(mounted)) return true;
+      }
       queue.push(f.child, f.sibling, f.alternate);
     }
     return false;
@@ -171,6 +193,14 @@ function sceneLifecycle() {
     const button = document.querySelector('[class*="tabler-icon-player-play"],[class*="tabler-icon-player-pause"]')?.closest('button');
     if (!button) return;
     const playing = !!button.querySelector('.tabler-icon-player-pause-filled');
+    if (!initialMotionApplied) {
+      initialMotionApplied = true;
+      // Let time-zero geometry mount first, then honor reduced motion once.
+      // Later explicit Play commands and viewport resume remain available.
+      if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+        resume = false; if (playing) button.click(); return;
+      }
+    }
     if (!visible && playing) { resume = true; button.click(); }
     else if (visible && resume) { resume = false; if (!playing) button.click(); }
   };
@@ -345,12 +375,17 @@ for (const grid of document.querySelectorAll('.media-grid')) {
   const viewer = overlay.querySelector('.viewer');
   const video = viewer.querySelector('video');
   let current = null, pinned = false, suppressHover = false;
-  const reset = wireViewer(viewer, () => { pinned=true; });
+  let closeTimer;
+  function pinOverlay(value) { pinned=value; overlay.dataset.pinned=String(value); }
+  const reset = wireViewer(viewer, () => { pinOverlay(true); });
   function open(tile, pin = false) {
-    if (current === tile && !overlay.hidden) { pinned ||= pin; return; }
-    reset(); current=tile; pinned=pin;
+    clearTimeout(closeTimer);
+    if (current === tile && !overlay.hidden) { pinOverlay(pinned || pin); return; }
+    reset(); current=tile; pinOverlay(pin);
     viewer.dataset.scene=tile.dataset.scene; viewer.dataset.title=tile.dataset.title;
     overlay.querySelector('.focus-title').textContent=tile.dataset.title;
+    const outcome=overlay.querySelector('.focus-outcome');
+    if(outcome)outcome.textContent=[tile.dataset.outcome,tile.dataset.note].filter(Boolean).join(' · ');
     viewer.querySelector('.launch').setAttribute('aria-label',`Play ${tile.dataset.title} in 3D`);
     const preview=tile.querySelector('video');
     video.poster=preview.poster;
@@ -364,7 +399,8 @@ for (const grid of document.querySelectorAll('.media-grid')) {
     if(!reduced.matches || pin) video.play().catch(()=>{});
   }
   function close(restoreFocus=false) {
-    reset(); video.pause(); if(manualMedia.has(video))manualMedia.get(video).resume=false; overlay.hidden=true; grid.classList.remove('has-focus'); pinned=false;
+    clearTimeout(closeTimer);
+    reset(); video.pause(); if(manualMedia.has(video))manualMedia.get(video).resume=false; overlay.hidden=true; grid.classList.remove('has-focus'); pinOverlay(false);
     if(restoreFocus) { suppressHover=true; current?.focus(); }
     current=null;
   }
@@ -372,7 +408,20 @@ for (const grid of document.querySelectorAll('.media-grid')) {
     tile.addEventListener('pointerenter', () => { if(hoverAvailable.matches && !pinned && !suppressHover) open(tile); });
     tile.addEventListener('click', () => { open(tile,true); overlay.querySelector('.launch').focus(); });
   });
-  grid.addEventListener('pointerleave', () => { suppressHover=false; if(!pinned) close(); });
+  const keepOpen=()=>clearTimeout(closeTimer);
+  const leave=event=>{
+    suppressHover=false;
+    if(grid.contains(event.relatedTarget)||overlay.contains(event.relatedTarget))return;
+    clearTimeout(closeTimer);
+    closeTimer=setTimeout(()=>{if(!pinned&&!grid.matches(':hover')&&!overlay.matches(':hover'))close();},160);
+  };
+  grid.addEventListener('pointerenter',keepOpen);
+  overlay.addEventListener('pointerenter',keepOpen);
+  grid.addEventListener('pointerleave',leave);
+  overlay.addEventListener('pointerleave',leave);
+  overlay.addEventListener('click',event=>{
+    if(!event.target.closest('button')&&!pinned){pinOverlay(true);video.play().catch(()=>{});}
+  });
   overlay.querySelector('.focus-close').addEventListener('click', () => close(true));
   grid.addEventListener('keydown', event => { if(event.key==='Escape') {event.preventDefault();close(true);} });
 }

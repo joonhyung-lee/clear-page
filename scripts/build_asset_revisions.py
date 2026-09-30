@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 import json
 from bs4 import BeautifulSoup
 root=Path(__file__).resolve().parents[1]
-paths=[p for p in (root/'assets').rglob('*') if p.is_file() and p.name!='asset-revisions.js' and p.suffix in ['.js','.css','.png','.mp4']]
+paths=[p for p in (root/'assets').rglob('*') if p.is_file() and p.name!='asset-revisions.js' and p.suffix in ['.js','.css','.png','.mp4','.svg']]
 revisions={p.relative_to(root).as_posix():sha256(p.read_bytes()).hexdigest()[:12] for p in paths}
 manifest=root/'assets/asset-revisions.js';manifest.write_text('window.CLEAR_ASSET_REVISIONS = '+json.dumps(revisions,separators=(',',':'))+';\n')
 revisions['assets/asset-revisions.js']=sha256(manifest.read_bytes()).hexdigest()[:12]

@@ -3,6 +3,7 @@ import argparse,copy,json,math,re
 from pathlib import Path
 import numpy as np
 from recording_io import read_recording,write_recording
+from annotate_mpc_context import annotate
 p=argparse.ArgumentParser();p.add_argument('kind',choices=['optimized','baseline']);p.add_argument('states',type=Path);a=p.parse_args();root=Path(__file__).resolve().parents[1]
 source,buffers=read_recording(root/f'assets/recordings/mpc-{a.kind}.viser');state=np.load(a.states);robot=set(state['robot'].tolist());process_path=root/'assets/mpc-process-data.js';process=json.loads(process_path.read_text().split('=',1)[1].rstrip(';\n'));r=process[a.kind]
 if a.kind=='optimized':
@@ -37,7 +38,7 @@ for t,m in source['messages']:
  if body and '/geom-' not in name and typ in ('SetPositionMessage','SetOrientationMessage'):keep=False
  if not keep:continue
  m=copy.deepcopy(m)
- if typ=='MeshMessage':m['props'].update(opacity=.16 if int(body[1]) in robot else .22,wireframe=int(body[1]) not in robot,cast_shadow=False,receive_shadow=False)
+ if typ=='MeshMessage':m['props'].update(opacity=.58 if int(body[1]) in robot else .72,wireframe=False,cast_shadow=False,receive_shadow=False)
  if typ=='SetCameraPositionMessage':m['position']=[-2.2,-2.6,2.0]
  if typ=='SetCameraLookAtMessage':m['look_at']=[.35,0,.8]
  messages.append([0.,m])
@@ -79,6 +80,6 @@ def remap(value):
    for v in value.values():remap(v)
  elif isinstance(value,list):
   for v in value:remap(v)
-remap(messages);write_recording(root/f'assets/recordings/mpc-context-{a.kind}.viser',record,packed)
+remap(messages);annotate(record,packed);write_recording(root/f'assets/recordings/mpc-context-{a.kind}.viser',record,packed)
 process_path.write_text('window.CLEAR_MPC_PROCESS='+json.dumps(process,separators=(',',':'))+';\n')
 print(a.kind,'context:',len(messages),'messages, 40 s, measured skeleton and transparent geometry')
