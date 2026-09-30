@@ -12,10 +12,11 @@ async def main():
   root=page.locator('#controller-pretraining')
   assert await root.locator('iframe').count()==0
   assert not await page.evaluate('!!window.CLEAR_LOCOMOTION_DATA')
+  await page.evaluate("location.hash='controller-pretraining'")
   await root.scroll_into_view_if_needed()
   await root.locator('[data-loco-source="recorded"]').click()
   await root.locator('.loco-charts').wait_for()
-  assert await page.locator('#page-contents a[href="#controller-pretraining"]').count()==1
+  assert await page.locator('#learning .chapter-links a[href="#controller-pretraining"]').count()==1
   for body in ['g1','spot_arm']:
    await root.locator(f'[data-loco-body="{body}"]').click()
    await root.locator('[data-loco-source="recorded"]').click()

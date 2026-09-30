@@ -72,6 +72,9 @@ def bake(folder, output):
         moved=float(np.linalg.norm(final_xy-start_xy)),goalError=float(np.linalg.norm(final_xy-target)),
         controller=result['config']['interaction']['selector'],
         pushReportedSuccess=bool(pushes[0]['success']),
+        commandSettings=dict(armCommandShaping=result.get('armCommandShaping','bounded'),
+                             armCommandHz=result.get('armCommandHz'),
+                             armTrustRegion=result['config']['interaction']['spot_trust_region_rad']),
         scope='Recorded object pushing interval. Subsequent arm stow and navigation are outside this clip.')
     output.mkdir(parents=True,exist_ok=True)
     np.savez_compressed(output/'geometry.npz',**geometry)

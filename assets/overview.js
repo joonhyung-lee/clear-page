@@ -70,8 +70,8 @@
   }));
   const examples={
     grounding:[['structure-g1','G1'],['structure-spot','Spot'],['structure-spot_arm','Spot + arm'],['structure-husky','Husky']],
-    ordering:[['order-distribution','Selection and sampled priorities']],
-    generation:[['method-flow-0-pipeline','Reference conditioned motion in the teaser scene']],
+    ordering:[['illustration-order','Illustrative object selection and ordering']],
+    generation:[['illustration-flow','Illustrative rank-conditioned references']],
     execution:[['mpc-optimized','Recorded interaction and candidate motions']]
   };
   // Inline inspection keeps the complete pipeline visible above the example.
@@ -104,11 +104,10 @@
       gallery=document.createElement('div');gallery.className=items.length>1?'overview-preview-grid':'';galleries.set(node,gallery);preview.append(gallery);
       items.forEach(([file,caption])=>{
         const figure=document.createElement('figure'),label=document.createElement('figcaption');label.textContent=caption;
-        if(file==='order-distribution'){
-          const plot=document.createElement('div');figure.classList.add('overview-ordering');figure.append(plot,label);gallery.append(figure);
-          let sample=0;window.clearOrderingPlot(plot,window.CLEAR_MAZE_TRACE,window.CLEAR_MAZE_TRACE.traces[sample]);
-          const timer=setInterval(()=>{const box=gallery.getBoundingClientRect();if(gallery.hidden||document.hidden||reducedMotion.matches||box.bottom<0||box.top>innerHeight)return;sample=(sample+1)%window.CLEAR_MAZE_TRACE.traces.length;plot.dataset.sample=sample;window.clearOrderingPlot(plot,window.CLEAR_MAZE_TRACE,window.CLEAR_MAZE_TRACE.traces[sample]);},2200);
-          window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
+        if(file.startsWith('illustration-')){
+          const source=document.querySelector(file==='illustration-order'?'#method-order .sequence-explanation svg':'#method-flow .sequence-explanation svg');
+          if(source){const diagram=source.cloneNode(true);diagram.style.width='100%';diagram.style.maxHeight='280px';figure.append(diagram);}
+          figure.append(label);gallery.append(figure);
         }else if(file.startsWith('method-')||file==='mpc-optimized'){
           const v=document.createElement('div');v.className='viewer overview-live-viewer';v.dataset.scene=file;v.dataset.title=caption;v.dataset.generation='true';
           if(file==='method-order-maze'){v.dataset.orderStage='supervision';label.textContent='Designated teaser reference interaction';}
@@ -122,7 +121,7 @@
       });
     }
     gallery.hidden=false;
-    launchTimer=setTimeout(()=>{if(previewOwner!==node||!onScreen())return;gallery.querySelectorAll('video').forEach(v=>{if(!reducedMotion.matches)v.play().catch(()=>{});});gallery.querySelectorAll('.viewer').forEach(v=>{const frame=v.querySelector('iframe');if(frame)frame.contentWindow.postMessage({type:'clear-scene-visible',visible:true},'*');else if(!reducedMotion.matches)v.querySelector('.launch').click();});},220);
+    launchTimer=setTimeout(()=>{if(previewOwner!==node||!onScreen())return;gallery.querySelectorAll('video').forEach(v=>{if(!reducedMotion.matches)v.play().catch(()=>{});});gallery.querySelectorAll('.viewer').forEach(v=>{const frame=v.querySelector('iframe');if(frame)frame.contentWindow.postMessage({type:'clear-scene-visible',visible:true},'*');});},220);
     drawPreview();
   }
 

@@ -9,12 +9,12 @@
  const splitLabel=sample=>sample.queryOnly?'Scene query':sample.split==='train'?'Training':sample.split==='evaluation'?'Evaluation replay':'Validation';
  function element(name,attrs){const el=document.createElementNS(ns,name);for(const [key,value]of Object.entries(attrs))el.setAttribute(key,value);return el;}
  for(const root of document.querySelectorAll('.learning-explorer')){
-  let initialized=false,visible=false,playing=!reduced.matches,index=0,progress=0,last=0,frame=0,samples=[],dots=[],filter='all',colorBy='terrain';
+  let initialized=false,visible=false,playing=false,index=0,progress=0,last=0,frame=0,samples=[],dots=[],filter='all',colorBy='terrain';
   const canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d'),range=root.querySelector('.sample-progress'),play=root.querySelector('.sample-play');
   const grid=root.querySelector('.sample-explorer-grid');
   let mediaTimer, movieVisible=false;
   const movie=root.dataset.kind==='grounding'?document.createElement('video'):null;
-  if(movie){movie.className='sample-video';movie.muted=true;movie.loop=true;movie.playsInline=true;movie.preload='metadata';movie.setAttribute('aria-label','Recorded physical robot attempt');canvas.before(movie);const map=document.createElement('div');map.className='sample-map-details';const title=document.createElement('h5');title.textContent='Trajectory map';map.append(title);canvas.after(map);map.append(canvas);movie.addEventListener('loadeddata',()=>{if(movieVisible&&playing&&!document.hidden)movie.play().catch(()=>{});});}
+  if(movie){movie.className='sample-video';movie.muted=true;movie.loop=true;movie.playsInline=true;movie.preload='metadata';movie.setAttribute('aria-label','Recorded physical robot attempt');canvas.before(movie);movie.after(root.querySelector('.sample-controls'));const map=document.createElement('div');map.className='sample-map-details';const title=document.createElement('h5');title.textContent='Trajectory map';map.append(title);canvas.after(map);map.append(canvas);movie.addEventListener('loadeddata',()=>{if(movieVisible&&playing&&!document.hidden)movie.play().catch(()=>{});});}
 
   const factors=document.createElement('div');factors.className='sample-factors';factors.setAttribute('role','group');factors.setAttribute('aria-label','Match observed inputs to dataset points');
   const factorNote=document.createElement('p');factorNote.className='sample-factor-note';
@@ -36,7 +36,7 @@
    highlightFactor(null);
   }
 
-  if(movie)new IntersectionObserver(entries=>{movieVisible=entries[0].isIntersecting;if(movieVisible&&playing&&!document.hidden)movie.play().catch(()=>{});else movie.pause();}).observe(movie);
+  if(movie)new IntersectionObserver(entries=>{movieVisible=entries.at(-1).isIntersecting;if(movieVisible&&playing&&!document.hidden)movie.play().catch(()=>{});else movie.pause();}).observe(movie.closest('.sample-inspector'));
   let objectFocus=null;
   if(root.dataset.kind==='ordering'){
    const legend=document.createElement('p');legend.className='sample-map-legend';legend.textContent='Dashed green: recorded route · Colored objects: reference interactions';canvas.after(legend);
@@ -176,7 +176,7 @@
     status.hidden=true;root.querySelector('.learning-content').hidden=false;const preferred=samples.findIndex(s=>s.split==='train'&&(root.dataset.kind==='ordering'?s.paths.length>1:s.target===1&&Math.max(...s.rollout.map(f=>f[5]))-Math.min(...s.rollout.map(f=>f[5]))>.3));select(preferred<0?0:preferred);
    }catch{initialized=false;status.textContent='Samples are taking longer to load. ';const button=document.createElement('button');button.type='button';button.textContent='Retry samples';button.onclick=initialize;status.append(button);}
   }
-  const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;root.classList.toggle('is-visible',visible);if(visible){initialize();connect();schedule();if(movie&&movieVisible&&playing&&movie.readyState>=2)movie.play().catch(()=>{});}else{cancelAnimationFrame(frame);frame=0;last=0;movie?.pause();}},{rootMargin:'0px'});observer.observe(root);
+  const observer=new IntersectionObserver(entries=>{visible=entries.at(-1).isIntersecting;root.classList.toggle('is-visible',visible);if(visible){initialize();connect();schedule();if(movie&&movieVisible&&playing&&movie.readyState>=2)movie.play().catch(()=>{});}else{cancelAnimationFrame(frame);frame=0;last=0;movie?.pause();}},{rootMargin:'0px'});observer.observe(root);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;movie?.pause();}else{schedule();if(movie&&movieVisible&&playing)movie.play().catch(()=>{});}});
   play.addEventListener('click',()=>{playing=!playing;if(movie){if(playing&&movieVisible)movie.play().catch(()=>{});else movie.pause();}render();schedule();});range.addEventListener('input',()=>{progress=+range.value;playing=false;if(movie){movie.pause();const f=samples[index].rollout;if(movie.readyState)movie.currentTime=progress*(f.at(-1)[0]-f[0][0]);}render();});
   function advance(direction){for(let step=1;step<=samples.length;step++){const i=(index+direction*step+samples.length)%samples.length;if(matches(samples[i])){select(i);break;}}}

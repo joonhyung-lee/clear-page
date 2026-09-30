@@ -23,7 +23,7 @@
     schedule();
   }
   function stageButtons(){const host=root.querySelector('.loco-stages');host.replaceChildren();stages[body].forEach((iteration,i)=>{const button=document.createElement('button');button.type='button';button.dataset.locoStage=i;button.textContent=(i+1)+' · '+iteration.toLocaleString('en-US');button.setAttribute('aria-label','Checkpoint '+(i+1)+', iteration '+iteration);button.onclick=()=>showStage(i,true);host.append(button);});showStage(0);}
-  viewers.forEach(v=>{observeAutomaticScene(v);v.addEventListener('scene-settled',e=>{if(v===activeViewer()&&!e.detail?.failed&&pendingStage!==null)showStage(pendingStage,true);});});
+  viewers.forEach(v=>{v.addEventListener('scene-settled',e=>{if(v===activeViewer()&&!e.detail?.failed&&pendingStage!==null)showStage(pendingStage,true);});});
   window.addEventListener('message',e=>{if(e.data?.type!=='clear-playback-time'||e.source!==activeViewer()?.querySelector('iframe')?.contentWindow||!Number.isFinite(e.data.time))return;const index=Math.min(3,Math.floor(e.data.time/8));if(index!==stageIndex)showStage(index);});
   function nearest(rows, x) {
     let lo = 0, hi = rows.length - 1;

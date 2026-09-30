@@ -14,7 +14,7 @@ assert {(r['controller'],r['body']) for r in rows}=={
     (c,b) for c in ['optimized','baseline'] for b in ['g1','spot_arm']}
 assert len({r['scene'] for r in rows})==4,'Four distinct physical replays are required'
 s=BeautifulSoup((root/'index.html').read_text(),'html.parser')
-gallery=s.select_one('#method-execution>.pushing-gallery')
+gallery=s.select_one('#method-execution .pushing-gallery')
 assert gallery and not s.select_one('#controller-additional')
 assert not gallery.select('.media-unavailable')
 for controller in ['optimized','baseline']:
@@ -25,6 +25,14 @@ for controller in ['optimized','baseline']:
     assert all(tile.select_one('video source')['src'].split('?')[0]==f"assets/media/{tile['data-scene']}.mp4" for tile in tiles)
 for row in rows:
     scene=row['scene'];assert scene
+    if row.get('variant'):
+        tile=gallery.select_one(f'[data-scene="{scene}"]')
+        assert row['variant'] in tile.get_text(' ',strip=True)
+        assert row['variant'] in tile['data-title']
+        original=row['originalScene']
+        assert (root/f'assets/media/{original}.mp4').is_file()
+        assert gallery.select_one(f'a[href^="assets/media/{original}.mp4"]')
+        assert 'not the original baseline' in row['note']
     script=(root/f'assets/recordings/{scene}.hex.js').read_text()
     binary=bytes.fromhex(json.loads(script.rsplit(' = ',1)[1].rstrip(';\n')))
     with tempfile.NamedTemporaryFile() as f:

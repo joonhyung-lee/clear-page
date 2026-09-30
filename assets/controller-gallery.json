@@ -14,6 +14,7 @@
     "controller": "optimized",
     "scene": "mpc-spot-optimized",
     "group": "primary",
+    "interactionComplete": true,
     "outcome": "1.94 m moved \u00b7 0.08 m goal error \u00b7 21.8 s",
     "note": "Recorded object pushing interval. Subsequent arm stow and navigation are outside this clip. The controller reports completion of the interaction."
   },
@@ -24,15 +25,19 @@
     "outcome": "0.70 m moved \u00b7 1.33 m goal error \u00b7 12.6 s",
     "note": "Recorded contact interval from 1.545 to 14.14 s. Contact is lost before reaching the goal.",
     "group": "primary",
-    "body": "g1"
+    "body": "g1",
+    "interactionComplete": false
   },
   {
     "task": "Spot + arm",
     "body": "spot_arm",
     "controller": "baseline",
-    "scene": "mpc-spot-baseline",
+    "scene": "mpc-spot-held-arm",
     "group": "primary",
-    "outcome": "1.93 m moved \u00b7 0.08 m goal error \u00b7 22.5 s",
-    "note": "Recorded object pushing interval. Subsequent arm stow and navigation are outside this clip. The controller reports completion of the interaction."
+    "interactionComplete": true,
+    "outcome": "1.93 m moved \u00b7 0.07 m goal error \u00b7 31.7 s",
+    "note": "Recorded object pushing interval. Subsequent arm stow and navigation are outside this clip. The controller reports completion of the interaction. Naive MPC command-rate diagnostic. Arm actuator targets update at 4 Hz in both actual and forecast worlds. Physics and base control retain their native rate. This physical variant disables arm command shaping. Other task and controller settings are matched. This is a command-setting diagnostic, not the original baseline configuration or a measured optimization speedup.",
+    "originalScene": "mpc-spot-baseline",
+    "variant": "4 Hz arm command diagnostic"
   }
 ]

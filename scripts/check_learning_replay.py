@@ -61,7 +61,7 @@ async def main():
     async with browser_diagnostics(page, 'learning-'+body):
      await page.goto('http://localhost:8765/#controller-pretraining',wait_until='domcontentloaded')
      if body!='g1':await page.locator(f'[data-loco-body="{body}"]').click()
-     if body!='g1':await page.locator('[data-loco-source="recorded"]').click()
+     await page.locator('[data-loco-source="recorded"]').click()
      v=page.locator(f'[data-loco-viewer="{body}"]');await v.locator('.launch').click();await v.locator('iframe.scene-ready').wait_for(timeout=90000)
      f=await (await v.locator('iframe').element_handle()).content_frame();await f.evaluate(FIND)
      # Inspect a stationary scene. Playback is exercised separately below.

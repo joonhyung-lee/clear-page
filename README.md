@@ -284,3 +284,57 @@ objects on this query, and conditional raw paths fail to form a feasible plan.
 Displayed lengths come directly from generated waypoints. The checkpoint's
 noise standard deviation remains unchanged. Similar predictions are not
 artificially varied or presented as successful physical executions.
+
+### Research page layout
+
+The pre-redesign site is preserved in the `snapshot-before-layout-20260930` tag.
+The main navigation has three chapters: Method, Learning and Results. The logo
+returns to the unchanged video hero. Paper and video dialogs provide local
+previews and downloads. The code icon points to the anonymous repository.
+
+`build_research_layout.py` moves existing players instead of duplicating them.
+Training evidence and sample explorers live under Learning. Measured controller
+evaluations share the right-hand metric area through an Evaluation tab.
+Reference-conditioned teaser failures live under Results. The Method schematics
+are explicitly illustrative, with hand-drawn paths rather than model outputs.
+
+`build_paper_results.py` transcribes Tables I–IV from the anonymous manuscript.
+It keeps aggregate protocols separate from individual and qualitative replays.
+All methods remain accessible through each result section's toggle. The local
+PDF retains anonymous manuscript content with document metadata removed.
+The anonymity audit also scans extracted PDF text, metadata and links, using
+PyMuPDF. Pixel-level visual review remains separate from the text audit.
+`build_paper_preview.py` renders all eight PDF pages for the in-page preview,
+with page navigation, zoom and accessible text. The original PDF remains the
+download. `check_paper_results.py` compares every preview pixel and text page
+against that PDF, as well as the 23 table rows.
+
+Run the layout builders after rebuilding older page sections, then run
+`build_asset_revisions.py`. `check_research_layout.py` verifies chapter order,
+resource dialogs, measured metric values, viewer continuity, deep links and
+mobile navigation.
+
+The default low-level learning summary compares Initial, Intermediate and Final
+snapshots from each body's own lineage. An unfinished run has no Final preview.
+Selecting a snapshot opens the corresponding native replay in the existing
+dashboard. Opening the dashboard alone does not start a 3D scene.
+The detailed flow-matching equations live under Planner training. Result scene
+selectors and longer explanations are available through Scene and protocol.
+
+The Spot + arm baseline gallery provides a separately labeled **4 Hz arm command
+diagnostic**. Arm targets use sample-and-hold updates in both the actual and
+forecast worlds, with command shaping disabled. Physics and base control retain
+their native rates. The original baseline recording remains directly linked.
+Both episodes complete the object interaction. The diagnostic moves the object
+1.93 m with 0.07 m goal error over a 31.7 s pushing interval.
+
+Across the six arm joints, the RMS of unsmoothed finite-difference jerk is
+395.57 rad/s³ for this diagnostic and 186.01 rad/s³ for the original recording,
+using each episode's measured pushing interval at a 0.02 s sampling interval.
+This demonstrates more abrupt motion in these two recordings. It is a changed
+command configuration, not evidence about the original baseline's benchmark
+performance or an isolated optimization ablation. Rebuild it with
+`build_pushing_gallery.py` and
+`--unshaped-baseline`, passing the separately baked variant as the baseline
+directory. `compare_spot_motion.py` keeps the underlying motion statistics in
+private output files.

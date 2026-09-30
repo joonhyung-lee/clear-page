@@ -1,5 +1,5 @@
 (() => {
- const d=window.CLEAR_MAZE_TRACE,root=document.querySelector('#method-order');if(!d||!root)return;
+ const d=window.CLEAR_MAZE_TRACE,root=document.querySelector('#ordering-context');if(!d||!root)return;
  let sample=0;
  const orderViewer=root.querySelector('.viewer');
  function updateOrder(){

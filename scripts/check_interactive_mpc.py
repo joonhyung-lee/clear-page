@@ -39,8 +39,8 @@ async def main():
     await root.locator('[data-mpc-view="'+view+'"]').click();assert await root.get_attribute('data-elapsed')=='15.000'
    objective=page.locator('#training-objective .paper-equation-row');assert await objective.locator('.katex-error').count()==0
    assert await objective.locator('.katex').count()==1
-   groups=page.locator('#method-execution>.controller-galleries>.controller-gallery');left=await groups.nth(0).bounding_box();right=await groups.nth(1).bounding_box();assert right['x']>left['x']+left['width']
-   assert await page.locator('#method-execution>.controller-galleries').evaluate('e=>e.getBoundingClientRect().width<=innerWidth*.85')
+   groups=page.locator('#method-execution .controller-galleries>.controller-gallery');left=await groups.nth(0).bounding_box();right=await groups.nth(1).bounding_box();assert right['x']>left['x']+left['width']
+   assert await page.locator('#method-execution .controller-galleries').evaluate('e=>e.getBoundingClientRect().width<=innerWidth*.85')
    assert await page.locator('#controller-additional').count()==0
    assert await page.locator('#method-execution .media-unavailable').count()==0
    for i in [0,1]:
@@ -69,7 +69,7 @@ async def main():
     assert await groups.nth(i).locator('.grid-focus').is_visible()
     assert await overlay.get_attribute('data-pinned')=='true'
     await groups.nth(i).locator('.focus-close').click()
-   await root.screenshot(path='/tmp/interactive-mpc-final.png');await page.locator('#method-execution>.controller-galleries').screenshot(path='/tmp/comparison-layout-final.png');await objective.screenshot(path='/tmp/paper-objective-final.png')
+   await root.screenshot(path='/tmp/interactive-mpc-final.png');await page.locator('#method-execution .controller-galleries').screenshot(path='/tmp/comparison-layout-final.png');await objective.screenshot(path='/tmp/paper-objective-final.png')
    for width in [768,390]:
     await page.set_viewport_size({'width':width,'height':1000});assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth');await root.scroll_into_view_if_needed();await root.screenshot(path=f'/tmp/interactive-mpc-{width}.png')
    assert not errors,errors;await b.close();print('PASS interactive 3D, follow inset, event pin, contact/full windows, fixed time across views, two embodiments in one row per controller, full enlarged videos, KaTeX objective, responsive layout')

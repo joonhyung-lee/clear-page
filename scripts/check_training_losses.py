@@ -28,9 +28,10 @@ async def main():
         page = await browser.new_page(viewport={'width': 1440, 'height': 1050}, reduced_motion='reduce', has_touch=True)
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
-        await page.goto('http://localhost:8765', wait_until='domcontentloaded')
+        await page.goto('http://localhost:8765/#training-objective', wait_until='domcontentloaded')
         root = page.locator('#training-losses')
         await root.scroll_into_view_if_needed()
+        await root.get_by_text('View training curves',exact=True).click()
         await root.locator('.loss-content').wait_for()
         assert await page.locator('#training-objective').evaluate('e=>!e.closest("details")')
         assert await root.locator('[data-loss]').count() == 6

@@ -19,7 +19,7 @@ async def main():
     await panel.locator('.loco-charts').wait_for(state='visible')
    else:
     await page.wait_for_function('(body)=>document.querySelector("#spot-curriculum").dataset.body===body',arg=body)
-   buttons=panel.locator('.loco-metrics button');assert await buttons.count()==2
+   buttons=panel.locator('.loco-metrics button:not([data-policy-evaluation])');assert await buttons.count()==2
    assert await buttons.locator('svg[aria-hidden="true"]').count()==2
    assert [s.strip() for s in await buttons.all_text_contents()]==['PPO losses','Training progress']
    charts=panel.locator('.loco-chart');assert await charts.count()==3

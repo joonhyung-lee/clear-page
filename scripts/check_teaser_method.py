@@ -61,8 +61,8 @@ for name in names:
 s=BeautifulSoup((root/'index.html').read_text(),'html.parser')
 assert 'teaser' in s.select_one('#ordering-context .preview-image')['alt'].lower()
 assert 'select no interaction' in s.select_one('#teaser-query-scope').get_text()
-assert s.select_one('#method-flow .flow-pair canvas') is not None
-assert 'supplied example order' in s.select_one('#method-flow').get_text()
+assert s.select_one('#failure-cases #flow-learning .flow-pair canvas') is not None
+assert 'supplied example order' in s.select_one('#flow-learning').get_text()
 assert 'does not produce a feasible plan' in s.select_one('#flow-learning').get_text()
 print('PASS two stair lanes, one slope, five objects, designated reference and actual checkpoint traces')
 

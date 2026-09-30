@@ -159,12 +159,23 @@ for path in files:
         else:
             scan(payload, label+':decoded', text=True, vendor=vendor)
     scan(data, label, text=path.suffix in ('.html', '.css', '.js', '.md', '.svg', '.json', '.py', '.txt', '.yml', '.yaml', '.toml', '.xml', '.csv'), vendor=vendor)
-    if path.suffix == '.png':
+    if path.suffix in ('.png','.webp'):
         im = Image.open(io.BytesIO(data))
-        if set(im.info) - {'srgb', 'gamma', 'chromaticity', 'transparency', 'aspect'}:
-            fail(label, 'PNG ancillary metadata')
+        harmless={'srgb', 'gamma', 'chromaticity', 'transparency', 'aspect'}
+        if path.suffix=='.webp':harmless.update({'loop','background'})
+        if set(im.info) - harmless:
+            fail(label, 'image ancillary metadata')
     if path.suffix == '.mp4':
         mp4_atoms(data, 0, len(data), label)
+    if path.suffix == '.pdf':
+        import pymupdf
+        document = pymupdf.open(stream=data, filetype='pdf')
+        scan(json.dumps(document.metadata).encode(), label+':metadata', text=True)
+        scan(document.get_xml_metadata().encode(), label+':xmp', text=True)
+        if document.embfile_count(): fail(label, 'PDF attachments require review')
+        for page in document:
+            scan(page.get_text().encode(), label+':page-'+str(page.number+1), text=True)
+            scan(json.dumps(page.get_links()).encode(), label+':links', text=True)
 if failed:
     for label, reason in sorted(failed): print(f'FAIL {label}: {reason}')
     raise SystemExit(1)

@@ -22,6 +22,7 @@ async def main():
         scene = await scratch.locator('.scratch-viewer').get_attribute('data-scene')
         assert scene == 'learning-g1-scratch-initialization-000000'
         assert '0 cumulative PPO updates' in await scratch.locator('[data-curriculum-caption]').inner_text()
+        await scratch.locator('[data-policy-evaluation]').click()
         evaluation = page.locator('#policy-evaluation')
         assert await evaluation.get_attribute('data-body') == 'g1_scratch'
         svg = evaluation.locator('figure svg').first

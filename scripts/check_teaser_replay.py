@@ -32,7 +32,7 @@ async def main():
             try:
                 async with browser_diagnostics(page,'teaser-'+label):
                     print('PROGRESS native teaser',label,'loading',flush=True)
-                    await page.goto('http://localhost:8765/',wait_until='domcontentloaded')
+                    await page.goto('http://localhost:8765/#'+('ordering-context' if label=='ordering' else 'flow-learning'),wait_until='domcontentloaded')
                     viewer=page.locator(selector);await viewer.scroll_into_view_if_needed()
                     await viewer.locator('.launch').click()
                     await viewer.locator('iframe.scene-ready').wait_for(timeout=90000)

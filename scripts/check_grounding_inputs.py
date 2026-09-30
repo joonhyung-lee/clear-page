@@ -11,8 +11,10 @@ async def main():
         await page.goto('http://localhost:8765', wait_until='domcontentloaded')
         for kind in ['grounding', 'ordering']:
             root = page.locator('#learning-' + kind)
+            await page.evaluate("id=>{location.hash=id}", "learning-"+kind)
             await root.scroll_into_view_if_needed()
             await root.locator('.learning-content').wait_for()
+            await root.locator('.research-representations > summary').click()
             assert await root.locator('.sample-factors button').count() == 4
             for key in ['body', 'objects', 'scene', 'query']:
                 await root.locator(f'.sample-factors [data-factor="{key}"]').focus()
@@ -28,13 +30,14 @@ async def main():
                 assert any(result['actual'])
             await root.locator('.sample-next').click()
             assert await root.locator('.factor-match').count() == 0
-            assert await root.locator('details').count() == 0
+            assert await root.locator('.research-representations[open]').count() == 1
         assert await page.locator('.context-mode, .context-training').count() == 0
         assert await page.locator('#ordering-context .selection-object').count() == 5
         assert await page.locator('#ordering-context .ordering-context-flow>section').count() == 2
         assert await page.locator('#ordering-context .ordering-scene-slot .viewer').count() == 1
         assert await page.locator('#ordering-context .selection-probability').count() == 0
         assert await page.locator('#ordering-context .ordering-main').count() == 1
+        await page.evaluate("location.hash='grounding-samples'")
         await page.locator('#grounding-samples').screenshot(path='/tmp/grounding-inputs.png')
         assert not errors, errors
         await browser.close()

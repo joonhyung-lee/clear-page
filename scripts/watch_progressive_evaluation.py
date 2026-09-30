@@ -52,7 +52,7 @@ def main():
         for stage in plan['stages']:
             folder = a.run/stage['name']
             files = sorted(folder.glob('update_*.pt'))
-            marks = [n for n in [0, 50, 250, 500, 1000, 1500, 2000, 3000, stage['updates']] if n <= stage['updates']]
+            marks = [n for n in [0, 50, 250, 500, 1000, 1500, 2000, 3000, 4000, 5000, stage['updates']] if n <= stage['updates']]
             for mark in sorted(set(marks)):
                 planned.add(offset+mark)
                 eligible = [f for f in files if int(f.stem.split('_')[1]) >= mark]
@@ -91,6 +91,8 @@ def main():
         if a.public_key and cache['rows']:
             rows = [{'update': r['update'], 'phase': r['phase'], **summarize(r['episodes'])} for r in cache['rows']]
             payload = {'rows': rows, 'initialization': 'random', 'plannedCheckpoints': len(planned),
+                       'trainingState': 'complete' if (a.run/'complete.json').exists() else
+                           ('training' if alive(read(a.run/'process.json', {}).get('pid')) else 'stopped'),
                        'complete': (a.run/'complete.json').exists() and max(r['update'] for r in rows) == offset}
             asset = ROOT/'assets'/f'{a.public_key}-evaluation-data.js'
             text = 'window.CLEAR_POLICY_EVALUATION = window.CLEAR_POLICY_EVALUATION || {bodies:{}};\n'

@@ -11,9 +11,9 @@ async def main():
         page = await browser.new_page(viewport={'width':1440, 'height':1000}, reduced_motion='reduce')
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
-        await page.goto('http://localhost:8765', wait_until='domcontentloaded')
+        await page.goto('http://localhost:8765/#controller-pretraining', wait_until='domcontentloaded')
         section = page.locator('#controller-pretraining')
-        assert await section.locator('#pretraining-title').inner_text() == 'Learning Low-Level Policy'
+        assert await section.locator('#pretraining-title').inner_text() == 'Low-level policy training'
         assert await section.locator('[data-loco-body]').count() == 3
         root = page.locator('#spot-curriculum')
         assert await root.locator('..').get_attribute('id') == 'controller-pretraining'

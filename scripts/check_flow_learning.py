@@ -9,7 +9,7 @@ async def main():
   browser=await p.chromium.launch(args=['--use-angle=vulkan','--enable-features=Vulkan','--disable-vulkan-surface','--enable-gpu','--ignore-gpu-blocklist'])
   page=await browser.new_page(viewport={'width':1440,'height':1050},reduced_motion='reduce')
   errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
-  await page.goto('http://localhost:8765',wait_until='domcontentloaded')
+  await page.goto('http://localhost:8765/#flow-learning',wait_until='domcontentloaded')
   root=page.locator('#flow-learning');await root.scroll_into_view_if_needed()
   await page.wait_for_function('()=>document.querySelector("#teaser-flow-map")._flowState?.length===3')
   assert await root.locator('.flow-pair canvas').count()==1

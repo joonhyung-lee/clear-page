@@ -17,8 +17,9 @@ async def main():
         page = await browser.new_page(viewport={'width': 1440, 'height': 1050}, reduced_motion='reduce')
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
-        await page.goto('http://localhost:8765/', wait_until='domcontentloaded')
+        await page.goto('http://localhost:8765/#controller-pretraining', wait_until='domcontentloaded')
         root = page.locator('#policy-evaluation')
+        await page.locator('#spot-curriculum [data-policy-evaluation]').click()
         for body in ['g1', 'spot', 'spot_arm']:
             await page.locator(f'[data-loco-body="{body}"]').evaluate('(b)=>b.click()')
             if body == 'g1':

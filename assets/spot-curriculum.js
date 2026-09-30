@@ -12,6 +12,7 @@
     arm: 'Continue locomotion training across an expanding range of arm postures.'
   };
   let selected = 'initialization', currentScene, loading = false, near = false, body = 'spot';
+  let requestedStage = null;
   const bodyName = () => ({g1:'G1',spot:'Spot',spot_arm:'Spot + arm'})[body];
   const fmt = value => value.toLocaleString('en-US');
   let chartData, metricMode = 'optimization', inspectedStep = null, hoveredChart;
@@ -159,7 +160,7 @@
     const launch = document.createElement('button'); launch.className = 'launch';
     launch.type = 'button'; launch.textContent = 'Play in 3D';
     viewer.append(poster, launch); host.replaceChildren(viewer);
-    wireViewer(viewer); observeAutomaticScene(viewer);
+    wireViewer(viewer);
     caption.textContent = `${stage.label} · ${fmt(stage.replay.cumulativeUpdates)} cumulative PPO updates · Replay 0.0 s`;
     root.dataset.replayUpdates = stage.replay.cumulativeUpdates;
     drawCurves();
@@ -177,8 +178,17 @@
     const active = stages.find(stage => stage.state === 'training');
     status.textContent = active ? `${active.label} in progress · ${fmt(data.numEnvironments)} parallel environments` : data.complete ? 'Scheduled training stages complete. Replay evaluation remains separate.' : 'Recorded progress from the new training run.';
     // New exports do not interrupt a camera interaction or an active replay.
-    if (!currentScene) select(stages.find(stage => stage.id === selected && stage.replay) || stages.find(stage => stage.replay) || stages[0]);
+    if (requestedStage) {
+      const stage=stages.find(stage=>stage.id===requestedStage&&stage.replay);
+      requestedStage=null;
+      if(stage){select(stage);host.querySelector('.launch')?.click();}
+    } else if (!currentScene) select(stages.find(stage => stage.id === selected && stage.replay) || stages.find(stage => stage.replay) || stages[0]);
   }
+  root.addEventListener('policy-select-checkpoint',event=>{
+    requestedStage=event.detail.stage;
+    if(chartData?.body===body)render(chartData);
+    else refresh();
+  });
   root.closest('#controller-pretraining').addEventListener('policy-body-change', event => {
     const changed = body !== event.detail.body;
     body = event.detail.body;
