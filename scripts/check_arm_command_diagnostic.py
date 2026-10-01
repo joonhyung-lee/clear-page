@@ -36,3 +36,31 @@ for _ in range(30):
     assert np.all(forecast.rt.arm_override == actual.rt.arm_override)
 assert not np.shares_memory(actual._diagnostic_arm_target, forecast._diagnostic_arm_target)
 print('PASS 4 Hz command timing at a 50 Hz physics-control step, unchanged base commands and identical forecast sample-and-hold memory')
+
+# Use an unwrapped class so the two diagnostics do not accidentally nest.
+class IrregularTracker:
+    def __init__(self,worlds=1):
+        self.rt=SimpleNamespace(dt=.02,num_envs=worlds)
+        self.tick=0
+    def command(self,residual):
+        self.rt.arm_override=np.full((self.rt.num_envs,7),self.tick,dtype=float)
+        result=np.full((self.rt.num_envs,3),self.tick,dtype=float)
+        self.tick+=1
+        return result
+    def copy_from(self,source):self.tick=source.tick
+
+install_sample_hold(IrregularTracker,intervals=[.10,.80,.20,1.,.16,.60],hold_base=True)
+actual=IrregularTracker();values=[]
+for _ in range(150):
+    base=actual.command(None);values.append(actual.rt.arm_override[0,0])
+    assert np.all(base==actual.rt.arm_override[0,0])
+assert sorted(set(values))==[0,5,45,55,105,113,143,148],sorted(set(values))
+for offset in [3,22,54,75,110]:
+    actual=IrregularTracker()
+    for _ in range(offset):actual.command(None)
+    forecast=IrregularTracker(16);forecast.copy_from(actual)
+    for _ in range(80):
+        a=actual.command(None);b=forecast.command(None)
+        assert np.all(a==b) and np.all(forecast.rt.arm_override==actual.rt.arm_override)
+    assert not np.shares_memory(actual._diagnostic_base_target,forecast._diagnostic_base_target)
+print('PASS variable arm/base command intervals and matching forecast phase at five clone times')

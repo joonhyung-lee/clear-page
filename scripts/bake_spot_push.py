@@ -66,14 +66,19 @@ def bake(folder, output):
     target=np.asarray(result['reference_plan']['paths'][0]['poses'][-1][:2])
     start_xy=xy[indices[0]];final_xy=xy[indices[-1]]
     public=dict(task='spot_box',taskConfig=dict(goal_position=[*target,.3]),
+        objectBodyId=int(body),gripperBodyId=int(model.body('robot/arm_link_fngr').id),
+        objectReference=result['reference_plan']['paths'][0]['poses'],
+        objectSize=result['input_scene']['objects'][0]['size'],
         camera=dict(target=[6.15,6.,.45],position=[3.15,2.25,3.075],fov=.75),
         interval=dict(start=float(times[indices[0]]),end=float(times[indices[-1]])),
         duration=float(times[indices[-1]]-times[indices[0]]),
         moved=float(np.linalg.norm(final_xy-start_xy)),goalError=float(np.linalg.norm(final_xy-target)),
         controller=result['config']['interaction']['selector'],
         pushReportedSuccess=bool(pushes[0]['success']),
+        costAblation=result.get('costAblation'),
         commandSettings=dict(armCommandShaping=result.get('armCommandShaping','bounded'),
                              armCommandHz=result.get('armCommandHz'),
+                             commandHoldIntervals=result.get('commandHoldIntervals'),
                              armTrustRegion=result['config']['interaction']['spot_trust_region_rad']),
         scope='Recorded object pushing interval. Subsequent arm stow and navigation are outside this clip.')
     output.mkdir(parents=True,exist_ok=True)

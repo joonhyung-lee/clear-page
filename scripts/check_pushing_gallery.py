@@ -35,6 +35,17 @@ for row in rows:
         assert (root/f'assets/media/{original}.mp4').is_file()
         assert gallery.select_one(f'a[href^="assets/media/{original}.mp4"]')
         assert 'not the original baseline' in row['note']
+        if row.get('costAblation'):
+            cost=row['costAblation']
+            assert scene=='mpc-spot-cost-ablation' and row['variant']=='Cost ablation'
+            assert cost['term']=='controls' and cost['weight']==0 and cost['originalWeight']==2
+            assert {key for key,value in cost['effectiveWeights'].items() if value!=cost['originalWeights'][key]}=={'controls'}
+            assert cost['effectiveWeights']['controls']==0
+            assert 'native command shaping and timing are retained' in row['note']
+        if row.get('commandHoldIntervals'):
+            assert row['scene']=='mpc-spot-variable-delay'
+            assert row['variant']=='Variable-delay actuation stress test'
+            assert row['commandHoldIntervals']==[.1,.8,.2,1.,.16,.6]
     script=(root/f'assets/recordings/{scene}.hex.js').read_text()
     binary=bytes.fromhex(json.loads(script.rsplit(' = ',1)[1].rstrip(';\n')))
     with tempfile.NamedTemporaryFile() as f:
@@ -49,6 +60,11 @@ for row in rows:
     assert abs(display_metadata['duration']-record['durationSeconds'])<.1,(scene,'Display timeline must match native replay')
     assert metadata['fps']>=24
     assert abs(metadata['duration']-record['durationSeconds'])<.1,(scene,metadata,record['durationSeconds'])
+    if row.get('body')=='spot_arm':
+        ego=imageio_ffmpeg.read_frames(str(root/f'assets/media/{scene}-ego.mp4'))
+        ego_metadata=next(ego);ego.close()
+        assert abs(ego_metadata['duration']-record['durationSeconds'])<.1,(scene,'Ego view must use the same interval')
+        assert (root/f'assets/media/{scene}-ego.png').is_file()
     assert (root/f'assets/media/{scene}.png').is_file()
     assert any(t>0 and m['type']=='SetPositionMessage' for t,m in record['messages'])
     print('PASS',scene,'video and native recording duration',record['durationSeconds'])

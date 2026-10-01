@@ -30,7 +30,7 @@ async def main():
   assert await page.locator('#method-flow .flow-ghost').count()==4
   for target in ['#method-order','#method-flow']:
    assert await page.locator(target+' .maze-wall').count()==8
-   assert all('OBJ' in text for text in await page.locator(target+' [data-object] text').all_text_contents())
+   assert await page.locator(target+' [data-object] text').all_text_contents()==['o₁','o₂','o₃']
   await page.locator('#method-flow input').fill('1')
   assert await page.locator('#method-flow .sequence-explanation').get_attribute('data-flow-time')=='1.00'
   assert await page.locator('#method-execution>details').get_attribute('open') is not None

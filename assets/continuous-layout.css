@@ -82,7 +82,16 @@
 .planning-scope{font-size:11px;color:#74816a;text-align:center;margin:14px 0 34px}
 .execution-process-grid{max-width:1040px;margin-inline:auto}
 .execution-process-grid .execution-record,.execution-process-grid .mpc-process-pair>figure{width:100%;max-width:480px;margin-inline:auto}
-#method-execution .pushing-gallery{max-width:1120px;margin-inline:auto}
+#main #method-execution{max-width:none}
+#method-execution .pushing-gallery{width:78vw;max-width:none;margin-inline:calc(50% - 39vw)}
+.pushing-motion-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:10px 20px;color:#64716b}
+#method-execution>.pushing-motion-legend{font-size:12px!important;margin-top:-22px!important}
+.pushing-motion-legend span{display:inline-flex;align-items:center;gap:6px}
+.pushing-motion-legend i{display:inline-block;width:24px;border-top:3px solid}
+.pushing-motion-legend .object-target{border-color:#3964a3;border-top-style:dashed}
+.pushing-motion-legend .object-motion{border-color:#1a7369}
+.pushing-motion-legend .eef-motion{border-color:#b85c5b}
+@media(max-width:900px){#method-execution .pushing-gallery{width:100%;margin-inline:0}}
 /* Each inset is positioned inside its own video tile. */
 .media-tile{position:relative}
 .media-tile>.ego-inset,.execution-body-viewer .ego-inset,.overview-live-viewer .ego-inset,.focus-viewer .ego-inset{width:27%;pointer-events:none}
@@ -174,3 +183,16 @@
 #encoding #input-objects>.viewer>video{object-fit:contain;transform:scale(1.06)}
 #method-execution .controller-summary{max-width:none;width:100%;margin:14px 0 20px}
 #method-execution .controller-summary p{max-width:none;width:100%;margin:0;font-size:15px;line-height:1.55}
+/* Paper-aligned formulation: diagrams, equations, mechanism, then a concrete case. */
+#clear-overview .overview-intro{max-width:1100px;font-size:16px;line-height:1.6}
+#method-order,#method-flow{container-type:inline-size}
+.planning-pair :is(#ordering-rule,#generation-rule) .equation{font-size:clamp(11px,2.6cqw,15px);padding-block:8px}
+#method .planning-pair .method-lead{font-size:15px;line-height:1.6}
+.planning-pair .method-explanation{width:100%;max-width:520px;margin:8px auto 0}
+.planning-pair .method-explanation p{font-size:14px;line-height:1.6;margin:8px 0;color:#56604f}
+.planning-pair .method-example{border-left:2px solid #c4d1bc;padding-left:12px}
+.planning-pair .method-example strong{font-weight:500;color:#3e5037}
+.rank-mask{border-collapse:collapse;margin:10px 0;font-size:13px;text-align:center}
+.rank-mask th,.rank-mask td{border:1px solid #d9e0d3;padding:4px 14px;font-weight:400}
+.rank-mask th{background:#edf3e7}.rank-mask+small{font-size:11px;color:#687760}
+.illustration-attention p{font-size:13px;line-height:1.5;margin:8px 0 0}

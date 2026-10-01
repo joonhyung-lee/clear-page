@@ -176,10 +176,14 @@ for panel in encoding.select('[data-input-content]'):
  if panel['data-input-content']=='objects':panel.attrs.pop('hidden',None)
  else:panel['hidden']=''
 encoding.select_one('.section-intro').string='Object poses and scene geometry combine with the robot embodiment to define the planning context.'
-for tile in s.select('.media-tile[data-scene="mpc-spot-optimized"],.media-tile[data-scene="mpc-spot-held-arm"]'):
- note='EEF anchors and lanes show the recorded gripper trajectory.'
- if note not in tile.get('data-note',''):tile['data-note']=tile.get('data-note','')+' '+note
+controller_notes={r['scene']:r['note'] for r in json.loads((ROOT/'assets/controller-gallery.json').read_text())}
+for tile in s.select('.pushing-gallery .media-tile[data-scene^="mpc-spot-"]'):
+ note='Blue dashed lanes show the intended object path. Teal follows the measured object motion. Rose anchors mark the recorded gripper path, with a 0.8 s live trail. Both clips show the extended arm during pushing.'
+ tile['data-note']=controller_notes[tile['data-scene']]+' '+note
  tile['title']=note
+gallery=s.select_one('#method-execution .pushing-gallery')
+for old in s.select('.pushing-motion-legend'):old.decompose()
+gallery.insert_after(frag('''<p class="pushing-motion-legend"><span>Spot overlays</span><span><i class="object-target"></i>Object target</span><span><i class="object-motion"></i>Object motion</span><span><i class="eef-motion"></i>EEF · recent 0.8 s</span></p>'''))
 s.select_one('.embodiment-controls')['class']=['embodiment-controls','structure-branches']
 for node in list(s.select('.planning-scope')):node.decompose()
 for id in ['method-order','method-flow']:
@@ -193,6 +197,53 @@ for id in ['method-order','method-flow']:
 # The execution introduction uses its full available reading row.
 section=s.select_one('#method-execution')
 section.select_one(':scope > .method-lead').string='The controller tracks object targets and updates its commands from new observations. High-level replanning revises the remaining interactions.'
-for para in list(section.select(':scope > p:not(.method-lead):not(.method-small-copy):not(.figure-caption)')):para.decompose()
+for para in list(section.select(':scope > p:not(.method-lead):not(.method-small-copy):not(.figure-caption):not(.pushing-motion-legend)')):para.decompose()
+
+# Use the manuscript's component names and notation throughout the Method.
+components=[
+ ('a','grounding','method-grounding','Embodiment-Aware Scene Grounding','Grounding'),
+ ('b','ordering','method-order','Latent Interaction Ordering','Selection and ordering'),
+ ('c','generation','method-flow','Rank-Causal Generation','Generation'),
+ ('d','execution','method-execution','Execution and Replanning','Execution and replanning'),
+]
+for letter,stage,id,title,short in components:
+ s.select_one('#'+id+'>h3').string=f'({letter}) {title}'
+ s.select_one(f'#method .chapter-links a[href="#{id}"]').string=f'({letter}) {short}'
+ button=s.select_one(f'[data-overview-stage="{stage}"]')
+ button.string=f'({letter}) '+('Ordering' if stage=='ordering' else short)
+ button['aria-label']=f'({letter}) {title}'
+
+def replace_content(node,html):
+ node.clear()
+ for child in list(frag(html).contents):node.append(child.extract())
+
+replace_content(s.select_one('#clear-overview .overview-intro'),r'''Given a scene <span data-tex="S"></span> and robot embodiment <span data-tex="B"></span>, CLEAR proposes plans <span data-tex="\pi=((i_1,\xi_1),\ldots,(i_K,\xi_K))"></span>. The scene includes the observed geometry, <span data-tex="N"></span> movable objects, the robot state and a task goal. Each plan entry specifies an object and its target configuration or trajectory. Among candidates accepted by the task's feasibility checks, the planner selects one with the fewest object interactions.''')
+s.select_one('#overview-grounding').parent.select_one('.overview-model-name').string='Affordance-Guided Encoding'
+s.select_one('#overview-generation>span').string='Yₜ'
+s.select_one('#overview-generation>small').string='Decode object references ξₖ'
+s.select_one('#overview-execution').parent.select_one('.overview-model-name').string='Feasibility check + MPC'
+replace_content(s.select_one('#method-grounding>.method-lead'),r'''Affordance-Guided Encoding combines morphology, object and scene features into the planning context <span data-tex="\mathbf H"></span>. Predicted traversal and interaction feasibility augment the object features. Reachability accounts for the terrain transitions needed to approach an object.''')
+
+rule=s.select_one('#ordering-rule');rule.clear()
+rule.append(frag(r'''<div class="equation" data-tex="\begin{aligned}m_i&amp;\sim\operatorname{Bernoulli}(q_i),&amp;\mathcal I&amp;=\{i:m_i=1\}\\u_i&amp;\sim\mathcal N(\mu_i,\sigma_i^2),&amp;\boldsymbol\rho&amp;=\operatorname{argsort}_{i\in\mathcal I}u_i\end{aligned}"></div>'''))
+rule=s.select_one('#generation-rule');rule.clear()
+rule.append(frag(r'''<div class="equation" data-tex="\begin{aligned}\mathbf v_t&amp;=v_\theta(\mathbf Y_t,t\mid\mathbf H,\boldsymbol\rho)\\\mathbf Y_{t+\Delta t}&amp;=\mathbf Y_t+\Delta t\,\mathbf v_t\end{aligned}"></div>'''))
+replace_content(s.select_one('#method-order>.method-lead'),r'''From <span data-tex="\mathbf H"></span>, OrderNet predicts a selection probability <span data-tex="q_i"></span> and priority mean and standard deviation <span data-tex="\mu_i,\sigma_i"></span> for each object <span data-tex="o_i"></span>. A sampled indicator <span data-tex="m_i"></span> determines participation. Sorting sampled scores <span data-tex="u_i"></span> from low to high gives the order <span data-tex="\boldsymbol\rho"></span>.''')
+replace_content(s.select_one('#method-flow>.method-lead'),r'''With <span data-tex="\mathbf H,\mathcal I,\boldsymbol\rho"></span> fixed, CausalFlowNet integrates from Gaussian noise in the active coordinates of <span data-tex="\mathbf Y_0"></span> to <span data-tex="\mathbf Y_1"></span>. In <span data-tex="\mathbf Y_t\in\mathbb R^{N\times D}"></span>, row <span data-tex="\mathbf y_i(t)"></span> stores <span data-tex="D"></span> coordinates for object <span data-tex="o_i"></span>. Fixed and padding coordinates remain unchanged. The selected rows are decoded in order <span data-tex="\boldsymbol\rho"></span> into references <span data-tex="(\xi_1,\ldots,\xi_K)"></span>. Flow time <span data-tex="t\in[0,1]"></span> describes generation progress, not execution time.''')
+explanations={
+ 'method-order':r'''<p>Sampling admits alternative object sets and orders for the same query. Selection considers the complete sequence, including objects that become reachable after earlier interactions.</p><p class="method-example"><strong>In this scene.</strong> <span data-tex="o_2"></span> blocks the first passage. Moving it creates access to <span data-tex="o_3"></span>. The example order is <span data-tex="\boldsymbol\rho=(2,3)"></span>, while <span data-tex="o_1"></span> remains outside the route.</p>''',
+ 'method-flow':r'''<p>All selected rows evolve over the same flow interval. Rank causal attention lets each row read its own and preceding ranks. Context tokens cannot read generated rows, preventing later interactions from influencing earlier ones through <span data-tex="\mathbf H"></span>.</p><p class="method-example"><strong>In this scene.</strong> <span data-tex="\xi_1"></span> relocates <span data-tex="o_2"></span> to clear the first passage. <span data-tex="\xi_2"></span> plans the motion of <span data-tex="o_3"></span> with access through that passage. Feasibility is checked after generation.</p>''',
+}
+for id,html in explanations.items():
+ section=s.select_one('#'+id)
+ for old in list(section.select(':scope > .method-explanation')):old.decompose()
+ section.append(frag('<div class="method-explanation">'+html+'</div>'))
+ figure=section.select_one('.sequence-explanation')
+ caption=figure.select_one('figcaption');caption['hidden']=''
+ caption.string='Selection and ordering in a two-passage scene' if id=='method-order' else 'Object references under the same interaction order'
+ figure.select_one('svg')['aria-label']='Example interaction order o₂ followed by o₃'
+ for label in figure.select('svg text'):
+  if label.get_text() in ['1','2']:label.string={'1':'o₂','2':'o₃'}[label.get_text()]
+replace_content(s.select_one('#method-execution>.method-lead'),r'''Decoded references <span data-tex="(\xi_1,\ldots,\xi_K)"></span> are checked in order <span data-tex="\boldsymbol\rho"></span>, accounting for the scene changes caused by earlier interactions. The planner selects a candidate that satisfies the goal with the fewest interactions among those accepted. A valid plan requiring no object interaction bypasses generation. MPC tracks the object references using updated state estimates. When enabled, replanning uses the updated scene to revise the remaining interactions.''')
 
 p.write_text(str(s).rstrip()+'\n')

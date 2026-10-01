@@ -4,7 +4,7 @@
   const stages = {
     grounding: ['Ground the scene in the robot’s body.', 'Structure, object states, and scene geometry form a planning context that represents the robot’s capabilities and accessible interactions.', 'method-grounding'],
     ordering: ['Choose what to move, then in which order.', 'OrderNet uses the planning context to select objects and sample interaction priorities. Sorting the selected priorities gives a candidate order.', 'method-order'],
-    generation: ['Generate motion conditioned on the context and order.', 'CausalFlowNet generates continuous object targets. Rank causal attention allows each interaction to depend on its own rank and earlier ranks.', 'method-flow'],
+    generation: ['Generate object references under a fixed interaction order.', 'CausalFlowNet jointly updates object parameters over flow time. Rank causal attention permits each generated row to read its own and earlier ranks, while the planning context remains fixed.', 'method-flow'],
     execution: ['Observe the consequences and update the plan.', 'Maze plans are checked for feasibility before execution. When replanning is enabled, updated observations condition the next plan.', 'method-execution']
   };
   const flow = root.querySelector('.overview-flow');

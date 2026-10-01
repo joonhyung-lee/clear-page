@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CHECKS = ['check_research_layout.py', 'check_continuous_layout.py', 'check_policy_summary.py', 'check_paper_results.py', 'check_learning_tree.py', 'check_teaser_method.py', 'check_teaser_replay.py', 'check_pushing_gallery.py', 'check_controller_pretraining.py', 'check_spot_curriculum.py', 'check_training_layout.py', 'check_learning_replay.py',
           'check_training_losses.py', 'check_policy_evaluation.py', 'check_g1_scratch.py', 'check_flow_learning.py',
           'check_grounding_inputs.py', 'check_learning_explorers.py',
-          'check_interactive_mpc.py', 'check_spot_eef_overlay.py']
+          'check_interactive_mpc.py', 'check_spot_eef_overlay.py', 'check_method_formulation.py']
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--check', choices=CHECKS, action='append',
                     help='Run only this check. Repeat to select multiple checks.')

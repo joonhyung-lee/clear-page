@@ -32,18 +32,18 @@ async def main():
    assert await grounding.locator('.embodiment-gallery>figure:visible').count()==4
   generation=page.locator('#method-flow .sequence-explanation')
   assert 'Illustrative rank-causal' in await generation.get_attribute('aria-label')
-  assert 'OBJ 1 → OBJ 2' in await page.locator('#method-order .illustration-order-summary').inner_text()
+  assert 'o₂ → o₃' in await page.locator('#method-order .illustration-order-summary').inner_text()
   original=await generation.locator('svg').inner_html()
   await generation.locator('input').fill('1')
   assert await generation.get_attribute('data-flow-time')=='1.00'
   assert await generation.locator('svg').inner_html()!=original
   await generation.locator('[data-illustration-view="3d"]').click()
   assert await generation.get_attribute('data-view')=='3d'
-  assert await generation.locator('svg text').all_text_contents()==['Start','Goal','OBJ 0','OBJ 1','OBJ 2','X','Y','Z']
+  assert await generation.locator('svg text').all_text_contents()==['Start','Goal','o₁','o₂','o₃','X','Y','Z']
   await generation.locator('[data-attention-mask]').click()
   assert 'later interaction and is masked' in await generation.locator('.illustration-attention').inner_text()
   await generation.locator('select').select_option('2')
-  assert 'OBJ 1’s generated reference' in await generation.locator('.illustration-attention').inner_text()
+  assert 'earlier generated row y₂' in await generation.locator('.illustration-attention').inner_text()
   for kind in ['paper','video']:
    button=page.locator(f'[data-resource="{kind}"]');await button.click()
    dialog=page.locator('#resource-dialog');assert await dialog.is_visible()

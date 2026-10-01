@@ -54,7 +54,7 @@ def gallery(controller, label, group):
         grid.append(tile)
     for row in items:
         if row.get('originalScene'):
-            link=tag('a','Original shaped-command recording',href=f"assets/media/{row['originalScene']}.mp4",
+            link=tag('a','Original MPC recording' if row.get('costAblation') else 'Original shaped-command recording',href=f"assets/media/{row['originalScene']}.mp4",
                      target='_blank',rel='noopener',**{'class':'original-recording'})
             section.append(link)
     overlay = BeautifulSoup('''<div class="grid-focus" hidden><div class="viewer focus-viewer"
@@ -83,7 +83,9 @@ if all(row.get('body') in ['g1','spot_arm'] for row in rows):
     caption.string=('Object pushing with G1 and Spot + arm. Each pair shows the same body and object task. '
                     'Hover or select a video to enlarge it, then choose Play in 3D. '
                     'These are individual physical recordings of the complete controllers, not an isolated optimization ablation.')
-    if any(row.get('variant') for row in rows):
+    if any(row.get('costAblation') for row in rows):
+        caption.string+=' The Spot + arm naive tile shows a labeled cost ablation. Its original recording remains linked.'
+    elif any(row.get('variant') for row in rows):
         caption.string+=' The Spot + arm naive tile shows the labeled command-setting variant. Its original recording remains linked.'
 else:
     caption.string = ('Hover or select a recorded task to enlarge its video, then choose Play in 3D. '

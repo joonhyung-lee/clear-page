@@ -34,9 +34,18 @@ def measure(folder):
         derivative=np.diff(positions,n=order,axis=0)/dt**order
         measurements[label]={'rms':float(np.sqrt(np.mean(derivative**2))),
                              'p95Abs':float(np.percentile(np.abs(derivative),95))}
+    selected=(times>=begin)&(times<=end)
+    motion=xy[selected]
+    push_speed=np.linalg.norm(np.diff(motion,axis=0),axis=1)/dt
+    object_motion=dict(displacement=float(np.linalg.norm(motion[-1]-motion[0])),
+        meanSpeed=float(np.mean(push_speed)),speedStd=float(np.std(push_speed)),
+        speedP95=float(np.percentile(push_speed,95)),
+        stoppedFraction=float(np.mean(push_speed<.015)),
+        accelerationRms=float(np.sqrt(np.mean((np.diff(motion,n=2,axis=0)/dt**2)**2))))
     return {'interval':[begin,end],'samples':len(positions),'dt':dt,'joints':names,
-            'measurements':measurements,'scope':'Physical joint positions, unsmoothed finite differences. Each episode uses its own measured pushing interval.'}
+            'measurements':measurements,'objectMotion':object_motion,
+            'scope':'Physical joint positions and box XY, unsmoothed finite differences. Each episode uses its own measured pushing interval.'}
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('original',type=Path);p.add_argument('unshaped',type=Path);p.add_argument('output',type=Path);a=p.parse_args()
-    a.output.write_text(json.dumps({'original':measure(a.original),'unshaped':measure(a.unshaped)},indent=2)+'\n')
+    p=argparse.ArgumentParser();p.add_argument('original',type=Path);p.add_argument('variant',type=Path);p.add_argument('output',type=Path);a=p.parse_args()
+    a.output.write_text(json.dumps({'original':measure(a.original),'variant':measure(a.variant)},indent=2)+'\n')

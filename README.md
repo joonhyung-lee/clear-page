@@ -321,20 +321,23 @@ dashboard. Opening the dashboard alone does not start a 3D scene.
 The detailed flow-matching equations live under Planner training. Result scene
 selectors and longer explanations are available through Scene and protocol.
 
-The Spot + arm baseline gallery provides a separately labeled **4 Hz arm command
-diagnostic**. Arm targets use sample-and-hold updates in both the actual and
-forecast worlds, with command shaping disabled. Physics and base control retain
-their native rates. The original baseline recording remains directly linked.
-Both episodes complete the object interaction. The diagnostic moves the object
-1.93 m with 0.07 m goal error over a 31.7 s pushing interval.
+The Spot + arm baseline gallery provides a separately labeled **Cost ablation**.
+Only the base-command magnitude penalty changes, from 2 to 0. Goal, contact,
+lateral, orientation and terminal object-speed costs retain their original
+weights. Native joint command shaping, control timing, trust region, physics,
+initial scene and random seed are unchanged. There is no injected jitter or
+sample-and-hold delay. The original baseline recording remains directly linked.
+The recorded pushing interval lasts 25.58 s, moves the object 1.95 m, and ends
+with 0.052 m of position error. The controller reports a successful interaction.
 
-Across the six arm joints, the RMS of unsmoothed finite-difference jerk is
-395.57 rad/s³ for this diagnostic and 186.01 rad/s³ for the original recording,
-using each episode's measured pushing interval at a 0.02 s sampling interval.
-This demonstrates more abrupt motion in these two recordings. It is a changed
-command configuration, not evidence about the original baseline's benchmark
-performance or an isolated optimization ablation. Rebuild it with
-`build_pushing_gallery.py` and
-`--unshaped-baseline`, passing the separately baked variant as the baseline
-directory. `compare_spot_motion.py` keeps the underlying motion statistics in
-private output files.
+Record this variant with `record_spot_comparison.py --controller baseline
+--control-cost-weight 0`, then bake and export it as `mpc-spot-cost-ablation`.
+Use `build_pushing_gallery.py --cost-ablation` with the baked variant as the
+baseline directory, followed by `build_continuous_layout.py` and
+`build_asset_revisions.py`. The recorder rejects combinations with command
+timing, shaping or trust-region overrides. The published numerical provenance
+stores every original and effective cost weight. Metrics describe this one
+physical episode, not benchmark performance or an optimization speedup.
+`compare_spot_motion.py` keeps derivative-based motion statistics in private
+output files. Earlier command-rate and variable-delay recordings are separate
+diagnostics and are not the displayed cost ablation.
