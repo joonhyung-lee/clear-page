@@ -22,7 +22,9 @@ for controller in ['optimized','baseline']:
     tiles=group.select('.media-tile')
     assert len(tiles)==2
     assert [tile.select_one('span').get_text() for tile in tiles]==['G1','Spot + arm']
-    assert all(tile.select_one('video source')['src'].split('?')[0]==f"assets/media/{tile['data-scene']}.mp4" for tile in tiles)
+    for tile in tiles:
+        suffix='-contact' if tile.get('data-contact-side')=='true' else ''
+        assert tile.select_one('video source')['src'].split('?')[0]==f"assets/media/{tile['data-scene']}{suffix}.mp4"
 for row in rows:
     scene=row['scene'];assert scene
     if row.get('variant'):
@@ -40,6 +42,11 @@ for row in rows:
     validate_binary_arrays(record,buffers)
     video=imageio_ffmpeg.read_frames(str(root/f'assets/media/{scene}.mp4'))
     metadata=next(video);video.close()
+    tile=gallery.select_one(f'[data-scene="{scene}"]')
+    published=tile.select_one('video source')['src'].split('?')[0]
+    display=imageio_ffmpeg.read_frames(str(root/published));display_metadata=next(display);display.close()
+    assert display_metadata['fps']>=20
+    assert abs(display_metadata['duration']-record['durationSeconds'])<.1,(scene,'Display timeline must match native replay')
     assert metadata['fps']>=24
     assert abs(metadata['duration']-record['durationSeconds'])<.1,(scene,metadata,record['durationSeconds'])
     assert (root/f'assets/media/{scene}.png').is_file()

@@ -4,10 +4,10 @@
   let tex=el.dataset.tex;
   if(el.dataset.objectiveAnnotations){
    const terms=[
-    [String.raw`\mathcal{L}_{\mathrm{order}}`,'Selection and ranking','order'],
-    [String.raw`\lambda_{\mathrm{flow}}\mathcal{L}_{\mathrm{flow}}`,'Object generation','flow'],
-    [String.raw`\lambda_{\mathrm{aff}}\mathcal{L}_{\mathrm{aff}}`,'Interaction feasibility','affordance'],
-    [String.raw`\lambda_{\mathrm{avail}}\mathcal{L}_{\mathrm{avail}}`,'First interaction','availability']
+    [String.raw`\mathcal{L}_{\mathrm{order}}`,'Selection / rank','order'],
+    [String.raw`\lambda_{\mathrm{flow}}\mathcal{L}_{\mathrm{flow}}`,'Generation','flow'],
+    [String.raw`\lambda_{\mathrm{aff}}\mathcal{L}_{\mathrm{aff}}`,'Feasibility','affordance'],
+    [String.raw`\lambda_{\mathrm{avail}}\mathcal{L}_{\mathrm{avail}}`,'Availability','availability']
    ];
    for(const [term,label,key] of terms)tex=tex.replace(term,String.raw`\htmlClass{objective-term term-${key}}{\underbrace{${term}}_{\text{${label}}}}`);
   }

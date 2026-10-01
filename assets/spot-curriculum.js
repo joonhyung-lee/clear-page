@@ -161,6 +161,7 @@
     launch.type = 'button'; launch.textContent = 'Play in 3D';
     viewer.append(poster, launch); host.replaceChildren(viewer);
     wireViewer(viewer);
+    observeAutomaticScene(viewer);
     caption.textContent = `${stage.label} · ${fmt(stage.replay.cumulativeUpdates)} cumulative PPO updates · Replay 0.0 s`;
     root.dataset.replayUpdates = stage.replay.cumulativeUpdates;
     drawCurves();

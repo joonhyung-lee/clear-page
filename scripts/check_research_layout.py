@@ -9,7 +9,7 @@ async def main():
   page=await browser.new_page(viewport={'width':1440,'height':1000},reduced_motion='reduce')
   errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
   await page.goto('http://localhost:8765/',wait_until='domcontentloaded')
-  assert await page.locator('.research-links a').all_text_contents()==['Method','Learning','Results']
+  assert await page.locator('.research-links a').all_text_contents()==['Method','Training','Experiment']
   assert await page.locator('#page-contents').count()==0
   assert await page.locator('#top video').count()==1 and 'CLEAR' in await page.locator('#top h1').inner_text()
   assert await page.evaluate("['method','learning','results'].map(id=>document.getElementById(id).getBoundingClientRect().top).every((v,i,a)=>!i||v>a[i-1])")
@@ -17,30 +17,33 @@ async def main():
   assert await page.locator('#learning #training-objective').count()==1
   assert await page.locator('#failure-cases #ordering-context').count()==1
   assert await page.locator('#failure-cases #flow-learning').count()==1
-  for key in ['structure','objects','scene']:
+  await page.locator('.overview-input-links a[href="#embodiment-demo"]').click()
+  assert await page.locator('#embodiment-demo').is_visible()
+  assert await page.locator('#input-structure').count()==0
+  for key in ['objects','scene']:
    await page.locator(f'.overview-input-links a[href="#input-{key}"]').click()
    assert await page.locator(f'#input-{key}').is_visible()
    assert await page.locator('[data-input-content]:visible').count()==1
    assert await page.locator(f'[data-input-panel="{key}"]').get_attribute('aria-pressed')=='true'
   grounding=page.locator('#embodiment-demo')
-  for body in ['g1','spot','spot_arm','husky']:
-   await grounding.locator(f'[data-grounding-body="{body}"]').click()
-   assert await grounding.locator('.embodiment-gallery>figure:visible').count()==1
-   assert await grounding.locator('.embodiment-gallery>figure:visible .viewer').get_attribute('data-embodiment')==body
+  assert await grounding.locator('.embodiment-gallery>figure:visible').count()==4
+  for mode in ['structure','traversability','manipulation']:
+   await grounding.locator(f'[data-embodiment-mode="{mode}"]').click()
+   assert await grounding.locator('.embodiment-gallery>figure:visible').count()==4
   generation=page.locator('#method-flow .sequence-explanation')
-  assert 'Illustrative visualization' in await generation.inner_text()
-  assert 'Object 1 → Object 2' in await page.locator('#method-order .illustration-order-summary').inner_text()
+  assert 'Illustrative rank-causal' in await generation.get_attribute('aria-label')
+  assert 'OBJ 1 → OBJ 2' in await page.locator('#method-order .illustration-order-summary').inner_text()
   original=await generation.locator('svg').inner_html()
   await generation.locator('input').fill('1')
   assert await generation.get_attribute('data-flow-time')=='1.00'
   assert await generation.locator('svg').inner_html()!=original
   await generation.locator('[data-illustration-view="3d"]').click()
   assert await generation.get_attribute('data-view')=='3d'
-  assert await generation.locator('svg text').all_text_contents()==['Start','Goal','0','1','2','X','Y','Z']
+  assert await generation.locator('svg text').all_text_contents()==['Start','Goal','OBJ 0','OBJ 1','OBJ 2','X','Y','Z']
   await generation.locator('[data-attention-mask]').click()
   assert 'later interaction and is masked' in await generation.locator('.illustration-attention').inner_text()
   await generation.locator('select').select_option('2')
-  assert 'Object 1’s generated reference' in await generation.locator('.illustration-attention').inner_text()
+  assert 'OBJ 1’s generated reference' in await generation.locator('.illustration-attention').inner_text()
   for kind in ['paper','video']:
    button=page.locator(f'[data-resource="{kind}"]');await button.click()
    dialog=page.locator('#resource-dialog');assert await dialog.is_visible()

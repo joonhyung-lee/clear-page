@@ -7,7 +7,7 @@ async def main():
   await page.goto('http://localhost:8765',wait_until='networkidle')
   assert not any('learning-samples' in x or 'mpc-process-data' in x for x in calls)
   for kind,count in [('grounding',126),('ordering',67)]:
-   root=page.locator('#learning-'+kind);await page.evaluate("id=>{location.hash=id}","learning-"+kind);await root.scroll_into_view_if_needed();await root.locator('.learning-content').wait_for();await root.locator('.research-representations > summary').click();assert await root.locator('.sample-scatter circle').count()==count
+   root=page.locator('#learning-'+kind);await page.evaluate("id=>{location.hash=id}","learning-"+kind);await root.scroll_into_view_if_needed();await root.locator('.learning-content').wait_for();await root.locator('.research-representations .sample-scatter').wait_for(state='visible');assert await root.locator('.sample-scatter circle').count()==count
    assert await root.locator('.sample-axis-label').count()==2
    assert await root.locator('.sample-neighbors').count()==0
    await root.screenshot(path='/tmp/learning-'+kind+'.png')

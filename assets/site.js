@@ -74,7 +74,7 @@ document.querySelectorAll('video').forEach(video => {
   video.addEventListener('playing', () => video.classList.add('media-ready'));
 });
 const heroVisibility = new IntersectionObserver(entries => {
-  if (!entries[0].isIntersecting) teaser.pause();
+  if (!entries.at(-1).isIntersecting) teaser.pause();
   else if (!document.hidden && !reduced.matches && !heroManuallyPaused) teaser.play().catch(updateHero);
 });
 let heroManuallyPaused = false;
@@ -126,9 +126,11 @@ function drainScenes() {
   }
 }
 function observeAutomaticScene(viewer) {
+  if(viewer._automaticObserved)return;viewer._automaticObserved=true;
   let timer, attempted = false;
+  viewer.addEventListener('scene-evicted',()=>{attempted=false;});
   const observer = new IntersectionObserver(entries => {
-    viewer._sceneNearby = entries[0].isIntersecting;
+    viewer._sceneNearby = entries.at(-1).isIntersecting;
     clearTimeout(timer);
     if (!viewer._sceneNearby) {
       autoScenes.delete(viewer);
@@ -280,6 +282,18 @@ function recordingBase64(hex) {
   for (let i = 0; i < bytes.length; i += 8192) chunks.push(String.fromCharCode(...bytes.subarray(i, i + 8192)));
   return btoa(chunks.join(''));
 }
+// Bound offscreen automatic WebGL contexts while keeping visible scenes alive.
+function releaseOffscreenScenes(current){
+ const live=[...document.querySelectorAll('.viewer')].filter(v=>v.querySelector('iframe'));
+ let count=live.length;
+ for(const view of live){
+  if(count<6)break;
+  const rect=view.getBoundingClientRect();
+  if(view===current||!view._automaticObserved||(rect.bottom>0&&rect.top<innerHeight&&rect.width>0))continue;
+  view._savedReplayTime=view._lastReplayTime||0;
+  view.dispatchEvent(new Event('reset-viewer'));view.dispatchEvent(new Event('scene-evicted'));count--;
+ }
+}
 // The same player supports the fixed panels and the enlarged grid previews.
 function wireViewer(viewer, onLaunch = () => {}) {
   const launch = viewer.querySelector('.launch');
@@ -288,7 +302,7 @@ function wireViewer(viewer, onLaunch = () => {}) {
   let timer, revealTimer, generation = 0, inView = false, localRecoveries = 0;
   const settled = (failed = false) => viewer.dispatchEvent(new CustomEvent('scene-settled', {detail:{failed}}));
   const syncVisibility = () => viewer.querySelector('iframe')?.contentWindow.postMessage({type:'clear-scene-visible',visible:inView && !document.hidden}, '*');
-  new IntersectionObserver(entries => { inView = entries[0].isIntersecting; syncVisibility(); }, {threshold:.01}).observe(viewer);
+  new IntersectionObserver(entries => { inView = entries.at(-1).isIntersecting; syncVisibility(); }, {threshold:.01}).observe(viewer);
   document.addEventListener('visibilitychange', syncVisibility);
   function reset() {
     generation++; clearTimeout(timer); clearTimeout(revealTimer);
@@ -299,6 +313,7 @@ function wireViewer(viewer, onLaunch = () => {}) {
   }
   viewer.addEventListener('reset-viewer', reset);
   launch.addEventListener('click', async () => {
+    releaseOffscreenScenes(viewer);
     // Reset without settling the new queue slot before it has started.
     generation++; clearTimeout(timer); clearTimeout(revealTimer);
     viewer.querySelectorAll('iframe,.viewer-tools,.viewer-status').forEach(e => e.remove());
@@ -315,15 +330,15 @@ function wireViewer(viewer, onLaunch = () => {}) {
       await loadScript(`assets/recordings/${scene}.hex.js`, () => !!window.CLEAR_RECORDINGS?.[scene]);
       if (attempt !== generation) return;
       if(viewer.dataset.embodiment)await loadScript('assets/embodiment-bridge.js', () => typeof window.CLEAR_EMBODIMENT_BRIDGE === 'function');
-      if(viewer.dataset.ego||viewer.dataset.generation)await loadScript('assets/playback-bridge.js', () => typeof window.CLEAR_PLAYBACK_BRIDGE === 'function');
+      if(viewer.dataset.ego||viewer.dataset.generation||viewer.dataset.autostart!==undefined)await loadScript('assets/playback-bridge.js', () => typeof window.CLEAR_PLAYBACK_BRIDGE === 'function');
       if(viewer.dataset.orderStage)await loadScript('assets/order-bridge.js', () => typeof window.CLEAR_ORDER_BRIDGE === 'function');
       if(attempt !== generation)return;
       const data = window.CLEAR_RECORDINGS?.[scene];
       if (!data || !window.CLEAR_VIEWER_HEX) throw new Error('Scene unavailable');
       const iframe = document.createElement('iframe');
       iframe.title = `${viewer.dataset.title || viewer.closest('article').querySelector('h3').textContent} interactive 3D playback`;
-      const bridge=(viewer.dataset.embodiment ? `window.__CLEAR_EMBODIMENT__=${JSON.stringify({robot:viewer.dataset.embodiment,mode:viewer.dataset.displayMode||'structure'})};(${window.CLEAR_EMBODIMENT_BRIDGE.toString()})();` : '')+((viewer.dataset.ego||viewer.dataset.generation) ? `(${window.CLEAR_PLAYBACK_BRIDGE.toString()})();` : '')+(viewer.dataset.orderStage ? `window.__CLEAR_ORDER__=${JSON.stringify({stage:viewer.dataset.orderStage,sample:+viewer.dataset.orderSample||0})};(${window.CLEAR_ORDER_BRIDGE.toString()})();` : '');
-      const embedded = `<script>window.__CLEAR_CHECKPOINT_REPLAY__=${!!viewer.dataset.locoViewer};window.__CLEAR_EXTERNAL_TIMELINE__=${viewer.dataset.externalTimeline==='true'};(${sceneLifecycle.toString()})();${bridge}window.__VISER_EMBED_DATA__=${JSON.stringify(recordingBase64(data))};window.__VISER_EMBED_CONFIG__={darkMode:false};<\/script>`;
+      const bridge=(viewer.dataset.embodiment ? `window.__CLEAR_EMBODIMENT__=${JSON.stringify({robot:viewer.dataset.embodiment,mode:viewer.dataset.displayMode||'structure'})};(${window.CLEAR_EMBODIMENT_BRIDGE.toString()})();` : '')+((viewer.dataset.ego||viewer.dataset.generation||viewer.dataset.autostart!==undefined) ? `(${window.CLEAR_PLAYBACK_BRIDGE.toString()})();` : '')+(viewer.dataset.orderStage ? `window.__CLEAR_ORDER__=${JSON.stringify({stage:viewer.dataset.orderStage,sample:+viewer.dataset.orderSample||0})};(${window.CLEAR_ORDER_BRIDGE.toString()})();` : '');
+      const embedded = `<script>window.__CLEAR_CONTACT_SIDE__=${viewer.dataset.contactSide==='true'};window.__CLEAR_CHECKPOINT_REPLAY__=${!!viewer.dataset.locoViewer};window.__CLEAR_EXTERNAL_TIMELINE__=${viewer.dataset.externalTimeline==='true'};(${sceneLifecycle.toString()})();${bridge}window.__VISER_EMBED_DATA__=${JSON.stringify(recordingBase64(data))};window.__VISER_EMBED_CONFIG__={darkMode:false};<\/script>`;
       const html = new TextDecoder().decode(decodeHex(window.CLEAR_VIEWER_HEX));
       iframe.srcdoc = html.replace('</head>', embedded + '</head>');
       iframe.allow = 'fullscreen';
@@ -360,11 +375,15 @@ function wireViewer(viewer, onLaunch = () => {}) {
       else { launch.textContent = 'Retry 3D'; }
       return;
     }
+    if(event.data?.type==='clear-playback-time')viewer._lastReplayTime=event.data.time;
     if (event.data?.type !== 'clear-scene-ready') return;
     viewer.removeAttribute('aria-busy'); iframe.removeAttribute('tabindex');
     clearTimeout(timer); viewer.querySelector('.viewer-status')?.remove();
     iframe.classList.remove('scene-pending'); iframe.classList.add('scene-ready');
-    syncVisibility(); settled();
+    syncVisibility();
+    if(viewer.dataset.contactSide==='true')iframe.contentWindow.postMessage({type:'clear-contact-camera'},'*');
+    if(viewer._savedReplayTime>0){iframe.contentWindow.postMessage({type:'clear-playback-command',time:viewer._savedReplayTime,playing:inView&&!reduced.matches},'*');delete viewer._savedReplayTime;}
+    settled();
     revealTimer = setTimeout(() => { video.pause?.(); video.hidden = true; }, reduced.matches ? 0 : 350);
   });
   return reset;
@@ -382,7 +401,8 @@ for (const grid of document.querySelectorAll('.media-grid')) {
     clearTimeout(closeTimer);
     if (current === tile && !overlay.hidden) { pinOverlay(pinned || pin); return; }
     reset(); current=tile; pinOverlay(pin);
-    viewer.dataset.scene=tile.dataset.scene; viewer.dataset.title=tile.dataset.title;
+    viewer.dataset.scene=tile.dataset.scene; viewer.dataset.title=tile.dataset.title;viewer.dataset.contactSide=tile.dataset.contactSide||'';
+    if(tile.dataset.scene.startsWith('mpc-'))attachEgoVideo(viewer,tile.dataset.scene);
     overlay.querySelector('.focus-title').textContent=tile.dataset.title;
     const outcome=overlay.querySelector('.focus-outcome');
     if(outcome)outcome.textContent=[tile.dataset.outcome,tile.dataset.note].filter(Boolean).join(' · ');
@@ -410,11 +430,12 @@ for (const grid of document.querySelectorAll('.media-grid')) {
   });
   const keepOpen=()=>clearTimeout(closeTimer);
   const leave=event=>{
-    suppressHover=false;
     if(grid.contains(event.relatedTarget)||overlay.contains(event.relatedTarget))return;
+    suppressHover=false;
     clearTimeout(closeTimer);
     closeTimer=setTimeout(()=>{if(!pinned&&!grid.matches(':hover')&&!overlay.matches(':hover'))close();},160);
   };
+  grid.addEventListener('pointermove',event=>{if(suppressHover&&(event.movementX||event.movementY)){suppressHover=false;const tile=event.target.closest('.media-tile');if(tile&&hoverAvailable.matches&&!pinned)open(tile);}});
   grid.addEventListener('pointerenter',keepOpen);
   overlay.addEventListener('pointerenter',keepOpen);
   grid.addEventListener('pointerleave',leave);
@@ -433,7 +454,7 @@ const gridFamily = document.querySelector('#grid-family');
 gridFamily?.addEventListener('change', () => {
   document.querySelectorAll('[data-family]').forEach(panel => {
     panel.hidden = panel.dataset.family !== gridFamily.value;
-    if (panel.hidden) panel.querySelectorAll('.viewer-tools').forEach(button => button.click());
+    if(panel.hidden)panel.querySelectorAll('.viewer').forEach(viewer=>{viewer._savedReplayTime=viewer._lastReplayTime||0;viewer.dispatchEvent(new Event('reset-viewer'));viewer.dispatchEvent(new Event('scene-evicted'));});
   });
 });
 
@@ -441,7 +462,7 @@ const mazeFamily = document.querySelector('#maze-family');
 mazeFamily?.addEventListener('change', () => {
   document.querySelectorAll('[data-maze-family]').forEach(panel => {
     panel.hidden = panel.dataset.mazeFamily !== mazeFamily.value;
-    if (panel.hidden) panel.querySelectorAll('.viewer-tools').forEach(button => button.click());
+    if(panel.hidden)panel.querySelectorAll('.viewer').forEach(viewer=>{viewer._savedReplayTime=viewer._lastReplayTime||0;viewer.dispatchEvent(new Event('reset-viewer'));viewer.dispatchEvent(new Event('scene-evicted'));});
   });
 });
 
@@ -491,3 +512,18 @@ for(const button of document.querySelectorAll('[data-mpc-seek]')){
 
 // CSS traces follow document visibility as well as their viewport observer.
 document.addEventListener('visibilitychange',()=>document.documentElement.toggleAttribute('data-page-hidden',document.hidden));
+
+// One RGB inset follows the same physical recording as its outer view.
+function attachEgoVideo(viewer,scene){
+ const key='assets/media/'+scene+'-ego.mp4';if(!window.CLEAR_ASSET_REVISIONS?.[key])return;
+ viewer.dataset.ego='true';let inset=viewer.querySelector('.ego-inset');
+ if(!inset){inset=document.createElement('div');inset.className='ego-inset';inset.innerHTML='<span>Ego RGB</span><video muted playsinline preload="none"></video>';viewer.append(inset);}
+ inset.title='Rendered robot camera, synchronized with the recorded motion';
+ const main=viewer.querySelector('video'),ego=inset.querySelector('video');ego.muted=true;ego.playsInline=true;ego.src=clearAssetURL(key);ego.poster=clearAssetURL(key.replace('.mp4','.png'));
+ if(!main.paused){ego.preload='auto';ego.play().catch(()=>{});}
+ if(main._egoWired)return;main._egoWired=true;
+ const sync=()=>{if(viewer.querySelector('iframe.scene-ready'))return;if(ego.readyState&&Math.abs(ego.currentTime-main.currentTime)>.08)ego.currentTime=Math.min(main.currentTime,ego.duration-.01);};
+ main.addEventListener('play',()=>{ego.preload='auto';sync();ego.play().catch(()=>{});});
+ for(const event of ['timeupdate','seeking','seeked'])main.addEventListener(event,sync);
+ main.addEventListener('pause',()=>ego.pause());ego.addEventListener('loadeddata',()=>{sync();if(!main.paused)ego.play().catch(()=>{});});
+}

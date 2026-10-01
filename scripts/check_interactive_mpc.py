@@ -46,6 +46,12 @@ async def main():
    for i in [0,1]:
     assert await groups.nth(i).locator('.media-tile').count()==2
     assert await groups.nth(i).locator('.media-tile>span').all_text_contents()==['G1','Spot + arm']
+    for card in await groups.nth(i).locator('.media-tile').all():
+     inset=card.locator('.ego-inset');assert await inset.count()==1
+     outer=await card.bounding_box();inner=await inset.bounding_box()
+     assert .24<=inner['width']/outer['width']<=.29
+     assert inner['x']>=outer['x'] and inner['x']+inner['width']<=outer['x']+outer['width']+.5
+     assert inner['y']>=outer['y'] and inner['y']+inner['height']<=outer['y']+outer['height']
     boxes=[await tile.bounding_box() for tile in await groups.nth(i).locator('.media-tile').all()]
     assert abs(boxes[0]['y']-boxes[1]['y'])<1,'Both embodiments must occupy one row'
     assert boxes[1]['x']>=boxes[0]['x']+boxes[0]['width']
@@ -58,14 +64,14 @@ async def main():
     overlay=groups.nth(i).locator('.grid-focus')
     await overlay.wait_for()
     assert await overlay.get_attribute('data-pinned')=='false'
-    assert await overlay.locator('video').evaluate('e=>getComputedStyle(e).pointerEvents')=='auto'
+    assert await overlay.locator('.focus-viewer>video').evaluate('e=>getComputedStyle(e).pointerEvents')=='auto'
     enlarged=await overlay.locator('.focus-viewer').bounding_box()
     assert abs(enlarged['width']/enlarged['height']-4/3)<.03,'Expanded video must preserve its full view'
     # The enlarged surface itself must remain hoverable and clickable.
     await page.mouse.move(enlarged['x']+enlarged['width']/2,enlarged['y']+enlarged['height']-25)
     await page.wait_for_timeout(250)
     assert await overlay.is_visible()
-    await overlay.locator('video').click(position={'x':enlarged['width']/2,'y':enlarged['height']/2})
+    await overlay.locator('.focus-viewer>video').click(position={'x':enlarged['width']/2,'y':enlarged['height']/2})
     assert await groups.nth(i).locator('.grid-focus').is_visible()
     assert await overlay.get_attribute('data-pinned')=='true'
     await groups.nth(i).locator('.focus-close').click()

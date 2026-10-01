@@ -9,7 +9,7 @@
  const splitLabel=sample=>sample.queryOnly?'Scene query':sample.split==='train'?'Training':sample.split==='evaluation'?'Evaluation replay':'Validation';
  function element(name,attrs){const el=document.createElementNS(ns,name);for(const [key,value]of Object.entries(attrs))el.setAttribute(key,value);return el;}
  for(const root of document.querySelectorAll('.learning-explorer')){
-  let initialized=false,visible=false,playing=false,index=0,progress=0,last=0,frame=0,samples=[],dots=[],filter='all',colorBy='terrain';
+  let initialized=false,visible=false,playing=!reduced.matches,index=0,progress=0,last=0,frame=0,samples=[],dots=[],filter='all',colorBy='terrain';
   const canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d'),range=root.querySelector('.sample-progress'),play=root.querySelector('.sample-play');
   const grid=root.querySelector('.sample-explorer-grid');
   let mediaTimer, movieVisible=false;
@@ -25,7 +25,7 @@
    root.dataset.factor=key||'';let count=0;
    dots.forEach((dot,i)=>{const same=!!key&&signature(samples[i],key)===signature(sample,key);if(same)count++;dot.classList.toggle('factor-match',same);dot.classList.toggle('factor-unmatched',!!key&&!same);});
    root.dataset.factorMatches=String(count);
-   factorNote.textContent=key?count+' points share this '+({body:'body structure',objects:'object configuration',scene:'scene geometry',query:'query'}[key])+'.': 'Hover or focus an input to outline matching samples. Each point encodes the combined inputs. The t-SNE axes do not represent individual factors.';
+   factorNote.textContent=key?count+' points share this '+({body:'body structure',objects:'object configuration',scene:'scene geometry',query:'query'}[key])+'.': 'Hover an input to highlight matching samples.';
   }
   function inputFactors(sample){
    factors.replaceChildren();
@@ -48,6 +48,7 @@
   const arrow=element('marker',{id:'sample-arrow-'+root.dataset.kind,viewBox:'0 0 8 8',refX:7,refY:4,markerWidth:6,markerHeight:6,orient:'auto'});arrow.append(element('path',{d:'M 1 1 L 7 4 L 1 7',fill:'none',stroke:'#748d80','stroke-width':1.2}));
   mask.append(reveal);defs.append(mask,arrow);connector.append(defs,leader,outline);leader.setAttribute('mask','url(#sample-reveal-'+root.dataset.kind+')');leader.setAttribute('marker-end','url(#sample-arrow-'+root.dataset.kind+')');grid.append(connector);
   const phaseLabel=document.createElement('p');phaseLabel.className='sample-phase';canvas.after(phaseLabel);
+  if(movie)root.querySelector('.sample-map-details').before(root.querySelector('.sample-target'));
   function connect(animate=false){
    if(!dots[index]||!visible)return;
    const bounds=grid.getBoundingClientRect(),a=dots[index].getBoundingClientRect(),b=(movie||canvas).getBoundingClientRect();
@@ -138,7 +139,7 @@
     const colorSelect=document.createElement('select');colorSelect.setAttribute('aria-label','Color embedding points by');
     for(const [key,label]of [['terrain','Scene type'],['body','Robot body']]){const option=document.createElement('option');option.value=key;option.textContent=label;colorSelect.append(option);}
     colorLabel.append(colorSelect);const legend=document.createElement('div');legend.className='sample-color-legend';
-    const meaning=document.createElement('p');meaning.className='sample-embedding-note';meaning.textContent='Each point is one '+(root.dataset.kind==='grounding'?'recorded crossing query':'planning query')+'. Nearby points have similar learned features. Filled: training. Outlined: validation. Dashed: evaluation.'+(root.dataset.kind==='ordering'?' Dotted: new scene query without execution.':'');
+    const meaning=document.createElement('p');meaning.className='sample-embedding-note';meaning.textContent='One point per query. Nearby points have similar learned features. Filled: training. Outlined: validation. Dashed: evaluation.'+(root.dataset.kind==='ordering'?' Dotted: unexecuted query.':'');
     colorControls.append(colorLabel,legend);svg.before(colorControls);svg.after(meaning);
     function recolor(){
      const palette=colorBy==='terrain'?terrainColors:colors;

@@ -7,6 +7,11 @@ from bs4 import BeautifulSoup
 ROOT = Path(__file__).resolve().parents[1]
 path = ROOT / 'index.html'
 soup = BeautifulSoup(path.read_text(), 'html.parser')
+# The continuous layout owns the newer arrangement and its idempotent rebuild.
+if soup.body.get('data-reading-layout') == 'continuous':
+    import subprocess, sys
+    subprocess.run([sys.executable, str(ROOT/'scripts/build_continuous_layout.py')], check=True)
+    raise SystemExit(0)
 
 def fragment(html):
     return BeautifulSoup(html, 'html.parser')

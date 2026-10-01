@@ -84,6 +84,7 @@
    detail(ctx,r,u,actual,time,colors,c,forecastValid);
    if(mode==='2d')for(let a=0;a<3;a++)stroke(ctx,[[tx(interactionEnd-start),66+a*151],[tx(interactionEnd-start),177+a*151]],'#94a28a',1,[3,4]);
   }syncContext();
+  root.dispatchEvent(new CustomEvent('clear-mpc-clock',{bubbles:true,detail:{time:elapsed,playing:playing&&visible&&!document.hidden,speed:2}}));
  }
  function syncContext(force=false){if(!robotOverlay)return;if(!force&&Math.abs(elapsed-lastContextTime)<.05)return;lastContextTime=elapsed;for(const panel of panels)panel.querySelector('.mpc-context-viewer iframe.scene-ready')?.contentWindow.postMessage({type:'clear-playback-command',time:elapsed,playing:false},'*');}
  function showContext(){
@@ -109,7 +110,7 @@
    status.hidden=true;root.querySelector('.mpc-process-content').hidden=false;render();schedule();
   }catch(error){data=null;status.textContent='Trajectories are taking longer to load. ';const b=document.createElement('button');b.textContent='Retry';b.onclick=initialize;status.append(b);}finally{loading=false;}
  }
- new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible){initialize();schedule();}else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:'0px'}).observe(root);
+ new IntersectionObserver(entries=>{visible=entries.at(-1).isIntersecting;if(visible){initialize();schedule();}else{cancelAnimationFrame(frame);frame=0;last=0;render();}},{rootMargin:'0px'}).observe(root);
  play.onclick=()=>{playing=!playing;if(playing&&elapsed>=playEnd)elapsed=0;render();schedule();};slider.oninput=()=>{elapsed=+slider.value*playEnd;render();};
  root.querySelectorAll('[data-mpc-view]').forEach(button=>button.onclick=()=>{mode=button.dataset.mpcView;if(mode==='2d'&&robotOverlay){robotOverlay=false;showContext();}root.querySelectorAll('[data-mpc-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();});
  root.querySelector('#mpc-robot-context').onclick=()=>{if(mode==='2d')root.querySelector('[data-mpc-view="3d"]').click();robotOverlay=!robotOverlay;showContext();};
@@ -129,5 +130,5 @@
   canvas.ondblclick=()=>{if(mode==='3d')resetCamera();};canvas.oncontextmenu=e=>{if(mode==='3d')e.preventDefault();};
   canvas.onkeydown=e=>{if(mode!=='3d')return;const changes={ArrowLeft:()=>camera.yaw+=.12,ArrowRight:()=>camera.yaw-=.12,ArrowUp:()=>camera.pitch=Math.min(1.4,camera.pitch+.08),ArrowDown:()=>camera.pitch=Math.max(.12,camera.pitch-.08),'+':()=>camera.zoom=Math.min(4,camera.zoom*1.15),'=':()=>camera.zoom=Math.min(4,camera.zoom*1.15),'-':()=>camera.zoom=Math.max(.6,camera.zoom/1.15),Home:resetCamera};if(changes[e.key]){e.preventDefault();changes[e.key]();cameraChanged();}};
  }
- document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;last=0;}else schedule();});reduced.addEventListener('change',()=>{if(reduced.matches){playing=false;render();}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;last=0;render();}else schedule();});reduced.addEventListener('change',()=>{if(reduced.matches){playing=false;render();}});
 })();

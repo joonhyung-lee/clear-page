@@ -21,7 +21,7 @@
     "goalReached": false,
     "contactField": "Contact locations reconstructed from recorded physical states. Whole-body target contacts are permitted.",
     "scope": "SUMO G1 box reward and native G1 dynamics adapted to the shared box scene in a goal-centered rigid coordinate frame. Population 24, complete offline rollouts, and whole-body target contact. Different runtime and action representation from the optimized controller. Not an isolated selector ablation.",
-    "insetView": "A rear oblique camera follows the recorded robot pose. This is a chase view, not an onboard camera.",
+    "insetView": "Reconstructed torso camera from saved native body transforms. Camera offset (0.14, 0, 0.30) m, forward +X, up +Z, vertical FOV 60 degrees. Display annotations are hidden. This is a replay rendering, not sensor telemetry.",
     "palmAnchors": 2,
     "palmAnchorScope": "Light red markers follow the two recorded palm sites. They are not commanded hand targets or evidence of palm contact."
   },

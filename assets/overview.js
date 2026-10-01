@@ -105,16 +105,17 @@
       items.forEach(([file,caption])=>{
         const figure=document.createElement('figure'),label=document.createElement('figcaption');label.textContent=caption;
         if(file.startsWith('illustration-')){
-          const source=document.querySelector(file==='illustration-order'?'#method-order .sequence-explanation svg':'#method-flow .sequence-explanation svg');
-          if(source){const diagram=source.cloneNode(true);diagram.style.width='100%';diagram.style.maxHeight='280px';figure.append(diagram);}
+          const kind=file==='illustration-order'?'ordering':file==='illustration-scene'?'scene':'flow';
+          const diagram=window.CLEAR_METHOD_SCHEMATIC?.createPreview(kind);
+          if(diagram){diagram.style.width='100%';diagram.style.maxHeight='360px';figure.append(diagram);}
           figure.append(label);gallery.append(figure);
         }else if(file.startsWith('method-')||file==='mpc-optimized'){
-          const v=document.createElement('div');v.className='viewer overview-live-viewer';v.dataset.scene=file;v.dataset.title=caption;v.dataset.generation='true';
+          const v=document.createElement('div');v.className='viewer overview-live-viewer';v.dataset.scene=file;v.dataset.title=caption;v.dataset.generation='true';if(file==='mpc-optimized')v.dataset.ego='true';
           if(file==='method-order-maze'){v.dataset.orderStage='supervision';label.textContent='Designated teaser reference interaction';}
           const poster=document.createElement(file==='mpc-optimized'?'video':'img');poster.className='preview-image';
-          if(poster.tagName==='VIDEO'){poster.muted=true;poster.loop=true;poster.playsInline=true;poster.poster=clearAssetURL('assets/media/'+file+'.png');poster.src=clearAssetURL('assets/media/'+file+'.mp4');}
+          if(poster.tagName==='VIDEO'){poster.muted=true;poster.loop=true;poster.playsInline=true;const media=file==='mpc-optimized'?'mpc-optimized-contact':file;poster.poster=clearAssetURL('assets/media/'+media+'.png');poster.src=clearAssetURL('assets/media/'+media+'.mp4');v.dataset.contactSide='true';}
           else{poster.src=clearAssetURL('assets/media/'+file+'.png');poster.alt=caption;}
-          const button=document.createElement('button');button.className='launch';button.textContent='Play example';button.type='button';v.append(poster,button);figure.append(v,label);gallery.append(figure);wireViewer(v);
+          const button=document.createElement('button');button.className='launch';button.textContent='Play example';button.type='button';v.append(poster,button);if(file==='mpc-optimized')attachEgoVideo(v,file);figure.append(v,label);gallery.append(figure);wireViewer(v);
         }else{
           const movie=document.createElement('video');movie.muted=true;movie.loop=true;movie.playsInline=true;movie.preload='none';movie.poster=clearAssetURL('assets/media/'+file+'.png');movie.src=clearAssetURL('assets/media/'+file+'.mp4');figure.append(movie,label);gallery.append(figure);
         }
@@ -142,7 +143,7 @@
     node.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();node.click();}if(event.key==='Escape')node.blur();});
   });
   buttons.forEach(button=>button.addEventListener('click',()=>showPreview(root.querySelector('#overview-'+button.dataset.overviewStage),examples[button.dataset.overviewStage])));
-  const inputExamples=[['structure-g1','Robot structure'],['objects','Object states and next states'],['scene-maze','Scene geometry']];
+  const inputExamples=[['structure-g1','Robot structure'],['objects','Object states and next states'],['illustration-scene','Scene geometry · Shared illustrative maze']];
   root.querySelectorAll('#overview-inputs>div').forEach((node,i)=>addPreview(node,[inputExamples[i]],'input-'+i));
   reducedMotion.addEventListener('change',draw);
   new ResizeObserver(()=>{draw();drawPreview();}).observe(flow);

@@ -1,7 +1,21 @@
 /* Native timeline remains authoritative, including seeks and pauses. */
 window.CLEAR_PLAYBACK_BRIDGE=function(){
  let previous='',command=null,afterSeek=null;
- let viewer=null;
+ let viewer=null,sideApplied=false;
+ function setContactCamera(){
+  if(!window.__CLEAR_CONTACT_SIDE__||sideApplied)return;
+  const root=document.querySelector('#root'),key=root&&Object.keys(root).find(k=>k.startsWith('__reactContainer'));
+  if(!key)return;
+  const queue=[root[key],root[key]?.stateNode?.current],seen=new Set();
+  while(queue.length){const f=queue.pop();if(!f||seen.has(f))continue;seen.add(f);const v=f.memoizedProps?.value;
+   if(v?.mutable?.current?.cameraControl&&v?.useSceneTree?.get('')?.wxyz){
+    const m=v.mutable.current,q=v.useSceneTree.get('').wxyz,r=m.camera.quaternion.clone().set(q[1],q[2],q[3],q[0]);
+    const eye=m.camera.position.clone().set(2.6,-1.8,1.5).applyQuaternion(r),at=m.camera.position.clone().set(0,.5,.7).applyQuaternion(r);
+    m.cameraControl.setLookAt(...eye.toArray(),...at.toArray(),false);sideApplied=true;return;
+   }queue.push(f.child,f.sibling,f.alternate);
+  }
+ }
+
  function compactCheckpointUpdates(){
   if(!window.__CLEAR_CHECKPOINT_REPLAY__)return;
   if(!viewer){
@@ -37,9 +51,9 @@ window.CLEAR_PLAYBACK_BRIDGE=function(){
   while(f){const p=f.memoizedProps;if(p?.step===.0001&&typeof p.value==='number')return p.value;f=f.return;}
   return Number(input.value);
  }
- window.addEventListener('message',e=>{if(e.source===parent&&e.data?.type==='clear-playback-command')command=e.data;});
+ window.addEventListener('message',e=>{if(e.source!==parent)return;if(e.data?.type==='clear-playback-command')command=e.data;else if(e.data?.type==='clear-contact-camera'){sideApplied=false;setContactCamera();}});
  const interval=setInterval(()=>{
-  compactCheckpointUpdates();
+  setContactCamera();compactCheckpointUpdates();
   const input=document.querySelector('input'),button=document.querySelector('[class*="tabler-icon-player-play"],[class*="tabler-icon-player-pause"]')?.closest('button');if(!input||!button)return;
   let playing=!!button.querySelector('.tabler-icon-player-pause-filled');
   if(command){

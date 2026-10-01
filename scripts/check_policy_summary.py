@@ -1,40 +1,28 @@
-"""Check real checkpoint previews, incomplete finals and explicit replay launch."""
+"""Verify the directly visible policy view and automatic body-specific replays."""
 import asyncio
 from playwright.async_api import async_playwright
-
-
+from check_continuous_layout import GPU
 async def main():
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(args=['--use-angle=vulkan', '--enable-features=Vulkan',
-            '--disable-vulkan-surface', '--enable-gpu', '--ignore-gpu-blocklist'])
-        page = await browser.new_page(viewport={'width': 1440, 'height': 1000}, reduced_motion='reduce')
-        await page.goto('http://localhost:8765/#learning-policy-summary', wait_until='domcontentloaded')
-        summary = page.locator('#learning-policy-summary')
-        training = page.locator('#controller-pretraining')
-        assert await summary.locator('.policy-summary-checkpoint:visible').count() == 3
-        assert await summary.locator('[data-policy-summary-panel="g1"] button').last.is_disabled()
-        assert not await training.is_visible()
-        await training.evaluate('e=>e.closest("details").open=true')
-        await training.scroll_into_view_if_needed()
-        await page.wait_for_function("document.querySelector('#spot-curriculum').dataset.body==='g1'")
-        assert await training.locator('iframe').count() == 0, 'Opening learning details must not launch a native scene'
-        await summary.locator('[data-policy-summary-body="spot"]').click()
-        card = summary.locator('[data-policy-summary-panel="spot"] [data-summary-stage="locomotion"]')
-        scene = await card.get_attribute('data-summary-scene')
-        await card.click()
-        await page.wait_for_function("document.querySelector('#spot-curriculum').dataset.body==='spot'")
-        viewer = training.locator('#spot-curriculum .viewer')
-        await page.wait_for_function('(scene)=>document.querySelector("#spot-curriculum .viewer")?.dataset.scene===scene', arg=scene)
-        await viewer.locator('iframe.scene-ready').wait_for(timeout=90000)
-        assert '3,000' in await training.locator('[data-curriculum-caption]').inner_text()
-        await page.screenshot(path='/tmp/clear-policy-summary-replay.png')
-        await page.set_viewport_size({'width': 390, 'height': 900})
-        await summary.scroll_into_view_if_needed()
-        assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
-        await summary.screenshot(path='/tmp/clear-policy-summary-mobile.png')
-        await browser.close()
-    print('PASS three checkpoint summaries, unavailable final, body-specific replay selection, click-only native startup and mobile layout')
-
-
-if __name__ == '__main__':
-    asyncio.run(main())
+ async with async_playwright() as p:
+  b=await p.chromium.launch(args=GPU);page=await b.new_page(viewport={'width':1440,'height':1000});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+  await page.goto('http://localhost:8765/#controller-pretraining',wait_until='domcontentloaded')
+  root=page.locator('#controller-pretraining');await root.scroll_into_view_if_needed()
+  assert await page.locator('#learning-policy-summary').count()==0
+  assert await root.evaluate("e=>!e.closest('details:not([open])')")
+  scenes=[]
+  for body in ['g1','spot','spot_arm']:
+   await root.locator(f'[data-loco-body="{body}"]').click()
+   await page.wait_for_function('(body)=>document.querySelector("#spot-curriculum").dataset.body===body',arg=body)
+   viewer=root.locator('#spot-curriculum .scratch-viewer');await viewer.scroll_into_view_if_needed()
+   await viewer.locator('iframe.scene-ready').wait_for(timeout=90000)
+   scene=await viewer.get_attribute('data-scene');scenes.append(scene)
+   await viewer.evaluate('v=>window.policyFrame=v.querySelector("iframe")')
+   await root.locator('#spot-curriculum [data-curriculum-metrics="task"]').click()
+   assert await viewer.evaluate('v=>v.querySelector("iframe")===policyFrame')
+   await page.wait_for_function('document.querySelector("#spot-curriculum .scratch-viewer")._lastReplayTime>0',timeout=30000)
+   print('PASS automatic policy replay',body,scene,flush=True)
+  assert len(set(scenes))==3
+  assert not errors,errors
+  await b.close()
+ print('PASS visible policy training, three distinct automatic replays and continuous metric switching')
+if __name__=='__main__':asyncio.run(main())
