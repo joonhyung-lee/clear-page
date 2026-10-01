@@ -96,6 +96,7 @@ def annotate(folder, scene, cache, source=None):
     result = json.loads((folder / 'result.json').read_text())
     variable_delay=bool(result.get('commandSettings',{}).get('commandHoldIntervals'))
     diagnostic_label='Cost ablation' if result.get('costAblation') else 'Variable-delay actuation stress test' if variable_delay else None
+    if result.get('gainDiagnostic'):diagnostic_label=f"P gain ×{result['gainDiagnostic']['scale']:g}"
     times, eef, anchors, lanes = paths(folder)
     objects, footprint, reference, object_lanes, size = object_paths(folder, source)
     recording = ROOT / 'assets/recordings' / (scene + '.viser')
@@ -250,6 +251,8 @@ def annotate(folder, scene, cache, source=None):
                 error=np.linalg.norm(objects[i,:2]-reference[-1,:2])
                 draw.text((20,height-31),f'Goal error {error:.2f} m',font=font,fill=OBJECT_COLOR)
                 scope='Cost ablation' if result.get('costAblation') else 'Variable-delay stress test' if variable_delay else 'Recorded motion · extended arm'
+                if result.get('gainDiagnostic'):scope=diagnostic_label
+                if result.get('gainDiagnostic') and result.get('failedAttempt'):scope='P ×3 · Contact timeout'
                 draw.text((170,height-31),scope,font=font,fill=(75,82,79))
                 if frame == 0:image.save(video.with_suffix('.png'))
                 if frame in [0, 250, 500]:image.save(cache / f'{scene}-{frame}.png')
@@ -265,7 +268,7 @@ def annotate(folder, scene, cache, source=None):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('baked', type=Path)
-    parser.add_argument('scene', choices=['mpc-spot-optimized', 'mpc-spot-held-arm','mpc-spot-variable-delay','mpc-spot-cost-ablation'])
+    parser.add_argument('scene', choices=['mpc-spot-optimized','mpc-spot-baseline', 'mpc-spot-held-arm','mpc-spot-variable-delay','mpc-spot-cost-ablation','mpc-spot-high-kp'])
     parser.add_argument('--source-cache', type=Path, required=True,
                         help='Retains the original unannotated video for repeatable exports')
     parser.add_argument('--reference-source',type=Path,

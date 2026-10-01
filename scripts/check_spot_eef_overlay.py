@@ -13,6 +13,10 @@ scenes = {row['scene'] for row in json.loads((ROOT/'assets/controller-gallery.js
           if row.get('body') == 'spot_arm'}
 scenes.add('mpc-spot-held-arm')
 for scene in sorted(scenes):
+    if scene=='mpc-spot-native':
+        from check_native_baseline_replays import check_scene
+        check_scene(scene)
+        continue
     record, buffers = read_recording(ROOT / f'assets/recordings/{scene}.viser')
     validate_binary_arrays(record, buffers)
     messages = record['messages']
@@ -21,6 +25,8 @@ for scene in sorted(scenes):
                    for _,m in messages), 'The native diagnostic must retain its scope label'
     if scene=='mpc-spot-cost-ablation':
         assert any(m.get('props',{}).get('text')=='Cost ablation' for _,m in messages)
+    if scene=='mpc-spot-high-kp':
+        assert any(m.get('props',{}).get('text')=='P gain ×3' for _,m in messages)
     body = {t: m['position'] for t, m in messages
             if m['type'] == 'SetPositionMessage' and m['name'] == '/body-20'}
     current = {t: m['position'] for t, m in messages

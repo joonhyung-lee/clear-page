@@ -25,10 +25,10 @@ for folder, scene in inputs:
     outcome = json.loads((folder/'result.json').read_text())
     record, buffers = read_recording(root/f'assets/recordings/{scene}.viser')
     assert record['durationSeconds'] == float(states['time'][-1]) == outcome['duration']
-    if outcome['task']=='spot_box':
+    if outcome['task']=='spot_box' or outcome.get('nativeController'):
         gallery=json.loads((root/'assets/controller-gallery.json').read_text())
         entry=next(r for r in gallery if r['scene']==scene)
-        assert entry['body']=='spot_arm'
+        assert entry['body']==outcome.get('robot','spot_arm')
         assert entry['outcome']==f"{outcome['moved']:.2f} m moved · {outcome['goalError']:.2f} m goal error · {outcome['duration']:.1f} s"
         np.testing.assert_allclose(next(m['position'] for t,m in record['messages'] if m['type']=='SetCameraPositionMessage'),outcome['camera']['position'])
     else:
@@ -65,7 +65,7 @@ for folder, scene in inputs:
     saved = {'positions': [], 'quaternions': []}
     expected = {'positions': [], 'quaternions': []}
     for time, message in record['messages']:
-        if message['type'] not in ['SetPositionMessage', 'SetOrientationMessage'] or not message['name']:
+        if message['type'] not in ['SetPositionMessage', 'SetOrientationMessage'] or not message['name'].startswith('/body-'):
             continue
         frame = int(np.searchsorted(states['time'], time))
         assert states['time'][frame] == time

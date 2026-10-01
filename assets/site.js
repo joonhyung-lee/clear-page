@@ -482,21 +482,15 @@ window.addEventListener('message',event=>{
   if(event.data?.type!=='clear-playback-time'||!Number.isFinite(event.data.time))return;
   for(const viewer of document.querySelectorAll('.viewer[data-ego]')){
     if(viewer.querySelector('iframe')?.contentWindow!==event.source)continue;
-    const video=viewer.querySelector('.ego-inset video');
-    const time=Math.max(0,Math.min(event.data.time,Number.isFinite(video.duration)?video.duration-.01:event.data.time));
-    if(video.readyState&&Math.abs(video.currentTime-time)>.055)video.currentTime=time;
+    if(viewer.dataset.executionClock&&viewer._egoClockMode==='external')continue;
+    syncEgoClock(viewer,event.data,'native');
   }
 });
 
 // Detail views accompany the video preview as well as native 3D playback.
 for(const viewer of document.querySelectorAll('.mpc-comparison .viewer[data-ego]')){
- const main=viewer.querySelector('.preview-video'),detail=viewer.querySelector('.ego-inset video');
- if(!main||!detail)continue;
- const synchronize=()=>{if(viewer.querySelector('iframe.scene-ready'))return;if(detail.readyState&&Math.abs(detail.currentTime-main.currentTime)>.08)detail.currentTime=Math.min(main.currentTime,detail.duration-.01);};
- main.addEventListener('play',()=>{if(detail.preload==='none'){detail.preload='auto';detail.load();}synchronize();detail.play().catch(()=>{});});
- for(const name of ['timeupdate','seeking','seeked'])main.addEventListener(name,synchronize);
- main.addEventListener('pause',()=>detail.pause());main.addEventListener('ended',()=>detail.pause());
- detail.addEventListener('loadeddata',()=>{synchronize();if(!main.paused&&!viewer.querySelector('iframe.scene-ready'))detail.play().catch(()=>{});});
+ const main=viewer.querySelector('.preview-video'),ego=viewer.querySelector('.ego-inset video');
+ if(main&&ego)wireEgoVideo(viewer,main,ego);
 }
 
 // Inspect measured contact events in either the movie or the native replay.
@@ -514,16 +508,58 @@ for(const button of document.querySelectorAll('[data-mpc-seek]')){
 document.addEventListener('visibilitychange',()=>document.documentElement.toggleAttribute('data-page-hidden',document.hidden));
 
 // One RGB inset follows the same physical recording as its outer view.
+// Let the decoder play continuously. Seek only for explicit jumps or large drift.
+function syncEgoClock(viewer,clock,mode='video'){
+ const ego=viewer.querySelector('.ego-inset video');if(!ego||!Number.isFinite(clock.time))return;
+ const now=performance.now()/1000,previous=viewer._egoClock;
+ let rate=Number.isFinite(clock.rate)?clock.rate:1;
+ const same=previous&&viewer._egoClockMode===mode;
+ if(mode==='native'&&same&&clock.playing&&previous.playing){
+  const elapsed=now-previous.wall,advance=clock.time-previous.time;
+  if(elapsed>.025&&advance>=0&&advance/elapsed<8)rate=Math.max(.1,advance/elapsed);
+  else rate=previous.rate;
+ }
+ const expected=same?previous.time+(previous.playing?(now-previous.wall)*previous.rate:0):clock.time;
+ const jump=!!clock.seek||(same&&Math.abs(clock.time-expected)>.5);
+ viewer._egoClockMode=mode;viewer._egoClock={...clock,rate,wall:now};
+ if(ego.preload!=='auto')ego.preload='auto';
+ if(!ego.readyState)return;
+ const end=Number.isFinite(ego.duration)?Math.max(0,ego.duration-.001):Infinity;
+ const target=Math.max(0,Math.min(clock.time,end)),error=target-ego.currentTime;
+ const playing=!!clock.playing&&target<end;
+ if(!ego.seeking&&(jump||Math.abs(error)>.5||(!playing&&Math.abs(error)>.025)))ego.currentTime=target;
+ const correction=playing&&!jump&&Math.abs(error)<.5?Math.max(-.08,Math.min(.08,error*.3)):0;
+ ego.playbackRate=Math.max(.1,Math.min(8,rate+correction));
+ if(playing){ego.preload='auto';if(ego.paused)ego.play().catch(()=>{});}else ego.pause();
+}
+function wireEgoVideo(viewer,main,ego){
+ if(main._egoWired)return;main._egoWired=true;
+ let waiting=false;
+ const sync=(seek=false)=>{
+  if(viewer.dataset.executionClock||viewer.querySelector('iframe.scene-ready'))return;
+  syncEgoClock(viewer,{time:main.currentTime,playing:!main.paused&&!waiting,rate:main.playbackRate,seek},'video');
+ };
+ main.addEventListener('play',()=>{waiting=false;ego.preload='auto';sync();});
+ main.addEventListener('playing',()=>{waiting=false;sync();});
+ for(const event of ['timeupdate','ratechange'])main.addEventListener(event,()=>sync());
+ for(const event of ['seeking','seeked'])main.addEventListener(event,()=>sync(true));
+ for(const event of ['pause','ended'])main.addEventListener(event,()=>sync());
+ main.addEventListener('waiting',()=>{waiting=true;sync();});
+ ego.addEventListener('loadeddata',()=>{
+  if((viewer.dataset.executionClock||viewer.querySelector('iframe.scene-ready'))&&viewer._egoClock)syncEgoClock(viewer,viewer._egoClock,viewer._egoClockMode);
+  else sync(true);
+ });
+ if(!main.paused)sync();
+}
 function attachEgoVideo(viewer,scene){
  const key='assets/media/'+scene+'-ego.mp4';if(!window.CLEAR_ASSET_REVISIONS?.[key])return;
  viewer.dataset.ego='true';let inset=viewer.querySelector('.ego-inset');
  if(!inset){inset=document.createElement('div');inset.className='ego-inset';inset.innerHTML='<span>Ego RGB</span><video muted playsinline preload="none"></video>';viewer.append(inset);}
  inset.title='Rendered robot camera, synchronized with the recorded motion';
- const main=viewer.querySelector('video'),ego=inset.querySelector('video');ego.muted=true;ego.playsInline=true;ego.src=clearAssetURL(key);ego.poster=clearAssetURL(key.replace('.mp4','.png'));
- if(!main.paused){ego.preload='auto';ego.play().catch(()=>{});}
- if(main._egoWired)return;main._egoWired=true;
- const sync=()=>{if(viewer.querySelector('iframe.scene-ready'))return;if(ego.readyState&&Math.abs(ego.currentTime-main.currentTime)>.08)ego.currentTime=Math.min(main.currentTime,ego.duration-.01);};
- main.addEventListener('play',()=>{ego.preload='auto';sync();ego.play().catch(()=>{});});
- for(const event of ['timeupdate','seeking','seeked'])main.addEventListener(event,sync);
- main.addEventListener('pause',()=>ego.pause());ego.addEventListener('loadeddata',()=>{sync();if(!main.paused)ego.play().catch(()=>{});});
+ const main=viewer.querySelector('video'),ego=inset.querySelector('video');ego.muted=true;ego.playsInline=true;
+ if(viewer._egoScene!==scene){
+  viewer._egoScene=scene;viewer._egoClock=null;
+  ego.src=clearAssetURL(key);ego.poster=clearAssetURL(key.replace('.mp4','.png'));
+ }
+ wireEgoVideo(viewer,main,ego);
 }

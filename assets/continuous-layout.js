@@ -4,10 +4,7 @@
  document.querySelectorAll('.media-tile[data-scene^="mpc-"]').forEach(tile=>attachEgoVideo(tile,tile.dataset.scene));
  document.querySelectorAll('.execution-body-viewer').forEach(viewer=>{
   const main=viewer.querySelector('.preview-video'),ego=viewer.querySelector('.ego-inset video');
-  const sync=()=>{if(viewer.querySelector('iframe.scene-ready'))return;if(ego.readyState&&Math.abs(ego.currentTime-main.currentTime)>.08)ego.currentTime=Math.min(main.currentTime,ego.duration-.01);};
-  main.addEventListener('play',()=>{ego.preload='auto';sync();ego.play().catch(()=>{});});
-  for(const event of ['timeupdate','seeking','seeked'])main.addEventListener(event,sync);
-  main.addEventListener('pause',()=>ego.pause());ego.addEventListener('loadeddata',()=>{sync();if(!main.paused)ego.play().catch(()=>{});});
+  wireEgoVideo(viewer,main,ego);
  });
  document.querySelector('[data-paper-figure]')?.addEventListener('click',()=>{
   const dialog=document.querySelector('#resource-dialog');dialog.querySelector('h2').textContent='Architecture in the paper';
@@ -28,12 +25,13 @@
   const video=view.querySelector('.preview-video'),ego=view.querySelector('.ego-inset video');
   const limit=Number.isFinite(video.duration)?Math.max(0,video.duration-.04):Infinity;
   const target=Math.min(clock.time,limit),finished=clock.time>=limit;
-  for(const media of [video,ego]){
+  for(const media of [video]){
    if(media.preload!=='auto')media.preload='auto';
    media.playbackRate=clock.speed;
    if(media.readyState&&!media.seeking&&Math.abs(media.currentTime-Math.min(target,media.duration-.04))>.14)media.currentTime=Math.max(0,Math.min(target,media.duration-.04));
    if(clock.playing&&!finished&&!view.querySelector('iframe.scene-ready')){if(media.paused)media.play().catch(()=>{});}else media.pause();
   }
+  syncEgoClock(view,{time:target,playing:clock.playing&&!finished,rate:clock.speed},'external');
   const native=view.querySelector('iframe.scene-ready');
   if(native&&(!view._clockSent||Math.abs(target-view._clockSent)>.08)){native.contentWindow.postMessage({type:'clear-playback-command',time:target,playing:false},'*');view._clockSent=target;}
   view.querySelector('.execution-clock-note').textContent=finished&&view.dataset.executionClock==='optimized'?'First interaction complete · Final video frame':target.toFixed(1)+' s · Recorded motion';

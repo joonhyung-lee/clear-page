@@ -11,7 +11,7 @@ import mujoco
 import numpy as np
 
 
-def bake(folder, output):
+def bake(folder, output, include_failed_attempt=False):
     result=json.loads((folder/'result.json').read_text())
     source=np.load(folder/'task.npz')
     model=mujoco.MjModel.from_binary_path(str(folder/'task.mjb'))
@@ -23,15 +23,20 @@ def bake(folder, output):
     assert model.jnt_type[joint]==mujoco.mjtJoint.mjJNT_FREE
     xy=qpos[:,address:address+2]
     displaced=np.flatnonzero(np.linalg.norm(xy-xy[0],axis=1)>.03)
-    if not len(displaced):raise ValueError('No measured object push to export')
     pushes=[e for e in result['events'] if e['stage']=='push']
     assert len(pushes)==1,'Expected exactly one object interaction'
     stop=min(float(pushes[0]['time_s']),float(times[-1]))
     speed=np.linalg.norm(np.diff(xy,axis=0),axis=1)/np.diff(times)
     moving=np.flatnonzero((speed>.015)&(times[1:]<=stop))+1
-    assert len(moving)
-    begin=max(float(times[0]),float(times[displaced[0]])-1.)
-    end=min(stop,float(times[moving[-1]])+.8)
+    no_push=not len(displaced)
+    if no_push:
+        if not include_failed_attempt:raise ValueError('No measured object push to export; use --include-failed-attempt for the complete failed attempt')
+        assert not pushes[0]['success'],'Successful runs require measured motion'
+        begin=float(times[0]);end=float(times[-1])
+    else:
+        assert len(moving)
+        begin=max(float(times[0]),float(times[displaced[0]])-1.)
+        end=min(stop,float(times[moving[-1]])+.8)
     assert end>begin
     available=np.flatnonzero((times>=begin)&(times<=end))
     # Retain at least 25 physical frames per second, including the final state.
@@ -76,11 +81,18 @@ def bake(folder, output):
         controller=result['config']['interaction']['selector'],
         pushReportedSuccess=bool(pushes[0]['success']),
         costAblation=result.get('costAblation'),
+        gainDiagnostic=result.get('gainDiagnostic'),
+        failedAttempt=no_push,
+        failureReason=pushes[0].get('info',{}).get('reason') if no_push else None,
         commandSettings=dict(armCommandShaping=result.get('armCommandShaping','bounded'),
                              armCommandHz=result.get('armCommandHz'),
                              commandHoldIntervals=result.get('commandHoldIntervals'),
                              armTrustRegion=result['config']['interaction']['spot_trust_region_rad']),
-        scope='Recorded object pushing interval. Subsequent arm stow and navigation are outside this clip.')
+        scope=('Complete failed attempt, including approach and contact preparation. No object push occurred. '+pushes[0].get('info',{}).get('reason','Interaction failed')+'.') if no_push else 'Recorded object pushing interval. Subsequent arm stow and navigation are outside this clip.')
+    if no_push:
+        # The complete attempt includes the distant approach. Keep it visible
+        # with a wider camera than the cropped contact-only comparisons.
+        public['camera']=dict(target=[5.45,6.,.45],position=[1.55,1.125,3.8625],fov=.75)
     output.mkdir(parents=True,exist_ok=True)
     np.savez_compressed(output/'geometry.npz',**geometry)
     np.savez_compressed(output/'states.npz',time=times[indices]-times[indices[0]],
@@ -93,4 +105,5 @@ def bake(folder, output):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('folder',type=Path);p.add_argument('output',type=Path)
-    a=p.parse_args();bake(a.folder,a.output)
+    p.add_argument('--include-failed-attempt',action='store_true',help='Export the complete failed attempt when no object push occurred')
+    a=p.parse_args();bake(a.folder,a.output,a.include_failed_attempt)

@@ -178,7 +178,7 @@ for panel in encoding.select('[data-input-content]'):
 encoding.select_one('.section-intro').string='Object poses and scene geometry combine with the robot embodiment to define the planning context.'
 controller_notes={r['scene']:r['note'] for r in json.loads((ROOT/'assets/controller-gallery.json').read_text())}
 for tile in s.select('.pushing-gallery .media-tile[data-scene^="mpc-spot-"]'):
- note='Blue dashed lanes show the intended object path. Teal follows the measured object motion. Rose anchors mark the recorded gripper path, with a 0.8 s live trail. Both clips show the extended arm during pushing.'
+ note='Blue dashed lanes show the intended object path. Teal follows the measured object motion. Rose anchors mark the recorded gripper path, with a 0.8 s live trail.'
  tile['data-note']=controller_notes[tile['data-scene']]+' '+note
  tile['title']=note
 gallery=s.select_one('#method-execution .pushing-gallery')

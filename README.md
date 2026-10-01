@@ -321,7 +321,57 @@ dashboard. Opening the dashboard alone does not start a 3D scene.
 The detailed flow-matching equations live under Planner training. Result scene
 selectors and longer explanations are available through Scene and protocol.
 
-The Spot + arm baseline gallery provides a separately labeled **Cost ablation**.
+Both default Naive tiles now show fresh **native SUMO/CEM** recordings, using
+the shared scene geometry with original robot dynamics, costs, command mapping,
+optimizer defaults and native joint reset. No CLEAR Cartesian tracker, extra
+joint smoothing, gain override or injected jitter is used. Native spline
+interpolation and the low-level policy remain intact. G1 shows its complete
+40 s attempt. The displayed Spot clip ends at 10.5 s, five seconds after its
+base first tips beyond 90 degrees at 5.5 s. Its full 40 s source is preserved
+privately. The displayed camera is enlarged by 1.25× and recentered on the
+robot and object. G1 moves the box 0.594 m and
+ends with 1.459 m goal error. The displayed Spot clip moves it 1.604 m and ends with 0.404 m error,
+but crosses its standing-height threshold at 2.84 s and does not satisfy the
+native success condition. Different starts and success rules preclude a speedup
+claim. Measured EEF and object overlays do not supply targets to the controllers.
+
+`record_native_baseline.py` uses the pinned SUMO runtime. The scene adapter
+transfers geometry and placement only. The Spot adapter matches the source
+model's box mass, inertia, floor and object contact parameters. Missing inherited
+Spot terminal fields are supplied from JUDO defaults without changing reward.
+`bake_native_baseline.py` checks source hashes, native body/joint/actuator
+parameters, cost and CEM defaults, and evaluates exact FK from saved qpos.
+The physical simulation clock drives planning. Offline rollout timeouts allow
+complete forecasts; padded trajectories are rejected. Protocols are available
+in `assets/native-baseline-protocol.json`. `check_native_baseline_replays.py`
+checks the published measured sites and synchronized video, Ego and 3D timelines.
+
+The earlier Cartesian MPC port remains archived as `mpc-spot-baseline.mp4`.
+It is not an unmodified upstream SUMO recording. Its 22.54 s interaction moves
+the object 1.93 m and ends with 0.077 m position error.
+
+An audit of the available SUMO/JUDO source found that JUDO's arm-enabled task
+resets with `ARM_UNSTOWED_POS` and directly exposes base and arm commands. The
+SUMO box-push reward uses goal distance, gripper proximity and object velocity.
+It does not include an explicit arm jerk penalty. The local Cartesian port has
+additional tracking and command-shaping behavior, so neither a high-gain failure
+nor injected delay is a substitute for an upstream baseline comparison. Absence
+of a jerk penalty does not alone establish the amount of jitter in a rollout.
+
+A separate **P gain ×3** experiment is retained. The six physical arm-joint PD
+stiffness gains increase from 120 to
+360, while derivative gains remain 2. Torque limits, legs, gripper, command
+shaping and all original baseline cost weights are unchanged. Both the real
+world and the 16 forecast worlds compile the same changed gains. This attempt
+fails during contact preparation, with no object displacement or fall. The
+24.70 s video shows the complete attempt, including approach and failed contact
+preparation, rather than a pushing interval. The original recording remains
+linked. Record with `--controller baseline --arm-kp-scale 3`, bake with
+`--include-failed-attempt`, export as `mpc-spot-high-kp`, and publish with
+`build_pushing_gallery.py --gain-diagnostic`. The recorder rejects combinations
+with cost, shaping, timing or trust-region overrides.
+
+A separate **Cost ablation** recording remains available.
 Only the base-command magnitude penalty changes, from 2 to 0. Goal, contact,
 lateral, orientation and terminal object-speed costs retain their original
 weights. Native joint command shaping, control timing, trust region, physics,
@@ -340,4 +390,34 @@ stores every original and effective cost weight. Metrics describe this one
 physical episode, not benchmark performance or an optimization speedup.
 `compare_spot_motion.py` keeps derivative-based motion statistics in private
 output files. Earlier command-rate and variable-delay recordings are separate
-diagnostics and are not the displayed cost ablation.
+diagnostics and are not the displayed native baseline recordings.
+
+The G1 comparison shows the saved object reference lane, five anchors and two
+corner-outline reference boxes at the middle and final positions. The native
+baseline receives no additional Cartesian targets from these annotations.
+`annotate_g1_reference.py` updates the native overlays and the baseline movie.
+The optimized contact and Ego movies share 420 frames at 30 fps over 14 s.
+`render_recorded_cameras.py` reconstructs both cameras in the native viewer,
+using linear position interpolation and quaternion SLERP between archived poses.
+This is display interpolation, not additional measured data or a physics rerun.
+All original sampled body and object poses remain unchanged.
+
+Ego movies now run continuously alongside the authoritative video or native
+replay clock. Explicit seeks and large drift trigger seeks, while small drift
+uses bounded playback-rate correction. Buffering, pause, playback speed,
+viewport visibility and the external controller timeline preserve that clock.
+
+Video checks can be repeated with:
+
+```bash
+node scripts/check_ego_sync.js
+python scripts/audit_video_integrity.py
+python scripts/check_goal_preview.py --check check_synced_camera_assets.py --check check_all_video_assets.py --check check_video_sync_browser.py
+```
+
+The file audit decodes every public MP4 and checks frame timestamps. The browser
+audit decodes and seeks the beginning, middle and end of every movie, checks
+126 sample intervals and compares matching native replay durations. The paired
+player check exercises all four current controller movies, including enlarged
+2× playback, native replay, seek, pause and viewport return. Static intervals
+in failed recordings are retained; low motion is not treated as corrupt video.

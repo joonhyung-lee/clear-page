@@ -21,6 +21,7 @@ p.add_argument('--arm-trust-region',type=float,help='Explicit diagnostic overrid
 p.add_argument('--arm-command-hz',type=float,help='Explicit sample-and-hold arm command diagnostic; physical simulation keeps its native time step')
 p.add_argument('--command-hold-intervals',type=float,nargs='+',help='Explicit variable-delay diagnostic for arm AND base outputs, in seconds')
 p.add_argument('--control-cost-weight',type=float,help='Single-term baseline ablation of the base-command magnitude penalty; retains native command shaping and timing')
+p.add_argument('--arm-kp-scale',type=float,help='Scale only the six physical arm-joint PD proportional gains, with identical real and forecast models')
 p.add_argument('--device',default='cpu',choices=['cpu','cuda:0'])
 a=p.parse_args();sys.path.insert(0,str(a.project));torch.set_num_threads(2)
 if a.arm_trust_region is not None and not 0<a.arm_trust_region<=1:
@@ -35,9 +36,18 @@ if a.control_cost_weight is not None:
         p.error('control cost weight must be finite and nonnegative')
     if a.controller!='baseline' or a.arm_command_shaping!='bounded' or any(v is not None for v in (a.arm_command_hz,a.arm_trust_region,a.command_hold_intervals)):
         p.error('Cost ablation requires the baseline with native shaping, timing and trust region')
+if a.arm_kp_scale is not None:
+    if not math.isfinite(a.arm_kp_scale) or not 1<a.arm_kp_scale<=5:
+        p.error('arm Kp scale must be in (1, 5]')
+    if a.controller!='baseline' or a.arm_command_shaping!='bounded' or any(v is not None for v in (a.control_cost_weight,a.arm_command_hz,a.arm_trust_region,a.command_hold_intervals)):
+        p.error('P gain experiment requires original baseline costs, shaping, timing and trust region')
 from experiments.exp3.development import spot_metric_path
 run=spot_metric_path.run
 cost_ablation=None
+gain_diagnostic=None
+if a.arm_kp_scale is not None:
+    from spot_gain_diagnostic import install_arm_gain_diagnostic
+    gain_diagnostic,checked_gain_worlds=install_arm_gain_diagnostic(a.arm_kp_scale)
 if a.control_cost_weight is not None:
     from clear.maze.sampling_mpc import PushWeights
     before=asdict(PushWeights())
@@ -87,7 +97,7 @@ if a.arm_trust_region is not None:
 a.output.mkdir(parents=True,exist_ok=False)
 (a.output/'comparison-input.json').write_text(json.dumps(dict(row=row,config=config,
     armCommandShaping=a.arm_command_shaping,armCommandHz=a.arm_command_hz,
-    commandHoldIntervals=a.command_hold_intervals,costAblation=cost_ablation),indent=2))
+    commandHoldIntervals=a.command_hold_intervals,costAblation=cost_ablation,gainDiagnostic=gain_diagnostic),indent=2))
 with empty_cpu_arrays():
     result=run(row,a.output,**config)
 if a.arm_command_shaping == 'none' or a.arm_command_hz is not None or a.arm_trust_region is not None or a.command_hold_intervals is not None:
@@ -110,5 +120,11 @@ if cost_ablation is not None:
     assert result['config']['interaction']['weights']==cost_ablation['effectiveWeights']
     result.update(costAblation=cost_ablation,armCommandShaping='bounded',armCommandHz=None,commandHoldIntervals=None)
     result['scope']='Single-term baseline cost ablation. Only the base-command magnitude weight changes. Native arm shaping, command timing, goal and contact terms are retained. This is not the original baseline configuration.'
+    (a.output/'result.json').write_text(json.dumps(result,indent=2))
+if gain_diagnostic is not None:
+    assert 1 in checked_gain_worlds
+    gain_diagnostic['verifiedWorldCounts']=checked_gain_worlds
+    result.update(gainDiagnostic=gain_diagnostic,armCommandShaping='bounded',armCommandHz=None,commandHoldIntervals=None)
+    result['scope']='Arm PD proportional-gain experiment. Only six arm joint stiffness gains change. D gains, torque limits, leg and gripper gains, native command shaping, timing and all original baseline cost weights are retained. This is not the original baseline configuration.'
     (a.output/'result.json').write_text(json.dumps(result,indent=2))
 print(json.dumps(dict(status=result['status'],task_success=result['task_success'])),flush=True)

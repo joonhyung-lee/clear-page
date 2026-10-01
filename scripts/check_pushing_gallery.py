@@ -27,6 +27,21 @@ for controller in ['optimized','baseline']:
         assert tile.select_one('video source')['src'].split('?')[0]==f"assets/media/{tile['data-scene']}{suffix}.mp4"
 for row in rows:
     scene=row['scene'];assert scene
+    if row.get('protocolLabel'):
+        tile=gallery.select_one(f'[data-scene="{scene}"]')
+        assert row['protocolLabel'] in tile.get_text(' ',strip=True)
+        if row.get('nativeController'):
+            assert row['protocolLabel']=='Native SUMO'
+            assert 'Original CEM' in row['note']
+            if row.get('displayClip'):
+                clip=row['displayClip']
+                assert abs(clip['end']-clip['toppleTime']-5)<1e-6
+                assert 'five seconds after toppling' in row['note']
+            else:
+                assert 'Full attempt from reset' in row['note']
+        else:
+            assert 'not an unmodified upstream SUMO controller' in row['note']
+            assert 'extended-arm push' in row['note']
     if row.get('variant'):
         tile=gallery.select_one(f'[data-scene="{scene}"]')
         assert row['variant'] in tile.get_text(' ',strip=True)
@@ -35,6 +50,17 @@ for row in rows:
         assert (root/f'assets/media/{original}.mp4').is_file()
         assert gallery.select_one(f'a[href^="assets/media/{original}.mp4"]')
         assert 'not the original baseline' in row['note']
+        if row.get('gainDiagnostic'):
+            gain=row['gainDiagnostic']
+            assert scene=='mpc-spot-high-kp' and row['variant']=='P gain ×3'
+            assert gain['scale']==3 and {1,16}<=set(gain['verifiedWorldCounts'])
+            assert len(gain['actuators'])==6
+            assert all(v['originalKp']==120 and v['kp']==360 and v['kd']==2 for v in gain['actuators'])
+            assert 'Original cost weights' in row['note'] and not row.get('costAblation')
+            if row.get('failedAttempt'):
+                assert row['interactionComplete'] is False and 'No push' in row['outcome']
+                assert row['failureReason']=='contact reference transition incomplete'
+                assert 'No object push occurred' in row['note']
         if row.get('costAblation'):
             cost=row['costAblation']
             assert scene=='mpc-spot-cost-ablation' and row['variant']=='Cost ablation'
