@@ -23,7 +23,7 @@ for folder,body,scene in [(a.g1,'g1','mpc-g1-native'),(a.spot,'spot_arm','mpc-sp
     elif r['fell']: note+=f" Body height crosses the native standing threshold at {r['firstFallTime']:.2f} s. The complete attempt remains visible."
     new.append(dict(task='G1' if body=='g1' else 'Spot + arm',body=body,controller='baseline',
         scene=scene,group='primary',interactionComplete=r['pushReportedSuccess'],nativeController=True,
-        protocolLabel='Native SUMO',
+        protocolLabel='',
         outcome=f"{r['moved']:.2f} m moved · {r['goalError']:.2f} m goal error · {r['duration']:.1f} s",
         note=note,**({'displayClip':r['displayClip']} if r.get('displayClip') else {})))
     protocols.append(dict(scene=scene,**r))

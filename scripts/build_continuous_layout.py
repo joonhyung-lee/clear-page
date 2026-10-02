@@ -135,8 +135,8 @@ for viewer in s.select('.execution-body-viewer'):
  viewer['data-execution-clock']='optimized' if scene=='mpc-optimized-full' else 'baseline'
  viewer['data-external-timeline']='true'
  ego=viewer.select_one('.ego-inset video');ego['poster']='assets/media/'+scene+'-ego.png';ego['src']='assets/media/'+scene+'-ego.mp4'
- viewer.find_next_sibling('p')['class']=['record-scope']
- viewer.find_next_sibling('p').string='Recorded simulation · Paired palm anchors and forecasts from the saved controller states.'
+ caption=viewer.find_next_sibling('p')
+ if caption:caption.decompose()
  if not viewer.select_one('.execution-clock-note'):viewer.append(frag('<output class="execution-clock-note"></output>'))
 # Side views contain the exact saved palm markers and candidate paths.
 for v in s.select('.execution-body-viewer,.media-tile[data-scene]'):
@@ -270,4 +270,6 @@ for id,html in explanations.items():
   if label.get_text() in ['1','2']:label.string={'1':'o₂','2':'o₃'}[label.get_text()]
 replace_content(s.select_one('#method-execution>.method-lead'),r'''Decoded references <span data-tex="(\xi_1,\ldots,\xi_K)"></span> are checked in order <span data-tex="\boldsymbol\rho"></span>, accounting for the scene changes caused by earlier interactions. The planner selects a candidate that satisfies the goal with the fewest interactions among those accepted. A valid plan requiring no object interaction bypasses generation. MPC tracks the object references using updated state estimates. When enabled, replanning uses the updated scene to revise the remaining interactions.''')
 
+from cleanup_reading_layout import apply
+apply(s)
 p.write_text(str(s).rstrip()+'\n')

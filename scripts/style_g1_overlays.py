@@ -6,6 +6,7 @@ onto the existing camera frames, without rerunning the physical simulation.
 """
 import argparse
 import copy
+import json
 import re
 from pathlib import Path
 import numpy as np
@@ -140,8 +141,13 @@ def render(scene, cache, output, sample=None):
     camera={}
     for _,m in record['messages']:
         if m['type'].startswith('SetCamera'):camera.update(m)
-    if scene in ('mpc-optimized','mpc-baseline'):
+    if scene == 'mpc-optimized':
         camera.update(position=[2.6,-1.8,1.5],look_at=[0,.5,.7])
+    chase=None
+    if scene=='mpc-g1-native':
+        rows=json.loads((ROOT/'assets/native-baseline-protocol.json').read_text())
+        chase=next(r for r in rows if r['scene']==scene).get('displayCamera')
+        if chase:camera.update(position=chase['eyeOffset'],look_at=chase['targetOffset'],fov=chase['fov'])
     eye=np.array(camera['position']);forward=np.array(camera['look_at'])-eye;forward/=np.linalg.norm(forward)
     right=np.cross(forward,[0,0,1.]);right/=np.linalg.norm(right);basis=np.stack([right,np.cross(right,forward),forward],axis=1)
     suffix='' if scene=='mpc-g1-native' else '-contact'
@@ -173,6 +179,9 @@ def render(scene, cache, output, sample=None):
                 elif kind=='SetSceneNodeVisibilityMessage':n['visible']=m['visible']
             if sample is not None and abs(t-sample)>0.5/fps:continue
             for (name,field),fn in tracks.items():node(name)[field]=fn(t)
+            if chase:
+                base=np.array(node('/body-1')['position']);base[2]=0
+                eye=base+chase['eyeOffset']
             image=Image.frombytes('RGB',(w,h),raw);draw=ImageDraw.Draw(image,'RGBA')
             active=[(name,n) for name,n in list(nodes.items()) if selected(name) and not name.endswith('-outline') and visible(name)]
             for name,n in active:

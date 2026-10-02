@@ -12,9 +12,8 @@
   dialog.querySelector('[data-resource-content]').replaceChildren(image);const download=dialog.querySelector('[data-resource-download]');download.href=image.src;download.textContent='Download figure';dialog.showModal();
  });
  const failure=document.querySelector('[data-failure-example="execution"] video');
- failure?.addEventListener('loadedmetadata',()=>{failure.currentTime=12.5;},{once:true});
  failure?.addEventListener('timeupdate',()=>{
-  failure.closest('article').querySelector('output').textContent=failure.currentTime<14.14?'Pushing · Contact lost at 14.14 s':failure.currentTime<15?'Contact lost · Goal not reached':'Box stopped · Goal still 1.33 m away';
+  failure.closest('article').querySelector('output').textContent=failure.currentTime<1.545?'Approaching the object':failure.currentTime<14.14?'Pushing · Contact lost at 14.14 s':failure.currentTime<15?'Contact lost · Goal not reached':'Box stopped · Goal still 1.33 m away';
  });
 })();
 

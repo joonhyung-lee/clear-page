@@ -175,7 +175,29 @@
         0.0
       ]
     ],
-    "initialArmPositions": []
+    "initialArmPositions": [],
+    "displayCamera": {
+      "mode": "horizontal body chase",
+      "body": 1,
+      "eyeOffset": [
+        -2.6,
+        -1.8,
+        2.4
+      ],
+      "targetOffset": [
+        0.6,
+        0,
+        0.7
+      ],
+      "fov": 0.85
+    },
+    "videoSampling": {
+      "fps": 50,
+      "frames": 2001,
+      "duration": 40.02,
+      "sourcePoseSamples": 2001,
+      "physicalStatesChanged": false
+    }
   },
   {
     "scene": "mpc-spot-native",

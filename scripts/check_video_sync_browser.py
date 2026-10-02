@@ -3,7 +3,35 @@ import json,time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
+FIND_VIEWER="""()=>{const root=document.querySelector('#root'),key=Object.keys(root).find(k=>k.startsWith('__reactContainer')),stack=[root[key],root[key]?.stateNode?.current],seen=new Set();while(stack.length){const f=stack.pop();if(!f||seen.has(f))continue;seen.add(f);const v=f.memoizedProps?.value;if(v?.useSceneTree&&v?.mutable?.current?.cameraControl){window.chaseTestViewer=v;return true;}stack.push(f.child,f.sibling,f.alternate);}return false;}"""
+CAMERA_STATE="""()=>{const v=window.chaseTestViewer,m=v.mutable.current,q=v.useSceneTree.get('').wxyz,rotation=m.camera.quaternion.clone().set(q[1],q[2],q[3],q[0]),up=m.camera.position.clone().set(0,0,1).applyQuaternion(rotation),n=m.nodeRefFromName['/body-1'];n.updateWorldMatrix(true,false);const base=n.getWorldPosition(m.camera.position.clone());base.addScaledVector(up,-base.dot(up));return {base:base.toArray(),eye:m.cameraControl.getPosition(m.camera.position.clone()).sub(base).toArray(),target:m.cameraControl.getTarget(m.camera.position.clone()).sub(base).toArray()};}"""
 SAMPLE='''v=>{const m=v.querySelector('video'),e=v.querySelector('.ego-inset video');return {main:m.currentTime,ego:e.currentTime,paused:e.paused,rate:e.playbackRate,seeks:e._seekCount||0,quality:e.getVideoPlaybackQuality().totalVideoFrames,dropped:e.getVideoPlaybackQuality().droppedVideoFrames,ready:e.readyState}}'''
+
+def check_body_chase(page,viewer):
+ frame=viewer.locator('iframe').element_handle().content_frame()
+ frame.wait_for_function(FIND_VIEWER)
+ def seek(t):
+  viewer.evaluate("(v,t)=>v.querySelector('iframe').contentWindow.postMessage({type:'clear-playback-command',time:t,playing:false},'*')",t)
+  page.wait_for_function("([v,t])=>Math.abs(v._lastReplayTime-t)<.08",arg=[viewer.element_handle(),t])
+  frame.evaluate('()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))')
+  return frame.evaluate(CAMERA_STATE)
+ def close(a,b):return max(abs(x-y) for x,y in zip(a,b))<.025
+ first=seek(2);later=seek(10)
+ assert sum((a-b)**2 for a,b in zip(first['base'],later['base']))>.01
+ assert close(first['eye'],later['eye']) and close(first['target'],later['target']),(first,later)
+ box=frame.locator('canvas').first.bounding_box();x=box['x']+box['width']*.5;y=box['y']+box['height']*.5
+ page.mouse.move(x,y);page.mouse.down();page.mouse.move(x+45,y+25,steps=8);page.mouse.up();page.wait_for_timeout(250)
+ orbit=frame.evaluate(CAMERA_STATE);assert not close(orbit['eye'],later['eye']),'Drag must change the camera'
+ moved=seek(15)
+ assert close(orbit['eye'],moved['eye']) and close(orbit['target'],moved['target']),'Body chase must preserve the user camera'
+ rewind=seek(4)
+ assert close(moved['eye'],rewind['eye']) and close(moved['target'],rewind['target']),'Backward seek must retain the relative camera'
+ frame.evaluate('()=>window.chaseTestViewer.mutable.current.resetCameraPose(false)')
+ frame.evaluate('()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))')
+ reset=frame.evaluate(CAMERA_STATE)
+ assert close(reset['eye'],first['eye']) and close(reset['target'],first['target']),'Reset must return to the current body, not the initial world position'
+ print('PASS native G1 chase follows body, preserves drag and supports backward seeks',flush=True)
+ return [first,later,orbit,moved,rewind]
 
 def measure(page,viewer,seconds=3):
  rows=[]
@@ -53,6 +81,7 @@ def main():
     page.wait_for_timeout(600)
     state=viewer.evaluate("v=>({time:v.querySelector('.ego-inset video').currentTime,paused:v.querySelector('.ego-inset video').paused})")
     assert state['paused'] and abs(state['time']-4)<.08,(scene,'native paused seek',state)
+    if scene=='mpc-g1-native':results['native G1 body chase']=check_body_chase(page,viewer)
     viewer.locator('.viewer-tools').click();page.wait_for_timeout(500)
     viewer.evaluate("v=>{v.querySelector('video').currentTime=3;v.querySelector('video').play();}")
     page.wait_for_timeout(400);check(measure(page,viewer,1.5),scene+' return to video')

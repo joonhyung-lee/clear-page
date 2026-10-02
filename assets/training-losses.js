@@ -16,13 +16,13 @@
     if (!w) return;
     canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); canvas.style.height = h + 'px';
     const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
-    const left = 38, right = w - 10, top = 12, bottom = h - 34;
+    const left = 50, right = w - 12, top = 14, bottom = h - 40;
     const maximum = Math.max(...rows.map(row => Math.max(row.raw, row.mean + row.std)));
     const unit = 10 ** Math.floor(Math.log10(maximum || 1));
     const ymax = Math.ceil(maximum / unit * 2) / 2 * unit || 1;
     const x = n => left + n / data.maxStep * (right - left), y = n => bottom - n / ymax * (bottom - top);
     chart._plot = {left, right};
-    ctx.font = '11px Arial'; ctx.fillStyle = '#73796e'; ctx.lineWidth = 1;
+    ctx.font = '13px Arial'; ctx.fillStyle = '#73796e'; ctx.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
       const v = ymax * i / 4;
       ctx.strokeStyle = '#e8ece4'; ctx.beginPath(); ctx.moveTo(left, y(v)); ctx.lineTo(right, y(v)); ctx.stroke();
@@ -33,7 +33,7 @@
       const t = data.maxStep * i / ticks;
       ctx.textAlign = i === ticks ? 'right' : i === 0 ? 'left' : 'center'; ctx.fillText(t ? (t / 1000) + 'k' : '0', x(t), h - 15);
     }
-    ctx.textAlign = 'right'; ctx.fillText('Step', right, h - 1);
+    ctx.textAlign = 'right'; ctx.fillText('Step', right, h - 4);
     ctx.save(); ctx.beginPath(); ctx.rect(left, top, right - left, bottom - top + 1); ctx.clip();
     ctx.beginPath();
     rows.forEach((row, i) => ctx[i ? 'lineTo' : 'moveTo'](x(row.step), y(row.mean + row.std)));

@@ -17,11 +17,12 @@ async def main():
   assert await page.locator('#learning #training-objective').count()==1
   assert await page.locator('#failure-cases #ordering-context').count()==1
   assert await page.locator('#failure-cases #flow-learning').count()==1
-  await page.locator('.overview-input-links a[href="#embodiment-demo"]').click()
+  assert await page.locator('.overview-input-links').count()==0
+  await page.locator('.chapter-links a[href="#method-grounding"]').click()
   assert await page.locator('#embodiment-demo').is_visible()
   assert await page.locator('#input-structure').count()==0
   for key in ['objects','scene']:
-   await page.locator(f'.overview-input-links a[href="#input-{key}"]').click()
+   await page.locator(f'[data-input-panel="{key}"]').click()
    assert await page.locator(f'#input-{key}').is_visible()
    assert await page.locator('[data-input-content]:visible').count()==1
    assert await page.locator(f'[data-input-panel="{key}"]').get_attribute('aria-pressed')=='true'

@@ -86,7 +86,7 @@ if all(row.get('body') in ['g1','spot_arm'] for row in rows):
                     'Hover or select a video to enlarge it, then choose Play in 3D. '
                     'These are individual physical recordings of the complete controllers, not an isolated optimization ablation.')
     if all(row.get('nativeController') for row in rows if row['controller']=='baseline'):
-        caption.string+=' Naive uses native SUMO controllers. Initial arm postures and success criteria follow each controller.'
+        caption.string='Recorded pushing with G1 and Spot + arm. Hover to enlarge or inspect in 3D. Complete controllers are compared, with their own reset and stopping criteria.'
     elif any(row.get('gainDiagnostic') for row in rows):
         caption.string+=' The Spot + arm naive tile shows a labeled P gain experiment. Its original recording remains linked.'
     elif any(row.get('costAblation') for row in rows):

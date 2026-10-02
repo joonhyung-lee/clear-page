@@ -2,6 +2,42 @@
 window.CLEAR_PLAYBACK_BRIDGE=function(){
  let previous='',command=null,afterSeek=null;
  let viewer=null,sideApplied=false;
+ let chasedPosition=null,chaseResetBound=false;
+ function followBody(){
+  if(!window.__CLEAR_BODY_CHASE__)return;
+  if(!viewer){
+   const root=document.querySelector('#root'),key=root&&Object.keys(root).find(k=>k.startsWith('__reactContainer'));
+   const queue=key?[root[key],root[key]?.stateNode?.current]:[],seen=new Set();
+   while(queue.length){const f=queue.pop();if(!f||seen.has(f))continue;seen.add(f);const v=f.memoizedProps?.value;
+    if(v?.mutable?.current?.cameraControl&&v?.useSceneTree){viewer=v;break;}queue.push(f.child,f.sibling,f.alternate);
+   }
+  }
+  const m=viewer?.mutable.current,node=m?.nodeRefFromName['/body-1'],q=viewer?.useSceneTree.get('')?.wxyz;
+  if(node&&q){
+   if(!chaseResetBound){
+    // Home/double-click reset relative to the current body, rather than the
+    // archive's original fixed world camera at the beginning of the run.
+    m.resetCameraPose=()=>{chasedPosition=null;};chaseResetBound=true;
+   }
+   node.updateWorldMatrix(true,false);
+   const rotation=m.camera.quaternion.clone().set(q[1],q[2],q[3],q[0]);
+   const up=m.camera.position.clone().set(0,0,1).applyQuaternion(rotation);
+   const base=node.getWorldPosition(m.camera.position.clone());base.addScaledVector(up,-base.dot(up));
+   let eye,at;
+   if(!chasedPosition){
+    eye=base.clone().add(m.camera.position.clone().set(-2.6,-1.8,2.4).applyQuaternion(rotation));
+    at=base.clone().add(m.camera.position.clone().set(.6,0,.7).applyQuaternion(rotation));
+    m.camera.up.copy(up);m.cameraControl.updateCameraUp();m.camera.fov=.85*180/Math.PI;m.camera.updateProjectionMatrix();
+   }else{
+    const delta=base.clone().sub(chasedPosition);
+    eye=m.cameraControl.getPosition(m.camera.position.clone()).add(delta);
+    at=m.cameraControl.getTarget(m.camera.position.clone()).add(delta);
+   }
+   m.cameraControl.setLookAt(...eye.toArray(),...at.toArray(),false);chasedPosition=base;
+  }
+  requestAnimationFrame(followBody);
+ }
+ if(window.__CLEAR_BODY_CHASE__)requestAnimationFrame(followBody);
  function setContactCamera(){
   if(!window.__CLEAR_CONTACT_SIDE__||sideApplied)return;
   const root=document.querySelector('#root'),key=root&&Object.keys(root).find(k=>k.startsWith('__reactContainer'));

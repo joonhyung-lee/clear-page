@@ -27,21 +27,20 @@ for controller in ['optimized','baseline']:
         assert tile.select_one('video source')['src'].split('?')[0]==f"assets/media/{tile['data-scene']}{suffix}.mp4"
 for row in rows:
     scene=row['scene'];assert scene
-    if row.get('protocolLabel'):
+    if row.get('nativeController'):
+        assert not row.get('protocolLabel'), 'Implementation label should not duplicate the heading'
+        assert 'Original CEM' in row['note']
+        if row.get('displayClip'):
+            clip=row['displayClip']
+            assert abs(clip['end']-clip['toppleTime']-5)<1e-6
+            assert 'five seconds after toppling' in row['note']
+        else:
+            assert 'Full attempt from reset' in row['note']
+    elif row.get('protocolLabel'):
         tile=gallery.select_one(f'[data-scene="{scene}"]')
         assert row['protocolLabel'] in tile.get_text(' ',strip=True)
-        if row.get('nativeController'):
-            assert row['protocolLabel']=='Native SUMO'
-            assert 'Original CEM' in row['note']
-            if row.get('displayClip'):
-                clip=row['displayClip']
-                assert abs(clip['end']-clip['toppleTime']-5)<1e-6
-                assert 'five seconds after toppling' in row['note']
-            else:
-                assert 'Full attempt from reset' in row['note']
-        else:
-            assert 'not an unmodified upstream SUMO controller' in row['note']
-            assert 'extended-arm push' in row['note']
+        assert 'not an unmodified upstream SUMO controller' in row['note']
+        assert 'extended-arm push' in row['note']
     if row.get('variant'):
         tile=gallery.select_one(f'[data-scene="{scene}"]')
         assert row['variant'] in tile.get_text(' ',strip=True)

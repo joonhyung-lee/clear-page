@@ -56,7 +56,7 @@
 .execution-process-grid .execution-controller-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:0;align-items:start}
 .execution-process-grid .mpc-process-pair>figure,.execution-process-grid .execution-record{margin:0;min-width:0}
 .execution-process-grid .mpc-recording-status{margin:8px 0 0;min-height:32px;font-size:11px}
-.execution-clock-note{position:absolute;bottom:7px;left:8px;z-index:4;background:#fffffff0;padding:3px 6px;font-size:10px;color:#53654b;pointer-events:none}
+.execution-clock-note{position:absolute;bottom:7px;left:8px;z-index:4;background:#fffffff0;padding:3px 6px;font-size:12px;color:#53654b;pointer-events:none}
 #embodiment-demo>h4{font-size:16px;margin:0 0 16px;font-weight:500}#embodiment-demo{padding:0;margin:0}
 .grounding-columns #encoding>.wrap{width:100%;max-width:none}
 .planning-pair>article{display:flex;flex-direction:column;min-width:0}.planning-pair .method-small-copy{min-height:68px}
@@ -96,7 +96,7 @@
 .media-tile{position:relative}
 .media-tile>.ego-inset,.execution-body-viewer .ego-inset,.overview-live-viewer .ego-inset,.focus-viewer .ego-inset{width:27%;pointer-events:none}
 .media-tile>.ego-inset{z-index:2;top:5px;right:5px}
-.media-tile>.ego-inset>span{font-size:6px!important;line-height:1.3}
+.media-tile>.ego-inset>span{font-size:10px!important;line-height:1.3}
 /* One compact evidence area: representation beside the sample and its map. */
 .learning-pair{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:32px}
 .learning-pair .sample-explorer-grid{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:20px;margin-top:0}
@@ -196,3 +196,44 @@
 .rank-mask th,.rank-mask td{border:1px solid #d9e0d3;padding:4px 14px;font-weight:400}
 .rank-mask th{background:#edf3e7}.rank-mask+small{font-size:11px;color:#687760}
 .illustration-attention p{font-size:13px;line-height:1.5;margin:8px 0 0}
+/* Reading scale: explanations remain legible beside the media. */
+#main .chapter-links{font-size:18px;gap:14px 30px;line-height:1.5}
+#main .chapter-links a{padding:8px 0}
+#main .overview-column>[data-overview-stage]{font-size:16px}
+#main .overview-model-name{font-size:14px}
+#main :is(.method-small-copy,.figure-caption,.record-scope,.viewer-note,.result-replay-label,.mpc-phase-note,.mpc-recording-status,.paper-notation,.sample-factor-note,.sample-embedding-note,.sample-count,.sample-phase){font-size:14px;line-height:1.6}
+#main :is(.method-explanation p,.failure-example p,.controller-summary p,.experiment-claim,.result-takeaway){font-size:16px;line-height:1.65}
+#main :is(.execution-controller>h5,.failure-example h4,.controller-gallery>h4){font-size:18px;line-height:1.4}
+#main .learning-pair :is(button,.sample-color-controls,.sample-title,.sample-target p,.paper-notation){font-size:14px;line-height:1.45}
+#main .learning-pair .sample-factors strong{font-size:14px}
+#main .learning-pair .sample-filters{flex-wrap:wrap}
+#main :is(.paper-results p,.paper-results table,.paper-results a,.all-methods-toggle,.illustration-controls,.illustration-controls button,.illustration-controls label,.illustration-order-summary,.sample-map-details>h5,.research-representations>h5){font-size:14px;line-height:1.5}
+#main :is(.controller-gallery .media-tile small,.replay-outcome,.loco-evidence .eval-disclosure,.loco-evidence .body-note,.loco-evidence .explain,.loco-evidence .delta){font-size:14px;line-height:1.5}
+#main .controller-gallery .media-tile>span{font-size:17px}
+#main .controller-details{margin-top:28px;padding:0;border:0}
+#main .controller-details>.controller-summary{margin:0 0 22px}
+.experiment-scenes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 40px;margin:26px 0 64px;max-width:1120px;margin-inline:auto}
+.experiment-scenes figure{margin:0;min-width:0}
+.experiment-scenes a{display:block;color:inherit;text-decoration:none}
+.experiment-scenes img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;background:#f7f8f4}
+.experiment-scenes figcaption{padding:14px 0 0;font-size:16px;line-height:1.5}
+.experiment-scenes strong{display:block;font-size:19px;font-weight:500;margin-bottom:5px}
+.experiment-scenes span{display:block;color:#586250}
+.experiment-scenes a:focus-visible{outline:2px solid #657d5b;outline-offset:6px}
+#experiment-horizon-replays>.horizon-scenes{display:grid;grid-template-columns:repeat(2,minmax(520px,1fr));gap:32px;overflow-x:auto;scrollbar-width:thin;padding-bottom:12px}
+.horizon-scene{min-width:0}
+#experiment-horizon .horizon-scene>.experiment-matrix{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:16px}
+#experiment-horizon .horizon-scene .experiment-viewer{height:auto;aspect-ratio:4/3}
+#experiment-horizon .comparison-label{font-size:20px;margin:0}
+.failure-example .failure-status{font-size:13px;max-width:calc(100% - 16px)}
+#main .failure-example h4{min-height:2.8em}
+.failure-example .failure-event{font-size:13px;max-width:calc(100% - 16px);bottom:38px}
+.failure-controls{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:14px}
+.failure-controls input{width:100%;min-width:40px}
+.failure-controls button{font:inherit;padding:6px 10px}
+.failure-controls output{white-space:nowrap;font-variant-numeric:tabular-nums}
+.failure-stage{font-size:14px;line-height:1.5;min-height:3em;margin-top:8px}
+@media(max-width:760px){#main .chapter-links{font-size:16px;gap:8px 20px}.experiment-scenes{gap:24px 16px;margin-bottom:40px}.experiment-scenes strong{font-size:17px}.experiment-scenes figcaption{font-size:14px}.failure-gallery{gap:32px}#main .failure-example h4{min-height:0}}
+@media(max-width:480px){.experiment-scenes{grid-template-columns:1fr}.experiment-scenes img{max-height:280px}}
+
+#experiment-horizon .horizon-scene .experiment-matrix article>h4{min-height:2.8em;font-size:16px;line-height:1.4;margin-bottom:10px}

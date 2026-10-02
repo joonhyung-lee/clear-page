@@ -23,7 +23,8 @@ def numbers(values):
 
 
 class ArchiveRenderer:
-    def __init__(self, scene):
+    def __init__(self, scene, chase=False):
+        self.chase = chase
         self.record, self.buffers = read_recording(ROOT / f'assets/recordings/{scene}.viser')
         self.nodes = defaultdict(lambda: dict(props={}, position=np.zeros(3), wxyz=[1, 0, 0, 0], visible=True))
         self.cursor = 0
@@ -65,7 +66,7 @@ class ArchiveRenderer:
             file = f'mesh-{len(mesh_assets)}.obj'
             mesh_assets[file] = ('\n'.join('v '+numbers(v) for v in vertices)+'\n'+
                                  '\n'.join('f '+' '.join(str(int(x)+1) for x in f) for f in faces)).encode()
-            ET.SubElement(asset, 'mesh', name=file, file=file)
+            ET.SubElement(asset, 'mesh', name=file, file=file, inertia='shell')
             rgba = [x/255 for x in props['color']] + [props.get('opacity') or 1.]
             ET.SubElement(bodies[parent], 'geom', type='mesh', mesh=file,
                           pos=numbers(node['position']), quat=numbers(node['wxyz']),
@@ -77,12 +78,19 @@ class ArchiveRenderer:
             if m['type'] in ('SetCameraPositionMessage', 'SetCameraLookAtMessage', 'SetCameraFovMessage'):
                 camera.update(m)
         eye = np.array(camera['position'])
-        forward = np.array(camera['look_at'])-eye
+        look_at = np.array(camera['look_at'])
+        if chase:
+            initial = np.array(self.nodes['/body-1']['position']); initial[2] = 0
+            eye = initial + [-2.6, -1.8, 2.4]
+            look_at = initial + [.6, 0, .7]
+            camera['fov'] = .85
+        forward = look_at-eye
         forward /= np.linalg.norm(forward)
         right = np.cross(forward, [0., 0., 1.]); right /= np.linalg.norm(right)
         up = np.cross(right, forward)
         ET.SubElement(view, 'camera', name='main', pos=numbers(eye), xyaxes=numbers(np.r_[right, up]), fovy=str(camera['fov']*180/np.pi))
-        ET.SubElement(bodies['/tracking/body-16'], 'camera', name='ego', pos='.14 0 .30', xyaxes='0 -1 0 0 0 1', fovy='60')
+        self.prefix = '/tracking' if '/tracking/body-16' in bodies else ''
+        ET.SubElement(bodies[self.prefix+'/body-16'], 'camera', name='ego', pos='.14 0 .30', xyaxes='0 -1 0 0 0 1', fovy='60')
         self.model = mujoco.MjModel.from_xml_string(ET.tostring(xml, encoding='unicode'), assets=mesh_assets)
         self.data = mujoco.MjData(self.model)
         self.body_ids = {name: self.model.body(name).mocapid[0] for name in bodies}
@@ -161,9 +169,17 @@ class ArchiveRenderer:
                 target = self.data.mocap_pos if field == 'position' else self.data.mocap_quat
                 target[self.body_ids[name]] = value
         # Invert the archive's display-only chase transform for a world camera.
-        rotation = Rotation.from_quat(self.sample[('/tracking', 'wxyz')](t), scalar_first=True).inv()
-        self.data.mocap_pos[self.camera_id] = -rotation.apply(self.sample[('/tracking', 'position')](t))
-        self.data.mocap_quat[self.camera_id] = rotation.as_quat(scalar_first=True)
+        if self.chase:
+            base = self.sample[(self.prefix+'/body-1', 'position')](t).copy()
+            initial = self.sample[(self.prefix+'/body-1', 'position')](0).copy()
+            base[2] = initial[2] = 0
+            self.data.mocap_pos[self.camera_id] = base-initial
+            self.data.mocap_quat[self.camera_id] = [1,0,0,0]
+        elif ('/tracking', 'position') in self.sample:
+            orientation = self.sample.get(('/tracking', 'wxyz'), lambda t: [1, 0, 0, 0])
+            rotation = Rotation.from_quat(orientation(t), scalar_first=True).inv()
+            self.data.mocap_pos[self.camera_id] = -rotation.apply(self.sample[('/tracking', 'position')](t))
+            self.data.mocap_quat[self.camera_id] = rotation.as_quat(scalar_first=True)
         mujoco.mj_forward(self.model, self.data)
         self.renderer.update_scene(self.data, camera='ego' if ego else 'main')
         if not ego:
@@ -177,10 +193,15 @@ def main():
     p.add_argument('--scene', default='mpc-optimized-full')
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--sample', type=float)
+    p.add_argument('--fps', type=int, default=30)
+    p.add_argument('--duration', type=float, default=40.)
+    p.add_argument('--chase', action='store_true')
     args = p.parse_args(); args.output.mkdir(parents=True, exist_ok=True)
-    renderer = ArchiveRenderer(args.scene)
+    if args.fps <= 0 or args.duration <= 0:
+        p.error('fps and duration must be positive')
+    renderer = ArchiveRenderer(args.scene, chase=args.chase)
     writers = {}
-    frames = [args.sample] if args.sample is not None else np.arange(1200)/30
+    frames = [args.sample] if args.sample is not None else np.arange(round(args.duration*args.fps))/args.fps
     try:
         for i, t in enumerate(frames):
             for ego in (False, True):
@@ -191,7 +212,7 @@ def main():
                 if args.sample is None:
                     if ego not in writers:
                         path = args.output / f'{args.scene}-{suffix}.mp4'
-                        writer = imageio_ffmpeg.write_frames(str(path), (pixels.shape[1], pixels.shape[0]), fps=30, codec='libx264', macro_block_size=1,
+                        writer = imageio_ffmpeg.write_frames(str(path), (pixels.shape[1], pixels.shape[0]), fps=args.fps, codec='libx264', macro_block_size=1,
                             output_params=['-crf','19','-map_metadata','-1','-fflags','+bitexact','-flags:v','+bitexact','-movflags','+faststart'])
                         writer.send(None); writers[ego] = writer
                     writers[ego].send(pixels)

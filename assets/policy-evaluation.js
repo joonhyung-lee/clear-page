@@ -81,16 +81,16 @@ function render(){
   const max=m.key==='tracking'&&real?Math.max(.1,...data.map(row=>row[m.key].high))*1.1:m.max;
   const x=update=>43+update/b.end*380,y=value=>145-value/max*110;
   let svg='';
-  b.phases.forEach((phase,i)=>{const a=x(phase[1]),z=x(phase[2]);svg+=`<rect x="${a}" y="35" width="${z-a}" height="110" fill="${phaseColors[i]}" opacity=".14"/><path d="M${a+1} 33 v-7 H${z-1} v7" fill="none" stroke="${phaseColors[i]}" stroke-width="2"/><text x="${(a+z)/2}" y="17" text-anchor="middle" font-size="10" fill="#71806a">Phase ${i+1}</text>`;});
-  for(let j=0;j<=4;j++){const value=max*j/4;svg+=`<path d="M43 ${y(value)} H423" stroke="#e0e5dd"/><text x="34" y="${y(value)+4}" text-anchor="end" fill="#7c8875" font-size="10">${m.key==='tracking'?value.toFixed(2):value}</text>`;}
+  b.phases.forEach((phase,i)=>{const a=x(phase[1]),z=x(phase[2]);svg+=`<rect x="${a}" y="35" width="${z-a}" height="110" fill="${phaseColors[i]}" opacity=".14"/><path d="M${a+1} 33 v-7 H${z-1} v7" fill="none" stroke="${phaseColors[i]}" stroke-width="2"/><text x="${(a+z)/2}" y="17" text-anchor="middle" font-size="12" fill="#71806a">Phase ${i+1}</text>`;});
+  for(let j=0;j<=4;j++){const value=max*j/4;svg+=`<path d="M43 ${y(value)} H423" stroke="#e0e5dd"/><text x="34" y="${y(value)+4}" text-anchor="end" fill="#7c8875" font-size="12">${m.key==='tracking'?value.toFixed(2):value}</text>`;}
   if(current){
    const upper=data.map(row=>`${x(row.update)},${y(row[m.key].high)}`),lower=data.map(row=>`${x(row.update)},${y(row[m.key].low)}`).reverse();
    svg+=`<polygon points="${upper.concat(lower).join(' ')}" fill="${m.color}" opacity=".14"/><path d="M43 ${y(first.mean)} H423" stroke="#919b8a" stroke-dasharray="4 4"/><polyline points="${data.map(row=>`${x(row.update)},${y(row[m.key].mean)}`).join(' ')}" fill="none" stroke="${m.color}" stroke-width="2.5" stroke-linejoin="round"/>`;
    if(real)data.forEach(row=>{svg+=`<circle cx="${x(row.update)}" cy="${y(row[m.key].mean)}" r="2.5" fill="${m.color}" stroke="white" stroke-width="1"/>`;});
    svg+=`<path d="M${x(selected.update)} 35 V145" stroke="${m.color}" opacity=".5" stroke-dasharray="3 3"/><circle cx="${x(selected.update)}" cy="${y(current.mean)}" r="5" fill="${m.color}" stroke="white" stroke-width="2"/>`;
   }else svg+='<rect x="76" y="122" width="312" height="47" fill="white" opacity=".95"/><text x="232" y="150" text-anchor="middle" font-size="12" fill="#76816d">Not yet evaluated</text>';
-  [0,.25,.5,.75,1].forEach(t=>{const update=Math.round(t*b.end);svg+=`<text x="${x(update)}" y="165" text-anchor="${t===0?'start':t===1?'end':'middle'}" font-size="10" fill="#7c8875">${fmt(update)}</text>`;});
-  svg+='<text x="233" y="186" text-anchor="middle" font-size="10" fill="#7c8875">Training update</text>';
+  [0,.25,.5,.75,1].forEach(t=>{const update=Math.round(t*b.end);svg+=`<text x="${x(update)}" y="165" text-anchor="${t===0?'start':t===1?'end':'middle'}" font-size="12" fill="#7c8875">${fmt(update)}</text>`;});
+  svg+='<text x="233" y="186" text-anchor="middle" font-size="12" fill="#7c8875">Training update</text>';
   const canvas=figure.querySelector('svg');canvas.innerHTML=svg;canvas.setAttribute('tabindex',current?'0':'-1');canvas.setAttribute('aria-label',m.title+(real?', measured evaluation. Arrow keys inspect checkpoints.':illustrative?', illustrative data. Arrow keys inspect examples.':', not yet evaluated.'));
  });
 }

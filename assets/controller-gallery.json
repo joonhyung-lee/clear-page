@@ -26,7 +26,7 @@
     "group": "primary",
     "interactionComplete": false,
     "nativeController": true,
-    "protocolLabel": "Native SUMO",
+    "protocolLabel": "",
     "outcome": "0.59 m moved \u00b7 1.46 m goal error \u00b7 40.0 s",
     "note": "Shared task geometry and initial base placement. Original CEM, costs, command mapping, policy and actuator settings. Native spline interpolation retained. Full attempt from reset. EEF markers show measured sites, not commanded Cartesian targets. Original native task success condition; otherwise 40 s recording limit."
   },
@@ -38,7 +38,7 @@
     "group": "primary",
     "interactionComplete": false,
     "nativeController": true,
-    "protocolLabel": "Native SUMO",
+    "protocolLabel": "",
     "outcome": "1.60 m moved \u00b7 0.40 m goal error \u00b7 10.5 s",
     "note": "Shared task geometry and initial base placement. Original CEM, costs, command mapping, policy and actuator settings. Native spline interpolation retained. Shown from reset through five seconds after toppling. EEF markers show measured sites, not commanded Cartesian targets. Display ends five seconds after toppling at 5.50 s.",
     "displayClip": {

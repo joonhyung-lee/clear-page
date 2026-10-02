@@ -33,11 +33,21 @@ async def main():
    assert await page.locator(target+' [data-object] text').all_text_contents()==['o₁','o₂','o₃']
   await page.locator('#method-flow input').fill('1')
   assert await page.locator('#method-flow .sequence-explanation').get_attribute('data-flow-time')=='1.00'
-  assert await page.locator('#method-execution>details').get_attribute('open') is not None
+  assert await page.locator('#method-execution>details').count()==0
+  assert await page.locator('#method-execution>.controller-details').is_visible()
   for selector in ['[data-sample-panels]','#controller-pretraining','#training-losses .loss-content']:
    assert await page.locator(selector).evaluate("e=>!e.closest('details:not([open])')")
   assert await page.locator('#learning .supervision-map').count()==0
-  assert await page.locator('#experiments .experiment-supervision').count()==1
+  assert await page.locator('#experiments .experiment-supervision').count()==0
+  assert await page.locator('.experiment-scenes figure').count()==4
+  assert await page.locator('#experiments>.chapter-links').count()==0
+  scenes=await page.locator('.experiment-scenes figure').evaluate_all('nodes=>nodes.map(n=>n.getBoundingClientRect().top)')
+  assert abs(scenes[0]-scenes[1])<1 and abs(scenes[2]-scenes[3])<1 and scenes[2]>scenes[0]
+  panels=await page.locator('.horizon-scenes .experiment-viewer').evaluate_all('nodes=>nodes.map(n=>n.getBoundingClientRect().top)')
+  assert len(panels)==4 and max(panels)-min(panels)<2,panels
+  for selector in ['.chapter-links','.failure-example p','.paper-results p','.record-scope']:
+   sizes=await page.locator(selector).evaluate_all('nodes=>nodes.map(n=>parseFloat(getComputedStyle(n).fontSize))')
+   assert min(sizes)>=14,(selector,sizes)
   await page.locator('#mpc-process').evaluate("e=>e.scrollIntoView({block:'start'})")
   await page.wait_for_function("document.querySelector('#mpc-process').dataset.elapsed!==undefined")
   await page.locator('#mpc-process-update').fill('0.3333')
@@ -52,8 +62,14 @@ async def main():
   await page.locator('#failure-cases').scroll_into_view_if_needed()
   await page.wait_for_function("document.querySelector('[data-failure-map]').dataset.overlapSegments!==undefined")
   assert len(json.loads(await page.locator('[data-failure-map]').get_attribute('data-overlap-segments')))>0
-  assert await page.locator('.failure-status').count()==3
-  assert all('FAILED' in s for s in await page.locator('.failure-status').all_text_contents())
+  await page.locator('[data-failure-example="transfer"] input').fill('1')
+  assert 'Clearance failed' in await page.locator('[data-failure-example="transfer"] .failure-stage').inner_text()
+  await page.wait_for_function("document.querySelector('[data-planning-failure]').dataset.source==='archived-planning-decisions'")
+  await page.locator('[data-failure-example="planning"] input').fill('1')
+  assert 'No valid plan' in await page.locator('[data-failure-example="planning"] .failure-stage').inner_text()
+  assert await page.locator('.failure-status').count()==0
+  visuals=await page.locator('.failure-gallery .failure-visual').evaluate_all('nodes=>nodes.map(n=>n.getBoundingClientRect().top)')
+  assert max(visuals)-min(visuals)<2,visuals
   for width in [1600,768,390]:
    await page.set_viewport_size({'width':width,'height':1000})
    assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
