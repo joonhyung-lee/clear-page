@@ -34,7 +34,7 @@
   syncEgoClock(view,{time:target,playing:clock.playing&&!finished,rate:clock.speed},'external');
   const native=view.querySelector('iframe.scene-ready');
   if(native&&(!view._clockSent||Math.abs(target-view._clockSent)>.08)){native.contentWindow.postMessage({type:'clear-playback-command',time:target,playing:false},'*');view._clockSent=target;}
-  view.querySelector('.execution-clock-note').textContent=finished&&view.dataset.executionClock==='optimized'?'First interaction complete · Final video frame':target.toFixed(1)+' s · Recorded motion';
+  view.querySelector('.execution-clock-note').textContent=finished?'Recording complete · Final video frame':target.toFixed(1)+' s · Recorded motion';
  }}
  document.addEventListener('clear-mpc-clock',event=>{clock=event.detail;synchronize();});
  for(const view of views){view.querySelector('.preview-video').addEventListener('loadedmetadata',synchronize);view.addEventListener('scene-settled',synchronize);}

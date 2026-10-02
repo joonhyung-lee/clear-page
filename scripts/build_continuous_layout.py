@@ -98,17 +98,41 @@ if rule: s.select_one('#method-order .sequence-explanation').insert_after(rule.e
 process=s.select_one('#mpc-process')
 if not s.select_one('.mpc-playback-speed'):s.select_one('#mpc-process-counter').insert_after(frag('<span class="mpc-playback-speed">2× replay</span>'))
 if not s.select_one('.execution-process-grid'):
- grid=s.new_tag('div',attrs={'class':'execution-process-grid'})
+ grid=s.new_tag('div',attrs={'class':'execution-process-grid','tabindex':'0','role':'region','aria-label':'Controller videos and palm trajectories'})
  content=process.select_one('.mpc-process-content');content.append(grid)
  grid.append(s.select_one('.execution-bodies').extract());grid.append(process.select_one('.mpc-process-pair').extract())
+# Keep each controller's robot and palm view under one shared heading.
+grid=s.select_one('.execution-process-grid')
+if not grid.select_one('.execution-controller'):
+ bodies=list(grid.select('.execution-record'))
+ for body,(key,label) in zip(bodies,[('optimized','MPC w/ optimization (ours)'),('baseline','MPC (naive)')]):
+  trajectory=grid.select_one('[data-process="'+key+'"]')
+  for title in [body.select_one('figcaption'),trajectory.select_one('h5')]:
+   if title:title.decompose()
+  body['aria-label']='Robot replay'
+  trajectory['aria-label']='End effector waypoints and trajectories'
+  heading_id='execution-heading-'+key
+  group=s.new_tag('section',attrs={'class':'execution-controller','aria-labelledby':heading_id})
+  heading=s.new_tag('h5',attrs={'id':heading_id});heading.string=label;group.append(heading)
+  panels=s.new_tag('div',attrs={'class':'execution-controller-panels mpc-process-pair'})
+  panels.append(body.extract());panels.append(trajectory.extract());group.append(panels)
+  # Status follows the plot so both visual surfaces start on the same line.
+  status=trajectory.select_one('.mpc-recording-status')
+  if status:trajectory.append(status.extract())
+  grid.append(group)
+ for wrapper in list(grid.select(':scope > .execution-bodies,:scope > .mpc-process-pair')):wrapper.decompose()
 for viewer in s.select('.execution-body-viewer'):
  scene=viewer['data-scene']
+ if scene=='mpc-optimized':
+  viewer['data-scene']='mpc-optimized-full';scene='mpc-optimized-full'
+  viewer.select_one('.preview-video')['poster']='assets/media/'+scene+'-contact.png'
+  viewer.select_one('.preview-video source')['src']='assets/media/'+scene+'-contact.mp4'
  if scene=='mpc-baseline-push':
   viewer['data-scene']='mpc-baseline';scene='mpc-baseline'
   viewer.select_one('.preview-video')['poster']='assets/media/'+scene+'.png'
   viewer.select_one('.preview-video source')['src']='assets/media/'+scene+'.mp4'
  main=viewer.select_one('.preview-video');main.attrs.pop('data-autoplay',None);main.attrs.pop('loop',None)
- viewer['data-execution-clock']='optimized' if scene=='mpc-optimized' else 'baseline'
+ viewer['data-execution-clock']='optimized' if scene=='mpc-optimized-full' else 'baseline'
  viewer['data-external-timeline']='true'
  ego=viewer.select_one('.ego-inset video');ego['poster']='assets/media/'+scene+'-ego.png';ego['src']='assets/media/'+scene+'-ego.mp4'
  viewer.find_next_sibling('p')['class']=['record-scope']
@@ -119,7 +143,7 @@ for v in s.select('.execution-body-viewer,.media-tile[data-scene]'):
  scene=v.get('data-scene','');contact=scene+'-contact'
  if (ROOT/'assets/media'/f'{contact}.mp4').exists():
   video=v.select_one('video');source=video.select_one('source');source['src']='assets/media/'+contact+'.mp4'
-  video['poster']='assets/media/'+contact+'.png';v['data-contact-side']='true'
+  video['poster']='assets/media/'+contact+'.png';v['data-contact-side']='false' if scene=='mpc-optimized-full' else 'true'
 fv=s.select_one('[data-failure-example="execution"] video')
 fv['poster']='assets/media/mpc-contact-lost.png';fv.select_one('source')['src']='assets/media/mpc-baseline-contact.mp4'
 # Compact reading density without replacing recorded evidence or interactions.

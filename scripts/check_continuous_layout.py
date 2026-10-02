@@ -44,6 +44,10 @@ async def main():
   await page.wait_for_function("[...document.querySelectorAll('.execution-body-viewer>.preview-video')].every(v=>Math.abs(v.currentTime-5)<.2&&v.readyState>=2)")
   for v in await page.locator('.execution-body-viewer').all():
    assert await v.locator('.ego-inset video').get_attribute('poster')
+  await page.locator('#mpc-full-rollout').check()
+  await page.locator('#mpc-process-update').fill('0.75')
+  await page.wait_for_function("[...document.querySelectorAll('.execution-body-viewer video')].every(v=>v.duration>=39.95&&Math.abs(v.currentTime-30)<.2&&v.readyState>=2)")
+  await page.locator('#mpc-full-rollout').uncheck()
   await page.screenshot(path='/tmp/clear-continuous-execution-final.png')
   await page.locator('#failure-cases').scroll_into_view_if_needed()
   await page.wait_for_function("document.querySelector('[data-failure-map]').dataset.overlapSegments!==undefined")
