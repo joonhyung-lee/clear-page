@@ -421,3 +421,75 @@ audit decodes and seeks the beginning, middle and end of every movie, checks
 player check exercises all four current controller movies, including enlarged
 2× playback, native replay, seek, pause and viewport return. Static intervals
 in failed recordings are retained; low motion is not treated as corrupt video.
+
+### Code and reproducibility
+
+The persistent `Code` entry opens `code/index.html`. Source and pretrained-model
+ZIP links and expandable archive trees precede a rendered CPU planning command.
+The System explorer contains five modules: representation, selection and order,
+trajectory generation, feasibility checking and execution. The three planning
+modules share a compact hierarchy. Each module has a distinct recorded example
+and its complete source symbol, with an option to inspect the entire file.
+Selection and clearance views are generated from saved data by
+`scripts/build_code_examples.py` and preserve reference labels and failed checks.
+The four canvas replays use recorded encoder attention, reference rollout states,
+training-checkpoint flow targets and teaser path traces. They support replay,
+seeking and coordinate inspection, and pause outside the viewport. The teaser
+transfer retains its failed checks; learned grid targets are a separate example.
+The execution video includes synchronized ego RGB. No model inference runs in the browser.
+Its trace is illustrative, not live execution telemetry. MP4
+previews and PNG posters remain available while the existing Viser player loads
+on request. Complete component files open in a source dialog.
+
+`python scripts/build_code_archives.py` builds complementary ZIPs from the audited
+anonymous snapshot and verifies every archived payload. Checkpoints are organized
+under `clear/checkpoints/{grid,maze,locomotion}` using recorded provenance.
+`scripts/code_package_layout.py` defines this mapping. Source code retains its
+original paths; the included `tools/link_checkpoints.py` verifies model hashes
+and creates relative compatibility links for existing experiment commands.
+The package path map records all 153 original paths and hashes, while reference
+models, variants and training history remain distinct. `--index-only` refreshes
+the web inventory from existing ZIPs without rebuilding them.
+`python scripts/build_code_browser.py` refreshes the highlighted excerpts and
+content revisions. Both commands require the local anonymous source snapshot.
+The browser builder also requires Black (`python -m pip install black==25.9.0`).
+It formats the reading view at 88 columns and verifies semantic equivalence.
+Archived source bytes remain unchanged. Display line numbers refer to the formatted
+view; symbol boundaries are indexed again after formatting. Long strings wrap to
+the available column width, and the inline code panel shows its full height.
+
+Run `python scripts/check_code_browser.py` for source, media, archive-link and
+route checks. Add `--browser` for interaction and responsive checks with Playwright.
+
+### Publishing the code page
+
+The source ZIP is published with the site. The model ZIP remains local and is
+excluded from Git. Public pages keep its download unavailable until an anonymous
+external location is configured; localhost can still download the local archive.
+Archive contents remain visible in either case. Personal GitHub Release and
+GitHub Pages URLs are not used for anonymous checkpoint downloads.
+
+From this working directory in a normal terminal:
+
+```bash
+python scripts/publish_page.py          # Checks only; no Git writes
+python scripts/publish_page.py --push   # Rebuild, check, commit, push main
+```
+
+The publishing command uses the repository-owner account stored in GitHub CLI
+for that subprocess, without changing the globally active account. It refuses
+oversized files and non-fast-forward publication, and verifies the remote commit.
+It requires the local anonymous source snapshot, existing package inventory,
+Black, and the dependencies used by the audit scripts. Supply additional private
+identifiers using repeated `--term PRIVATE_IDENTIFIER` arguments.
+
+After an external checkpoint download and its redirects have been reviewed for
+owner disclosure, configure its stable HTTPS URL with
+`python scripts/publish_page.py --checkpoint-url ANONYMOUS_URL --push`.
+URL syntax checks do not certify the anonymity of external hosting.
+
+The automated audit has six exact, hash-pinned source exceptions recorded in
+`scripts/publish_reviewed_sources.json`: synthetic redaction-test paths,
+private-prefix detection literals, and matrix-multiplication syntax. Changes to
+those files invalidate the exceptions. Browser rendering, image pixels, and
+external hosting still require separate review.

@@ -1,15 +1,37 @@
 /* A shared illustrative maze. Geometry and object IDs match every method view. */
 (() => {
- const ordering=document.querySelector('#method-order .sequence-explanation'),generation=document.querySelector('#method-flow .sequence-explanation');if(!ordering||!generation)return;
+ const ordering=document.querySelector('#method-order .sequence-explanation, [data-method-illustration=ordering]'),generation=document.querySelector('#method-flow .sequence-explanation, [data-method-illustration=generation]');if(!ordering||!generation)return;
  const objects=[{id:0,p:[1.2,4.7],selected:false,color:'#bcc7b6'},{id:1,p:[3,2.5],selected:true,color:'#c99773'},{id:2,p:[7,4.5],selected:true,color:'#7d9eaf'}];
  const subs=['₁','₂','₃'],objectName=id=>'o'+subs[id];
  const walls=[[0,0,.12,6],[9.88,0,10,6],[0,0,10,.12],[0,5.88,10,6],[2.7,0,3.3,2],[2.7,3,3.3,6],[6.7,0,7.3,4],[6.7,5,7.3,6]];
  const route=[[1,1],[2.1,2.5],[4,2.5],[5.9,4.5],[8.1,4.5],[9,5.2]];
  const references={1:[[3,2.5],[4,2.5],[4.5,2.5],[4.5,1.2]],2:[[7,4.5],[8,4.5],[8.5,4.5],[8.5,3]]};
  const noise={1:[[3,2.5],[4.7,4.9],[2.9,.8],[5.2,3.7]],2:[[7,4.5],[6.1,2.8],[8.3,1.8],[5.9,4.9]]};
+ // Geometric illustration only: use the same generated references and object IDs.
+ function validationState(progress){
+  const positions=objects.map(o=>{
+   if(!o.selected)return [...o.p];
+   const path=references[o.id],t=Math.max(0,Math.min(1,progress-(o.id-1)));
+   const index=Math.min(path.length-2,Math.floor(t*(path.length-1))),u=t*(path.length-1)-index;
+   return path[index].map((v,j)=>v+(path[index+1][j]-v)*u);
+  });
+  const intersects=(a,b,p)=>{
+   let lo=0,hi=1;
+   for(let j=0;j<2;j++){
+    const d=b[j]-a[j],min=p[j]-.5,max=p[j]+.5;
+    if(Math.abs(d)<1e-9){if(a[j]<min||a[j]>max)return false;continue;}
+    const u=(min-a[j])/d,v=(max-a[j])/d;lo=Math.max(lo,Math.min(u,v));hi=Math.min(hi,Math.max(u,v));
+    if(lo>hi)return false;
+   }
+   return true;
+  };
+  const clear=route.slice(1).map((b,i)=>positions.every(p=>!intersects(route[i],b,p)));
+  return {positions,clear};
+ }
  let time=0,selectionTime=reduced.matches?1:0,selectionPlaying=!reduced.matches,view='2d',mask=false,rank=1,playing=!reduced.matches;
  const project=(p,mode)=>mode==='2d'?[36+p[0]*60,380-p[1]*57]:[44+p[0]*47+p[1]*21,345+p[0]*5-p[1]*39-(p[2]||0)*45];
  function scene(mode='2d',kind='ordering',t=0){
+  const validation=kind==='validation'?validationState(t):null;
   const xy=p=>project(p,mode),points=ps=>ps.map(p=>xy(p).join(',')).join(' ');
   const polygon=(ps,color,cls='',opacity=1)=>`<polygon class="${cls}" points="${points(ps)}" fill="${color}" fill-opacity="${opacity}" stroke="${color}"/>`;
   const box=(p,color,ghost=false,size=.7,height=.7)=>{const a=size/2,bottom=[[-a,-a],[a,-a],[a,a],[-a,a]].map(([x,y])=>[p[0]+x,p[1]+y,0]);let out=polygon(bottom,color,ghost?'flow-ghost':'object-footprint',ghost?.15:.85);
@@ -18,9 +40,16 @@
   for(let x=1;x<10;x++)svg+=`<polyline points="${points([[x,0],[x,6]])}" stroke="#e5e9df"/>`;
   for(let y=1;y<6;y++)svg+=`<polyline points="${points([[0,y],[10,y]])}" stroke="#e5e9df"/>`;
   walls.forEach(([a,b,c,d])=>{svg+=polygon([[a,b],[c,b],[c,d],[a,d]],'#bec8bd','maze-wall');if(mode==='3d')svg+=polygon([[a,b,.55],[c,b,.55],[c,d,.55],[a,d,.55]],'#d0d7ca','maze-wall-top');});
-  if(kind!=='scene')svg+=`<polyline class="query-route" points="${points(route)}" fill="none" stroke="#768c67" stroke-width="2" stroke-dasharray="6 5"/>`;
+  if(validation){
+   route.slice(1).forEach((p,i)=>{svg+=`<polyline class="clearance-route" data-clear="${validation.clear[i]}" points="${points([route[i],p])}" fill="none" stroke="${validation.clear[i]?'#577647':'#b56c60'}" stroke-width="3" ${validation.clear[i]?'':'stroke-dasharray="6 5"'}/>`;});
+  }else if(kind!=='scene')svg+=`<polyline class="query-route" points="${points(route)}" fill="none" stroke="#768c67" stroke-width="2" stroke-dasharray="6 5"/>`;
   for(const [p,label]of [[route[0],'Start'],[route.at(-1),'Goal']]){const q=xy(p);svg+=`<circle cx="${q[0]}" cy="${q[1]}" r="6" fill="#577647"/><text x="${q[0]+9}" y="${q[1]+5}">${label}</text>`;}
-  objects.forEach(o=>{
+  objects.forEach(source=>{
+   const o=validation?{...source,p:validation.positions[source.id]}:source;
+   if(validation&&o.selected){
+    svg+=`<polyline class="checked-reference" points="${points(references[o.id])}" fill="none" stroke="${o.color}" stroke-width="2" stroke-opacity=".5"/>`;
+    references[o.id].forEach(p=>{const q=xy(p);svg+=`<circle cx="${q[0]}" cy="${q[1]}" r="3" fill="white" stroke="${o.color}"/>`;});
+   }
    const faded=mask&&kind==='flow'&&o.id>rank,color=faded?'#cbd0c8':o.color;
    svg+=`<g data-object="${o.id}" data-selected="${o.selected}"><title>${objectName(o.id)}: ${o.selected?'selected to clear a passage':'omitted, outside the route'}</title>`+box(o.p,color);
    if(o.selected&&kind==='ordering'&&t>=(o.id===1?.24:.60)){const q=xy(o.p);svg+=`<rect class="selection-ring" x="${q[0]-28}" y="${q[1]-27}" width="56" height="54" rx="3" fill="none" stroke="${color}" stroke-width="3"/>`;}
@@ -66,6 +95,6 @@
  selectionControls.querySelector('button').onclick=()=>{selectionPlaying=!selectionPlaying;draw();};
  let near=false,last=0;const visible=new Set(),observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting)visible.add(entry.target);else visible.delete(entry.target);}near=visible.size>0;last=0;});observer.observe(ordering);observer.observe(generation);
  function tick(now){if(near&&!document.hidden&&(playing||selectionPlaying)){const dt=last?Math.min(now-last,100):0;if(playing)time=(time+dt/6500)%1.18;if(selectionPlaying)selectionTime=(selectionTime+dt/6000)%1.2;const saved=time;time=Math.min(time,1);draw();time=saved;}last=now;requestAnimationFrame(tick);}requestAnimationFrame(tick);
- window.CLEAR_METHOD_SCHEMATIC={objects,walls,route,scene,createPreview(kind){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 660 410');svg.setAttribute('aria-label','Shared illustrative maze');svg.setAttribute('role','img');svg.dataset.methodPreview=kind;let active=false,start=0;new IntersectionObserver(entries=>{active=entries.at(-1).isIntersecting;}).observe(svg);function update(now){if(active&&!document.hidden){if(!start)start=now;const t=reduced.matches?1:Math.min(1,((now-start)/6500)%1.18);svg.innerHTML=scene('2d',kind,t);svg.dataset.flowTime=t.toFixed(3);}requestAnimationFrame(update);}svg.innerHTML=scene('2d',kind,0);requestAnimationFrame(update);return svg;}};
+ window.CLEAR_METHOD_SCHEMATIC={objects,walls,route,scene,validationState,createPreview(kind){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 660 410');svg.setAttribute('aria-label','Shared illustrative maze');svg.setAttribute('role','img');svg.dataset.methodPreview=kind;let active=false,start=0;new IntersectionObserver(entries=>{active=entries.at(-1).isIntersecting;}).observe(svg);function update(now){if(active&&!document.hidden){if(!start)start=now;const t=reduced.matches?1:Math.min(1,((now-start)/6500)%1.18);svg.innerHTML=scene('2d',kind,t);svg.dataset.flowTime=t.toFixed(3);}requestAnimationFrame(update);}svg.innerHTML=scene('2d',kind,0);requestAnimationFrame(update);return svg;}};
  draw();
 })();

@@ -104,20 +104,20 @@ async def main():
    await page.locator('.research-logo').click()
    assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
    assert await page.locator('.research-links').is_visible()
+   assert await page.locator('.research-code span').is_visible()
+   assert await page.locator('.research-code').get_attribute('href')=='code/index.html'
    if width==390:
-    menu=page.locator('#resource-menu-toggle')
-    assert await menu.is_visible()
-    assert not await page.locator('.research-resources').is_visible()
-    await menu.click()
+    assert not await page.locator('#resource-menu-toggle').is_visible()
     assert await page.locator('.research-resources').is_visible()
+    for kind in ['paper','video']:
+     control=page.locator(f'[data-resource="{kind}"]')
+     assert await control.locator('span').is_visible()
+     icon=await control.locator('svg').bounding_box();label=await control.locator('span').bounding_box()
+     assert label['y']>=icon['y']+icon['height']
     await page.locator('[data-resource="paper"]').click()
     assert await page.locator('#resource-dialog').is_visible()
     await page.keyboard.press('Escape')
     assert not await page.locator('#resource-dialog').is_visible()
-    assert await page.locator('.research-resources').is_visible()
-    await page.keyboard.press('Escape')
-    assert not await page.locator('.research-resources').is_visible()
-    assert await menu.evaluate('e=>document.activeElement===e')
    await page.screenshot(path=f'/tmp/clear-research-{width}.png')
   assert not errors,errors
   await browser.close()

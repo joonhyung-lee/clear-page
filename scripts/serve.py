@@ -12,15 +12,17 @@ class Handler(SimpleHTTPRequestHandler):
         path=unquote(urlsplit(self.path).path)
         relative=Path(path.lstrip('/'))
         resolved=(ROOT/relative).resolve()
+        code_public = path in ('/code', '/code/', '/code/index.html', '/code/code.css', '/code/code.js', '/code/catalog.js') or (
+            path.startswith('/code/source/') and resolved.suffix == '.js')
         replanning_public = path in ('/replanning/', '/replanning/index.html', '/replanning/README.md') or (
             path.startswith('/replanning/videos-upright/') and resolved.suffix in {'.mp4', '.viser', '.js', '.png', '.json'}) or path in (
             '/replanning/previews/upright-palm-probe.mp4', '/replanning/previews/upright-palm-probe.png')
         if (any(part.startswith('.') or part=='..' for part in relative.parts)
             or not resolved.is_relative_to(ROOT)
-            or not (path in ('/','/index.html','/.nojekyll') or path.startswith('/assets/') or replanning_public)):
+            or not (path in ('/','/index.html','/.nojekyll') or path.startswith('/assets/') or replanning_public or code_public)):
             self.send_error(404);return None
         self.range_remaining=None
-        if resolved.is_file() and resolved.suffix=='.mp4':
+        if resolved.is_file() and resolved.suffix in {'.mp4', '.zip'}:
             size=resolved.stat().st_size
             header=self.headers.get('Range')
             start,end=0,size-1
@@ -40,7 +42,7 @@ class Handler(SimpleHTTPRequestHandler):
             stream=resolved.open('rb');stream.seek(start)
             self.range_remaining=end-start+1
             self.send_response(206 if header else 200)
-            self.send_header('Content-Type','video/mp4')
+            self.send_header('Content-Type','video/mp4' if resolved.suffix=='.mp4' else 'application/zip')
             self.send_header('Accept-Ranges','bytes')
             self.send_header('Content-Length',str(self.range_remaining))
             if header:self.send_header('Content-Range',f'bytes {start}-{end}/{size}')

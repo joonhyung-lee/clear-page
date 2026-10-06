@@ -1,5 +1,5 @@
 /* Keep the existing restrained type and palette. Give navigation one quiet row. */
-#research-nav{position:sticky;top:0;z-index:45;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;padding:12px max(24px,4vw);background:#fffffff5;border-bottom:1px solid #e1e5de;font-size:13px}
+#research-nav{position:sticky;top:0;z-index:45;display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:24px;padding:12px max(24px,4vw);background:#fffffff5;border-bottom:1px solid #e1e5de;font-size:13px}
 #research-nav a{text-decoration:none;color:#54604f}#research-nav button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 #research-nav .research-logo{font-size:19px;font-weight:600;letter-spacing:.06em;color:#33432f;justify-self:start}
 .research-links,.research-resources{display:flex;align-items:center;gap:26px}.research-resources{justify-self:end;gap:12px}
@@ -57,3 +57,20 @@
 .policy-summary-checkpoint:disabled{cursor:default}
 .policy-checkpoint-pending{display:grid;place-items:center;aspect-ratio:4/3;background:#f5f7f2;padding:1rem}
 @media(max-width:640px){.policy-summary-checkpoints{gap:.5rem}.policy-summary-checkpoint>span{font-size:.7rem}.policy-checkpoint-pending{padding:.4rem}}
+/* The implementation entry stays visible, including its label and on mobile. */
+#research-nav .research-code{display:grid;place-items:center;gap:1px;min-width:44px;padding:3px 7px;font-size:11px;line-height:1.4;justify-self:end;color:#385438;border-radius:3px}
+#research-nav .research-code svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+#research-nav .research-code:hover{background:#f0f4ed}
+@media(max-width:640px){#research-nav{grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;padding:10px 12px}#research-nav .research-links{gap:10px;font-size:11px}#research-nav .research-code{grid-column:4;grid-row:1;min-width:38px;padding:3px 4px}#research-nav #resource-menu-toggle{grid-column:3;grid-row:1;width:24px}#research-nav .research-resources{grid-column:auto}}
+/* Resource names remain visible below their icons. */
+#research-nav .research-resources>a,#research-nav .research-resources>button{display:grid;place-items:center;gap:1px;width:auto;height:auto;min-width:44px;padding:3px 7px;line-height:1.4;font-size:11px}
+#research-nav .research-resources svg{width:23px;height:23px}
+#research-nav .research-resources span{position:static;transform:none;border:0;background:none;padding:0;opacity:1;font-size:11px}
+@media(max-width:640px){
+ #research-nav{grid-template-columns:1fr auto auto;gap:3px 8px}
+ #research-nav .research-logo{grid-column:1;grid-row:1}
+ #research-nav .research-resources,#research-nav[data-resources-open=true] .research-resources{display:flex;flex-direction:row;position:static;grid-column:2;grid-row:1;border:0;background:none;padding:0;gap:2px}
+ #research-nav .research-code{grid-column:3;grid-row:1}
+ #research-nav .research-links{grid-column:1/-1;grid-row:2;justify-self:center}
+ #research-nav #resource-menu-toggle{display:none!important}
+}

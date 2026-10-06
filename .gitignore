@@ -225,3 +225,14 @@ MUJOCO_LOG.TXT
 
 # Local session scratch file.
 /:memory:.ses
+
+# Local research assemblies. The audited source reading view lives in code/.
+/clear-standalone/
+/clear-standalone-anonymous/
+
+# Large model archive is distributed through an anonymous external host.
+/assets/code-downloads/clear-pretrained.zip
+/assets/code-downloads/*.partial
+# Local planning references may contain unrelated project identities.
+/replanning/htx-demo-standalone.html
+/replanning/htx-demo-workload.html

@@ -1,0 +1,26 @@
+{
+  "release_tools/pack_grid_training.py": {
+    "sha256": "06e9563d47dfd1653427a03db5ec71dc75bf5ad64e1b63b98a862295c410ce25",
+    "reason": "String literals that reject private mount prefixes"
+  },
+  "release_tools/pack_revision_recipes.py": {
+    "sha256": "09561c83fd5ab4ff039aff9417bdf1d9799a36dc993a404781a6f71b52073909",
+    "reason": "String literals that reject private mount prefixes"
+  },
+  "release_tools/pack_v4_inputs.py": {
+    "sha256": "7ea3c8d37e2e88df84b8de4dc12a1d4b9e602e894e609f848fec122f9b0ecddd",
+    "reason": "String literals that reject private mount prefixes"
+  },
+  "release_tools/test_checkpoint_derivatives.py": {
+    "sha256": "f95d5abac4bb6f66296da8e4e108980af23559174d48a2128ac439ff6b9177aa",
+    "reason": "Synthetic paths used to test checkpoint redaction"
+  },
+  "release_tools/test_standalone.py": {
+    "sha256": "168fe55bb76bbe4569d9a703b881d79dd4250bb24d7781be493a2aded8a57376",
+    "reason": "Synthetic paths and matrix multiplication used to test auditing"
+  },
+  "scripts/build_code_native.py": {
+    "sha256": "fa27c1f2d8a8013d35d294c6226978292b2a1771e80fa703fe86642105b3f9f0",
+    "reason": "Matrix multiplication expression, not an email address"
+  }
+}

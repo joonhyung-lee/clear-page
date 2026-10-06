@@ -1,12 +1,14 @@
-function clearAssetURL(path) { const base=path.split('?')[0], version=window.CLEAR_ASSET_REVISIONS?.[base]; return version ? base+'?v='+version : path; }
+function clearAssetURL(path) { const base=path.split('?')[0], version=window.CLEAR_ASSET_REVISIONS?.[base]; const url=version ? base+'?v='+version : path; return window.CLEAR_ASSET_BASE ? new URL(url,window.CLEAR_ASSET_BASE).href : url; }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const hoverAvailable = matchMedia('(hover: hover) and (pointer: fine)');
 const teaser = document.querySelector('#teaser');
 const heroToggle = document.querySelector('#hero-toggle');
 function updateHero() { heroToggle.textContent = teaser.paused ? 'Play teaser' : 'Pause teaser'; }
-if (reduced.matches) teaser.pause();
-heroToggle.addEventListener('click', () => teaser.paused ? teaser.play().catch(updateHero) : teaser.pause());
-teaser.addEventListener('play', updateHero); teaser.addEventListener('pause', updateHero); updateHero();
+if (teaser && heroToggle) {
+  if (reduced.matches) teaser.pause();
+  heroToggle.addEventListener('click', () => teaser.paused ? teaser.play().catch(updateHero) : teaser.pause());
+  teaser.addEventListener('play', updateHero); teaser.addEventListener('pause', updateHero); updateHero();
+}
 // Warm only nearby previews, with two media preparations at a time.
 // Sources are retained after preparation so scrolling back never resets playback.
 const mediaQueue = new Set(), mediaStates = new Map();
@@ -78,14 +80,14 @@ const heroVisibility = new IntersectionObserver(entries => {
   else if (!document.hidden && !reduced.matches && !heroManuallyPaused) teaser.play().catch(updateHero);
 });
 let heroManuallyPaused = false;
-heroToggle.addEventListener('click', () => { heroManuallyPaused = teaser.paused; });
-heroVisibility.observe(teaser);
+heroToggle?.addEventListener('click', () => { heroManuallyPaused = teaser.paused; });
+if(teaser)heroVisibility.observe(teaser);
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { teaser.pause(); for (const video of mediaStates.keys()) video.pause(); }
+  if (document.hidden) { teaser?.pause(); for (const video of mediaStates.keys()) video.pause(); }
   else {
     drainMedia();
     for (const [video,state] of mediaStates) if (state.visible && state.loaded && !reduced.matches && !video.closest('.viewer')?.querySelector('iframe')) video.play().catch(() => {});
-    if (!heroManuallyPaused && !reduced.matches && teaser.getBoundingClientRect().bottom > 0 && teaser.getBoundingClientRect().top < innerHeight) teaser.play().catch(updateHero);
+    if (teaser && !heroManuallyPaused && !reduced.matches && teaser.getBoundingClientRect().bottom > 0 && teaser.getBoundingClientRect().top < innerHeight) teaser.play().catch(updateHero);
   }
 });
 
@@ -334,12 +336,13 @@ function wireViewer(viewer, onLaunch = () => {}) {
       if(viewer.dataset.embodiment)await loadScript('assets/embodiment-bridge.js', () => typeof window.CLEAR_EMBODIMENT_BRIDGE === 'function');
       if(viewer.dataset.ego||viewer.dataset.generation||viewer.dataset.autostart!==undefined)await loadScript('assets/playback-bridge.js', () => typeof window.CLEAR_PLAYBACK_BRIDGE === 'function');
       if(viewer.dataset.orderStage)await loadScript('assets/order-bridge.js', () => typeof window.CLEAR_ORDER_BRIDGE === 'function');
+      if(viewer.dataset.codeLayers!==undefined)await loadScript('assets/code-layer-bridge.js', () => typeof window.CLEAR_CODE_LAYER_BRIDGE === 'function');
       if(attempt !== generation)return;
       const data = window.CLEAR_RECORDINGS?.[scene];
       if (!data || !window.CLEAR_VIEWER_HEX) throw new Error('Scene unavailable');
       const iframe = document.createElement('iframe');
       iframe.title = `${viewer.dataset.title || viewer.closest('article').querySelector('h3').textContent} interactive 3D playback`;
-      const bridge=(viewer.dataset.embodiment ? `window.__CLEAR_EMBODIMENT__=${JSON.stringify({robot:viewer.dataset.embodiment,mode:viewer.dataset.displayMode||'structure'})};(${window.CLEAR_EMBODIMENT_BRIDGE.toString()})();` : '')+((viewer.dataset.ego||viewer.dataset.generation||viewer.dataset.autostart!==undefined) ? `(${window.CLEAR_PLAYBACK_BRIDGE.toString()})();` : '')+(viewer.dataset.orderStage ? `window.__CLEAR_ORDER__=${JSON.stringify({stage:viewer.dataset.orderStage,sample:+viewer.dataset.orderSample||0})};(${window.CLEAR_ORDER_BRIDGE.toString()})();` : '');
+      const bridge=(viewer.dataset.embodiment ? `window.__CLEAR_EMBODIMENT__=${JSON.stringify({robot:viewer.dataset.embodiment,mode:viewer.dataset.displayMode||'structure'})};(${window.CLEAR_EMBODIMENT_BRIDGE.toString()})();` : '')+((viewer.dataset.ego||viewer.dataset.generation||viewer.dataset.autostart!==undefined) ? `(${window.CLEAR_PLAYBACK_BRIDGE.toString()})();` : '')+(viewer.dataset.orderStage ? `window.__CLEAR_ORDER__=${JSON.stringify({stage:viewer.dataset.orderStage,sample:+viewer.dataset.orderSample||0})};(${window.CLEAR_ORDER_BRIDGE.toString()})();` : '')+(viewer.dataset.codeLayers!==undefined ? `(${window.CLEAR_CODE_LAYER_BRIDGE.toString()})();` : '');
       const embedded = `<script>window.__CLEAR_BODY_CHASE__=${viewer.dataset.scene==='mpc-g1-native'};window.__CLEAR_CONTACT_SIDE__=${viewer.dataset.contactSide==='true'};window.__CLEAR_CHECKPOINT_REPLAY__=${!!viewer.dataset.locoViewer};window.__CLEAR_EXTERNAL_TIMELINE__=${viewer.dataset.externalTimeline==='true'};(${sceneLifecycle.toString()})();${bridge}window.__VISER_EMBED_DATA__=${JSON.stringify(recordingBase64(data))};window.__VISER_EMBED_CONFIG__={darkMode:false};<\/script>`;
       const html = new TextDecoder().decode(decodeHex(window.CLEAR_VIEWER_HEX));
       iframe.srcdoc = html.replace('</head>', embedded + '</head>');
