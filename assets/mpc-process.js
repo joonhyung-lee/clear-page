@@ -69,7 +69,7 @@
   for(const panel of panels){const name=panel.dataset.process,r=data[name],start=r.updates[0].time,end=r.observed.at(-1)[0],interactionEnd=r.interactionEnd??end,time=Math.min(start+elapsed,end),done=elapsed>=interactionEnd-start;let index=0;while(index+1<r.updates.length&&r.updates[index+1].time<=time)index++;
    const u=r.updates[index],forecastValid=time<=interactionEnd+1e-6,actual=at(r.observed,time),c=panel.querySelector('canvas'),ctx=c.getContext('2d'),ghost=ghosts(name,r),colors=name==='optimized'?['#537d59','#739b97']:['#b97773','#bd9891'];
    panel.dataset.update=String(u.sourceIndex);panel.dataset.time=String(time);panel.dataset.complete=String(done);panel.dataset.retained=u.elites.join(',');panel.dataset.candidateCount=String(r.population);
-   panel.querySelector('.mpc-recording-status').textContent=name==='baseline'&&elapsed>14.14?'After contact loss · box settles by 15 s':name==='optimized'&&done?'First interaction complete · following recorded motion':(done?'Recording complete · ':name==='optimized'?'First interaction · ':'Recorded duration · ')+(interactionEnd-start).toFixed(1)+' s';
+   panel.querySelector('.mpc-recording-status').textContent=name==='baseline'&&elapsed>14.14?'Contact lost':name==='optimized'&&done?'Interaction complete':'';
    c.width=W;c.height=mode==='3d'?420:H;c.dataset.view=mode;c.dataset.hands='2';c.dataset.ghostTrajectories=String(ghost.count);c.dataset.coordinateBounds=JSON.stringify(bounds);c.dataset.axisEnd=String(axisEnd);c.dataset.observedUntil=String(time-start);c.dataset.recordedEnd=String(end-start);c.dataset.applied=String(u.applied);c.dataset.camera=JSON.stringify(camera);c.dataset.forecastValid=String(forecastValid);c.dataset.postContact=String(name==='baseline'&&elapsed>14.14);
    ctx.fillStyle='#fbfcfa';ctx.fillRect(0,0,W,H);drawGrid(ctx);ctx.globalAlpha=.27;ctx.drawImage(ghost.layer,0,0);ctx.globalAlpha=1;
    const currentTimes=r.futureTimes.map(t=>u.time-start+t);
@@ -112,6 +112,7 @@
  }
  new IntersectionObserver(entries=>{visible=entries.at(-1).isIntersecting;if(visible){initialize();schedule();}else{cancelAnimationFrame(frame);frame=0;last=0;render();}},{rootMargin:'0px'}).observe(root);
  play.onclick=()=>{playing=!playing;if(playing&&elapsed>=playEnd)elapsed=0;render();schedule();};slider.oninput=()=>{elapsed=+slider.value*playEnd;render();};
+ root.querySelector('#mpc-process-replay').onclick=()=>{elapsed=0;playing=true;last=0;render();schedule();};
  root.querySelectorAll('[data-mpc-view]').forEach(button=>button.onclick=()=>{mode=button.dataset.mpcView;if(mode==='2d'&&robotOverlay){robotOverlay=false;showContext();}root.querySelectorAll('[data-mpc-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();});
  root.querySelector('#mpc-robot-context').onclick=()=>{if(mode==='2d')root.querySelector('[data-mpc-view="3d"]').click();robotOverlay=!robotOverlay;showContext();};
  root.querySelector('.mpc-time-pin').onclick=()=>{elapsed=14;playing=false;render();};

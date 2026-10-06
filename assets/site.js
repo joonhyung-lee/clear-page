@@ -306,10 +306,12 @@ function wireViewer(viewer, onLaunch = () => {}) {
   document.addEventListener('visibilitychange', syncVisibility);
   function reset() {
     generation++; clearTimeout(timer); clearTimeout(revealTimer);
-    settled(); viewer.removeAttribute('aria-busy');
+    viewer.removeAttribute('aria-busy');
     viewer.querySelectorAll('iframe,.viewer-tools,.viewer-status').forEach(e => e.remove());
-    const ego=viewer.querySelector('.ego-inset video');if(ego?.readyState)ego.currentTime=0;
+    const ego=viewer.querySelector('.ego-inset video');if(ego?.readyState&&!viewer.dataset.executionClock)ego.currentTime=0;
     video.hidden = false; launch.hidden = false; launch.disabled = false; launch.textContent = launchLabel;
+    // External clocks must see the final preview state, after the iframe is gone.
+    settled();
   }
   viewer.addEventListener('reset-viewer', reset);
   launch.addEventListener('click', async () => {
@@ -356,7 +358,7 @@ function wireViewer(viewer, onLaunch = () => {}) {
       const ego = viewer.querySelector('.ego-inset video');
       if (ego && ego.readyState === 0) { ego.preload = 'auto'; ego.load(); }
       const back = document.createElement('button'); back.type='button'; back.className='viewer-tools'; back.textContent=video.tagName==='VIDEO'?'Back to video':'Back to preview';
-      back.addEventListener('click', () => { reset(); if(!reduced.matches) video.play?.().catch(()=>{}); launch.focus(); });
+      back.addEventListener('click', () => { reset(); if(!viewer.dataset.executionClock&&!reduced.matches) video.play?.().catch(()=>{}); launch.focus(); });
       viewer.append(back);
     } catch {
       if(attempt !== generation) return;
@@ -382,7 +384,7 @@ function wireViewer(viewer, onLaunch = () => {}) {
     iframe.classList.remove('scene-pending'); iframe.classList.add('scene-ready');
     syncVisibility();
     if(viewer.dataset.contactSide==='true')iframe.contentWindow.postMessage({type:'clear-contact-camera'},'*');
-    if(viewer._savedReplayTime>0){iframe.contentWindow.postMessage({type:'clear-playback-command',time:viewer._savedReplayTime,playing:inView&&!reduced.matches},'*');delete viewer._savedReplayTime;}
+    if(viewer._savedReplayTime>0){if(!viewer.dataset.executionClock)iframe.contentWindow.postMessage({type:'clear-playback-command',time:viewer._savedReplayTime,playing:inView&&!reduced.matches},'*');delete viewer._savedReplayTime;}
     settled();
     revealTimer = setTimeout(() => { video.pause?.(); video.hidden = true; }, reduced.matches ? 0 : 350);
   });

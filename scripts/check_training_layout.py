@@ -3,6 +3,10 @@ import asyncio,json
 from playwright.async_api import async_playwright
 
 async def main():
+ from pathlib import Path
+ if 'data-training-layout="unified"' in Path(__file__).resolve().parents[1].joinpath('index.html').read_text():
+     from check_unified_training_browser import main as check_unified
+     return await check_unified()
  async with async_playwright() as p:
   browser=await p.chromium.launch()
   page=await browser.new_page(viewport={'width':1440,'height':1100},reduced_motion='reduce',has_touch=True)
@@ -54,7 +58,7 @@ async def main():
        assert c['baselineUpdate']==rows[0]['update'] and c['baselineUpdate']>0
        assert c['baseline']==rows[0][key] and c['value']==rows[-1][key]
        assert abs(c['delta']-(rows[-1][key]-rows[0][key]))<1e-9
-       if key in ['value','entropy'] and rows[0][key]>1e-12:
+       if key=='value' and await chart.get_attribute('data-scale')!='symlog' and rows[0][key]>1e-12:
         assert abs(c['percent']-100*(rows[-1][key]-rows[0][key])/rows[0][key])<1e-8
        else:assert c['percent'] is None
        assert 'Latest' in await chart.locator('.curriculum-comparison').inner_text()
@@ -77,8 +81,8 @@ async def main():
    if body!='g1':
     assert await panel.locator('[data-curriculum-stages]').count()==0
     stages=await page.evaluate('(body)=>window.CLEAR_BODY_CURRICULA[body].stages',body)
-    assert await charts.first.evaluate('e=>e._plot.maximum')==sum(s['targetUpdates'] for s in stages)
-    assert await panel.locator('[data-curriculum-phases] span').count()==len(stages)-1
+    assert await charts.first.evaluate('e=>e._plot.maximum')==max(1, rows[-1]['update'])
+    assert await panel.locator('[data-curriculum-phases] .curriculum-phase').count()==len(stages)-1
     saved=[s for s in stages if s['replay']]
     assert await charts.first.locator('[data-checkpoint-stage]').count()==len(saved)
     for stage in (saved[-1],saved[0]):

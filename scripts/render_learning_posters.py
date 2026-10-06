@@ -40,10 +40,10 @@ def raster(points, faces, shades, depth, pixels, color):
                         pixels[y, x, k] = min(255, color[k]*shades[i])
 
 
-def render(body, size=1000, scene=None):
+def render(body, size=1000, scene=None, recordings_dir=None, output_dir=None):
     root = Path(__file__).resolve().parents[1]
     scene = scene or f'learning-{body}'
-    text = (root / f'assets/recordings/{scene}.hex.js').read_text()
+    text = ((recordings_dir or root / 'assets/recordings') / f'{scene}.hex.js').read_text()
     with tempfile.NamedTemporaryFile(suffix='.viser') as tmp:
         tmp.write(bytes.fromhex(json.loads(text.rsplit(' = ', 1)[1].rstrip(';\n'))))
         tmp.flush()
@@ -94,7 +94,8 @@ def render(body, size=1000, scene=None):
                 if center[2] < -margin or np.any(np.abs(center[:2]) > max(center[2], 0)*np.tan(fov/2)+margin):
                     continue
                 draw(Rotation.from_quat(quat, scalar_first=True).apply(vertices)+pos, faces, colors[min(index, len(colors)-1)])
-    out = root / f'assets/media/{scene}.png'
+    out = (output_dir or root / 'assets/media') / f'{scene}.png'
+    out.parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray(pixels.astype('uint8')).resize((700, 700), Image.Resampling.LANCZOS).save(out)
     print(body, 'poster rendered from published complete mesh')
 
@@ -103,5 +104,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--body', choices=['g1', 'spot', 'spot_arm'], required=True)
     parser.add_argument('--scene')
+    parser.add_argument('--recordings-dir', type=Path)
+    parser.add_argument('--output-dir', type=Path)
     args = parser.parse_args()
-    render(args.body, scene=args.scene)
+    render(args.body, scene=args.scene, recordings_dir=args.recordings_dir, output_dir=args.output_dir)

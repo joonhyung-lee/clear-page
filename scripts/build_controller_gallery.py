@@ -69,6 +69,12 @@ def gallery(controller, label, group):
 
 
 old = soup.select_one('.controller-galleries')
+if old is None and soup.select_one('#spot-process'):
+    from build_body_replays import apply
+    apply(soup)
+    (root/'index.html').write_text(str(soup).rstrip()+'\n')
+    print('Retained body-grouped robot and EEF comparisons')
+    raise SystemExit(0)
 previous_extra = soup.select_one('#controller-additional')
 if previous_extra:
     previous_extra.decompose()

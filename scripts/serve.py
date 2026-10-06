@@ -12,9 +12,12 @@ class Handler(SimpleHTTPRequestHandler):
         path=unquote(urlsplit(self.path).path)
         relative=Path(path.lstrip('/'))
         resolved=(ROOT/relative).resolve()
+        replanning_public = path in ('/replanning/', '/replanning/index.html', '/replanning/README.md') or (
+            path.startswith('/replanning/videos-upright/') and resolved.suffix in {'.mp4', '.viser', '.js', '.png', '.json'}) or path in (
+            '/replanning/previews/upright-palm-probe.mp4', '/replanning/previews/upright-palm-probe.png')
         if (any(part.startswith('.') or part=='..' for part in relative.parts)
             or not resolved.is_relative_to(ROOT)
-            or not (path in ('/','/index.html','/.nojekyll') or path.startswith('/assets/'))):
+            or not (path in ('/','/index.html','/.nojekyll') or path.startswith('/assets/') or replanning_public)):
             self.send_error(404);return None
         self.range_remaining=None
         if resolved.is_file() and resolved.suffix=='.mp4':

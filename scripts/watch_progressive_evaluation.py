@@ -1,5 +1,6 @@
 """Evaluate new curriculum milestones without borrowing archived performance."""
 import argparse
+import fcntl
 import hashlib
 import json
 import os
@@ -8,6 +9,7 @@ import subprocess
 import sys
 import time
 from export_policy_evaluation import summarize
+from watch_spot_curriculum import training_state
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -38,11 +40,19 @@ def main():
     p.add_argument('--mjlab', type=Path, required=True)
     p.add_argument('--body', choices=['g1', 'spot_arm'], required=True)
     p.add_argument('--public-key', choices=['g1_scratch', 'spot_arm_trial'])
+    p.add_argument('--device', default='cuda:0')
+    p.add_argument('--consistent-commands', action='store_true')
+    p.add_argument('--supervisor', type=Path)
+    p.add_argument('--once', action='store_true')
+    p.add_argument('--evaluator', type=Path, default=ROOT/'scripts/evaluate_policy_progress.py',
+                   help='Explicit evaluator source for private policy-contract comparisons')
     a = p.parse_args()
+    lock = (a.run / 'fixed-evaluation.lock').open('w')
+    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     plan = read(a.run/'plan.json')
     assert plan['body'] == a.body
     cache_path = a.run/'fixed-evaluations.json'
-    code_hash = digest(ROOT/'scripts/evaluate_policy_progress.py')
+    code_hash = digest(a.evaluator)
     cache = read(cache_path, {'evaluatorHash': code_hash, 'rows': []})
     assert cache['evaluatorHash'] == code_hash
     env = {**os.environ, 'PYTHONPATH': str(a.mjlab), 'OMP_NUM_THREADS': '4', 'OPENBLAS_NUM_THREADS': '4'}
@@ -70,8 +80,9 @@ def main():
             manifest = work/'manifest.json'
             write(manifest, {a.body: pending})
             with (work/'evaluation.log').open('w') as log:
-                subprocess.run([str(a.python), str(ROOT/'scripts/evaluate_policy_progress.py'),
-                                '--manifest', str(manifest), '--body', a.body, '--output', str(work)],
+                subprocess.run([str(a.python), str(a.evaluator),
+                                '--manifest', str(manifest), '--body', a.body, '--output', str(work),
+                                '--device', a.device] + (['--consistent-commands'] if a.consistent_commands else []),
                                cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
             result = read(work/(a.body+'.json'))
             reference = cache.get('protocol')
@@ -92,13 +103,13 @@ def main():
             rows = [{'update': r['update'], 'phase': r['phase'], **summarize(r['episodes'])} for r in cache['rows']]
             payload = {'rows': rows, 'initialization': 'random', 'plannedCheckpoints': len(planned),
                        'trainingState': 'complete' if (a.run/'complete.json').exists() else
-                           ('training' if alive(read(a.run/'process.json', {}).get('pid')) else 'stopped'),
+                           ('training' if training_state(a) == 'running' else training_state(a)),
                        'complete': (a.run/'complete.json').exists() and max(r['update'] for r in rows) == offset}
             asset = ROOT/'assets'/f'{a.public_key}-evaluation-data.js'
             text = 'window.CLEAR_POLICY_EVALUATION = window.CLEAR_POLICY_EVALUATION || {bodies:{}};\n'
             text += 'window.CLEAR_POLICY_EVALUATION.bodies['+json.dumps(a.public_key)+'] = '+json.dumps(payload, separators=(',', ':'), allow_nan=False)+';\n'
             temp = asset.with_suffix('.tmp');temp.write_text(text);temp.replace(asset)
-        if not alive(read(a.run/'process.json', {}).get('pid')):
+        if a.once or training_state(a) in ['complete', 'failed', 'stopped']:
             break
         time.sleep(30)
 

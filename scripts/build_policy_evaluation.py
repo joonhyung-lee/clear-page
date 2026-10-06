@@ -8,6 +8,10 @@ soup = BeautifulSoup(path.read_text(), 'html.parser')
 old = soup.select_one('#policy-evaluation')
 if old:
     old.decompose()
+if soup.select_one('[data-training-layout="unified"]'):
+    path.write_text(str(soup).rstrip()+'\n')
+    print('Unified training shows PPO losses and Training progress only')
+    raise SystemExit(0)
 html = '''<section id="policy-evaluation" aria-labelledby="policy-evaluation-title" data-mode="unmeasured">
 <div class="eval-heading"><h5 id="policy-evaluation-title">Evaluating locomotion progress</h5><button type="button" data-eval-example aria-pressed="false">Show illustrative example</button></div>
 <p class="eval-disclosure" role="status">Fixed-protocol evaluation has not been recorded for these plots. No measured values are shown.</p>

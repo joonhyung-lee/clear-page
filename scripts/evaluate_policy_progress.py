@@ -30,25 +30,32 @@ def main():
     parser.add_argument('--seeds', type=int, nargs='+', default=[101, 202, 303])
     parser.add_argument('--duration', type=float, default=20.)
     parser.add_argument('--limit', type=int)
+    parser.add_argument('--device', default='cuda:0')
+    parser.add_argument('--consistent-commands', action='store_true')
     args = parser.parse_args()
     os.environ.update(WANDB_MODE='disabled', MUJOCO_GL='egl',
                       MJLAB_SPOT_ARM_FOLLOW='1', MJLAB_SPOT_ARM_JITTER='0',
                       MJLAB_SPOT_TORSO_STANCE='1', MJLAB_SPOT_ARM_BLEND='0',
                       MJLAB_SPOT_ARM_CURRICULUM='0', MJLAB_SPOT_ARM_SPAN='0')
-    from dataclasses import asdict
+    from dataclasses import asdict, replace
     import numpy as np
     import torch
+    import warp as wp
     from mjlab.envs import ManagerBasedRlEnv
     from mjlab.rl import MjlabOnPolicyRunner, RslRlVecEnvWrapper
     from mjlab.tasks.registry import load_env_cfg, load_rl_cfg
     from mjlab.tasks.velocity.config.spot.spot_stairs_env_cfg import spot_mixed_terrain_cfg
 
     torch.set_num_threads(4)
+    wp.config.kernel_cache_dir = str(args.output / 'warp-cache')
     checkpoints = json.loads(args.manifest.read_text())[args.body]
     if args.limit:
         checkpoints = checkpoints[:args.limit]
     task = 'Mjlab-Velocity-BlindStairs-Unitree-G1' if args.body == 'g1' else 'Mjlab-Velocity-Mixed-Spot'
     cfg = load_env_cfg(task, play=True)
+    if args.consistent_commands and args.body == 'spot_arm':
+        from progressive_policy_mdp import configure_command_consistency
+        cfg = configure_command_consistency(cfg)
     if args.body == 'spot':
         from bare_spot import configure, verify_model
         cfg = configure(cfg)
@@ -58,6 +65,7 @@ def main():
     cfg.curriculum = {}
     cfg.episode_length_s = args.duration + 1.
     cfg.sim.nconmax = 256
+    cfg.sim.nan_guard = replace(cfg.sim.nan_guard, output_dir=str(args.output / 'nan-dumps'))
     # Keep only reset events, eliminating pushes and startup randomization.
     cfg.events = {k: v for k, v in cfg.events.items() if v.mode == 'reset'}
     cfg.events.pop('randomize_terrain', None)
@@ -89,7 +97,7 @@ def main():
     command.resampling_time_range = (1000., 1000.)
     cfg.terminations = {'fell_over': cfg.terminations['fell_over']}
     cfg.terminations['fell_over'].params['limit_angle'] = math.radians(70)
-    env = ManagerBasedRlEnv(cfg=cfg, device='cuda:0')
+    env = ManagerBasedRlEnv(cfg=cfg, device=args.device)
     if args.body == 'spot':
         physics = verify_model(env.sim.mj_model)
     else:
@@ -106,6 +114,7 @@ def main():
     robot = env.scene['robot']
     args.output.mkdir(parents=True, exist_ok=True)
     protocol = {'version': 1, 'terrainSeed': 42, 'episodeSeeds': args.seeds,
+                'device': args.device, 'consistentTorsoCommands': args.consistent_commands,
                 'terrains': list(generator.sub_terrains), 'difficulties': [0., .2, .4, .6],
                 'numEnvironments': 20, 'durationSeconds': args.duration,
                 'goalDistanceM': 3., 'lateralToleranceM': .75,
@@ -132,7 +141,9 @@ def main():
         if update in finished:
             continue
         tick = time.monotonic()
-        runner.load(checkpoint['path'], load_cfg={'actor': True}, strict=True, map_location=env.device)
+        infos = runner.load(checkpoint['path'], load_cfg={'actor': True}, strict=True, map_location=env.device)
+        from policy_action_contract import checkpoint_action_limit, applied_actions
+        action_limit = checkpoint_action_limit(infos, rl.clip_actions)
         actor = runner.alg.get_policy()
         actor.eval()
         episodes = []
@@ -151,8 +162,7 @@ def main():
                 steps = int(round(args.duration / env.step_dt))
                 for step in range(steps):
                     actions = actor(obs, stochastic_output=False)
-                    if rl.clip_actions is not None:
-                        actions = actions.clamp(-rl.clip_actions, rl.clip_actions)
+                    actions = applied_actions(actions, action_limit)
                     obs, _, terminated, _, _ = env.step(actions)
                     terminated = terminated.clone()
                     velocity = robot.data.root_link_lin_vel_w[:, :2]
@@ -185,6 +195,7 @@ def main():
                                      'progress': float(end_progress[i])})
             print(f'PROGRESS {args.body} update {update} seed {seed}: {sum(e["success"] for e in episodes[-20:])}/20 goals, {sum(e["fall"] for e in episodes[-20:])}/20 falls', flush=True)
         result['checkpoints'].append({'update': update, 'phase': checkpoint['phase'],
+                                      'actionLimit': action_limit,
                                       'checkpointHash': digest(checkpoint['path']), 'episodes': episodes,
                                       'wallSeconds': round(time.monotonic() - tick, 3)})
         write_json(target, result)

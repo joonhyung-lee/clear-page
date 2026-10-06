@@ -35,6 +35,6 @@ def main():
  expired={m['name'] for t,m in record['messages'] if t==14.000001 and m['type']=='SetSceneNodeVisibilityMessage' and not m['visible']}
  assert expired and expired<=initial.keys(),'Expired overlays must reset on backward seeks'
  assert viewer['data-contact-side']=='false','The continuation needs its recorded camera, not the first-push side camera'
- assert 'mpc-optimized-contact.mp4' in soup.select_one('.media-tile[data-scene="mpc-optimized"] source')['src'],'First-push gallery changed'
+ assert soup.select_one('#spot-process'),'A separate Spot robot/EEF row must follow the G1 row'
  print('PASS full Ours robot, Ego and native replay cover 40 s with post-push motion')
 if __name__=='__main__':main()

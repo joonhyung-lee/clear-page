@@ -34,7 +34,8 @@ async def main():
   await page.locator('#method-flow input').fill('1')
   assert await page.locator('#method-flow .sequence-explanation').get_attribute('data-flow-time')=='1.00'
   assert await page.locator('#method-execution>details').count()==0
-  assert await page.locator('#method-execution>.controller-details').is_visible()
+  assert await page.locator('#spot-process').is_visible()
+  assert await page.locator('#method-execution .pushing-gallery').count()==0
   for selector in ['[data-sample-panels]','#controller-pretraining','#training-losses .loss-content']:
    assert await page.locator(selector).evaluate("e=>!e.closest('details:not([open])')")
   assert await page.locator('#learning .supervision-map').count()==0
@@ -51,12 +52,12 @@ async def main():
   await page.locator('#mpc-process').evaluate("e=>e.scrollIntoView({block:'start'})")
   await page.wait_for_function("document.querySelector('#mpc-process').dataset.elapsed!==undefined")
   await page.locator('#mpc-process-update').fill('0.3333')
-  await page.wait_for_function("[...document.querySelectorAll('.execution-body-viewer>.preview-video')].every(v=>Math.abs(v.currentTime-5)<.2&&v.readyState>=2)")
+  await page.wait_for_function("[...document.querySelectorAll('#mpc-process .execution-body-viewer>.preview-video')].every(v=>Math.abs(v.currentTime-5)<.2&&v.readyState>=2)")
   for v in await page.locator('.execution-body-viewer').all():
    assert await v.locator('.ego-inset video').get_attribute('poster')
   await page.locator('#mpc-full-rollout').check()
   await page.locator('#mpc-process-update').fill('0.75')
-  await page.wait_for_function("[...document.querySelectorAll('.execution-body-viewer video')].every(v=>v.duration>=39.95&&Math.abs(v.currentTime-30)<.2&&v.readyState>=2)")
+  await page.wait_for_function("[...document.querySelectorAll('#mpc-process .execution-body-viewer video')].every(v=>v.duration>=39.95&&Math.abs(v.currentTime-30)<.2&&v.readyState>=2)")
   await page.locator('#mpc-full-rollout').uncheck()
   await page.screenshot(path='/tmp/clear-continuous-execution-final.png')
   await page.locator('#failure-cases').scroll_into_view_if_needed()

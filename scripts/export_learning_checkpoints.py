@@ -4,15 +4,16 @@ import json
 from pathlib import Path
 import numpy as np
 import trimesh
-import viser
 from scipy.spatial.transform import Rotation
 from recording_io import read_recording, write_recording
 from style_learning_checkpoints import style_recording
+from export_teaser_method import Recording
 
 p = argparse.ArgumentParser()
 p.add_argument('source', type=Path)
 p.add_argument('--body', choices=['g1', 'spot', 'spot_arm'], required=True)
 p.add_argument('--scene', help='Distinct public scene name for a new training lineage')
+p.add_argument('--output-dir', type=Path, help='Optional staging directory for verification before publication')
 a = p.parse_args()
 root = Path(__file__).resolve().parents[1]
 g = dict(np.load(a.source / (a.body + '-geometry.npz')))
@@ -70,44 +71,48 @@ for i, b in enumerate(g['geom_bodyid']):
         color = (196, 201, 190) if int(g['geom_type'][i]) == 1 else (209, 213, 202)
     groups.setdefault((int(b), color), []).append(mesh)
 
-server = viser.ViserServer(host='127.0.0.1', port=8099, verbose=False)
-server.gui.configure_theme(show_logo=False, show_share_button=False)
-server.scene.world_axes.visible = False
-server.scene.set_up_direction('+z')
+recording = Recording()
+recording.emit('SetSceneNodeVisibilityMessage', name='/WorldAxes', visible=False)
 # Inspect an ascending stair example close up. Native camera controls reveal the
 # surrounding bank and all 32 independent agents without replacing the scene.
 focus = s['origins'][len(audit['terrains'])+1].astype(float)
 focus[2] += .55
-server.initial_camera.position = tuple(focus + [5.1, -6.5, 4.6])
-server.initial_camera.look_at = tuple(focus)
-server.initial_camera.fov = .65
+recording.emit('SetCameraPositionMessage', position=list(focus + [5.1, -6.5, 4.6]), initial=True)
+recording.emit('SetCameraLookAtMessage', look_at=list(focus), initial=True)
+recording.emit('SetCameraFovMessage', fov=.65, initial=True)
 handles = []
 for group, ((body, color), meshes) in enumerate(groups.items()):
     mesh = trimesh.util.concatenate(meshes)
     name = '/terrain/' if body == 0 else '/agents/'
     name += str(group)
     if body == 0:
-        server.scene.add_mesh_simple(name, vertices=mesh.vertices, faces=mesh.faces, color=color, flat_shading=True)
+        recording.mesh(name, mesh.vertices, mesh.faces, color, [0., 0., 0.])
     else:
-        handle = server.scene.add_batched_meshes_simple(name, vertices=mesh.vertices, faces=mesh.faces,
-            batched_positions=s['positions'][0, 0, :, body],
-            batched_wxyzs=s['quaternions'][0, 0, :, body], batched_colors=color, lod='off')
-        handles.append((body, handle))
+        recording.node('BatchedMeshesMessage', name, dict(
+            vertices=recording.pack(mesh.vertices, '<f4'), faces=recording.pack(mesh.faces, '<u4'),
+            batched_positions=recording.pack(s['positions'][0, 0, :, body], '<f4'),
+            batched_wxyzs=recording.pack(s['quaternions'][0, 0, :, body], '<f4'),
+            batched_colors=recording.pack(color, 'u1'), batched_scales=None, lod='off',
+            wireframe=False, opacity=None, flat_shading=False, side='double',
+            material='standard', cast_shadow=True, receive_shadow=True,
+            batched_opacities=None, scale=1.))
+        handles.append((body, name))
 # Labels identify terrain families, never the source machine or run path.
 for i, name in enumerate(audit['terrains']):
     origin = s['origins'][i].astype(float)
-    server.scene.add_label('/terrain-label/'+str(i), name.replace('_', ' '), position=tuple(origin+[0, 0, .1]))
-recording = server.get_scene_serializer()
+    recording.label('/terrain-label/'+str(i), name.replace('_', ' '), origin+[0, 0, .1])
+time = 0.
 for stage in range(len(audit['stages'])):
     for frame in range(s['positions'].shape[1]):
-        for body, handle in handles:
-            handle.batched_positions = s['positions'][stage, frame, :, body]
-            handle.batched_wxyzs = s['quaternions'][stage, frame, :, body]
-        recording.insert_sleep(float(s['dt']))
-out = root / 'assets/recordings' / ((a.scene or 'learning-'+a.body)+'.viser')
-out.write_bytes(recording.serialize())
-server.stop()
-record, buffers = read_recording(out)
+        for body, name in handles:
+            recording.emit('SceneNodeUpdateMessage', time, name=name, updates=dict(
+                batched_positions=recording.pack(s['positions'][stage, frame, :, body], '<f4'),
+                batched_wxyzs=recording.pack(s['quaternions'][stage, frame, :, body], '<f4')))
+        time += float(s['dt'])
+recording.record['durationSeconds'] = time
+out = (a.output_dir or root / 'assets/recordings') / ((a.scene or 'learning-'+a.body)+'.viser')
+out.parent.mkdir(parents=True, exist_ok=True)
+record, buffers = recording.record, recording.buffers
 record, buffers = style_recording(record, buffers, a.source, a.body)
 write_recording(out, record, buffers)
 out.unlink()  # Only the packed, self-contained browser asset is published.

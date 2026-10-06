@@ -5,6 +5,10 @@ from playwright.async_api import async_playwright
 ROOT=Path(__file__).resolve().parents[1]
 def data(body):return json.loads((ROOT/f'assets/locomotion-training-{body}.js').read_text().split(']=',1)[1].rstrip(';\n'))
 async def main():
+ from pathlib import Path
+ if 'data-training-layout="unified"' in Path(__file__).resolve().parents[1].joinpath('index.html').read_text():
+     from check_unified_training_browser import main as check_unified
+     return await check_unified()
  async with async_playwright() as p:
   browser=await p.chromium.launch();page=await browser.new_page(viewport={'width':1440,'height':1000},reduced_motion='reduce',has_touch=True)
   errors=[];page.on('pageerror',lambda e:errors.append(str(e)))

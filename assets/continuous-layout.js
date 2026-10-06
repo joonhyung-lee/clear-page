@@ -6,6 +6,10 @@
   const main=viewer.querySelector('.preview-video'),ego=viewer.querySelector('.ego-inset video');
   wireEgoVideo(viewer,main,ego);
  });
+ const replayRows=[...document.querySelectorAll('[data-replay-body] .execution-process-grid')];
+ for(const row of replayRows)row.addEventListener('scroll',()=>{
+  for(const other of replayRows)if(Math.abs(other.scrollLeft-row.scrollLeft)>1)other.scrollLeft=row.scrollLeft;
+ },{passive:true});
  document.querySelector('[data-paper-figure]')?.addEventListener('click',()=>{
   const dialog=document.querySelector('#resource-dialog');dialog.querySelector('h2').textContent='Architecture in the paper';
   const image=document.createElement('img');image.src=clearAssetURL('assets/pipeline-anonymous.png');image.alt='Original CLEAR paper architecture';image.style.cssText='width:100%;height:100%;object-fit:contain';
@@ -19,8 +23,9 @@
 
 // One replay clock drives the measured body and palm views, including seeks.
 (() => {
- const views=[...document.querySelectorAll('[data-execution-clock]')];let clock={time:0,playing:false,speed:2};
+ const views=[...document.querySelectorAll('[data-execution-clock]')],clocks={};
  function synchronize(){for(const view of views){
+  const clock=clocks[view.dataset.clockGroup||'g1'];if(!clock)continue;
   const video=view.querySelector('.preview-video'),ego=view.querySelector('.ego-inset video');
   const limit=Number.isFinite(video.duration)?Math.max(0,video.duration-.04):Infinity;
   const target=Math.min(clock.time,limit),finished=clock.time>=limit;
@@ -32,9 +37,8 @@
   }
   syncEgoClock(view,{time:target,playing:clock.playing&&!finished,rate:clock.speed},'external');
   const native=view.querySelector('iframe.scene-ready');
-  if(native&&(!view._clockSent||Math.abs(target-view._clockSent)>.08)){native.contentWindow.postMessage({type:'clear-playback-command',time:target,playing:false},'*');view._clockSent=target;}
-  view.querySelector('.execution-clock-note').textContent=finished?'Recording complete · Final video frame':target.toFixed(1)+' s · Recorded motion';
+  if(native&&(view._clockFrame!==native||view._clockSent===undefined||Math.abs(target-view._clockSent)>.08)){native.contentWindow.postMessage({type:'clear-playback-command',time:target,playing:false},'*');view._clockSent=target;view._clockFrame=native;}
  }}
- document.addEventListener('clear-mpc-clock',event=>{clock=event.detail;synchronize();});
+ document.addEventListener('clear-mpc-clock',event=>{clocks[event.detail.group||'g1']=event.detail;synchronize();});
  for(const view of views){view.querySelector('.preview-video').addEventListener('loadedmetadata',synchronize);view.addEventListener('scene-settled',synchronize);}
 })();

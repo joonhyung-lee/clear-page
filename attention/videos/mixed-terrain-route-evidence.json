@@ -1,0 +1,70 @@
+{
+  "g1": {
+    "decision": "navigate",
+    "selected_objects": [],
+    "decision_trace": [
+      {
+        "event": "traversability",
+        "source": "learned_prediction",
+        "predictor_hash": "c330ba6bf38a53a1c1ef2fa83bc596967efeb882fad0583efe8408342eb3f6d1",
+        "unknown_edges": 0
+      },
+      {
+        "event": "zero_interaction_route",
+        "status": "predicted_reachable"
+      }
+    ],
+    "route": [
+      [
+        1.2,
+        9.5
+      ],
+      [
+        1.1500000000000001,
+        9.55
+      ],
+      [
+        1.1500000000000001,
+        10.75
+      ],
+      [
+        10.850000000000001,
+        10.75
+      ],
+      [
+        10.850000000000001,
+        9.55
+      ],
+      [
+        10.8,
+        9.5
+      ]
+    ],
+    "interaction_attempts": [],
+    "status": "goal_reached",
+    "task_success": true,
+    "meaning": "No push was attempted. This recording does not test G1 pushing capability for Object 0. Displayed object attention is not a push-selection probability."
+  },
+  "husky": {
+    "scene_change": "Original interior translated north by 2.4 m, lower free corridor added, outer side walls extended. Existing relative terrain, object and wall geometry preserved.",
+    "route_source": "Designed obstacle-free comparison route, not a learned CLEAR plan.",
+    "route": [
+      [
+        1.2,
+        11.9
+      ],
+      [
+        1.2,
+        1.4
+      ],
+      [
+        10.8,
+        1.4
+      ],
+      [
+        10.8,
+        11.9
+      ]
+    ]
+  }
+}

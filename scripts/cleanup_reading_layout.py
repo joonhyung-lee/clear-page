@@ -48,7 +48,7 @@ def apply(s):
             group.append(matrix.extract())
             row.append(group)
         horizon.append(row)
-    for viewer in s.select('[data-execution-clock="baseline"]'):
+    for viewer in s.select('#mpc-process [data-execution-clock="baseline"]'):
         viewer['data-contact-side'] = 'false'
     for caption in s.select('.execution-record > .record-scope'):
         caption.decompose()
@@ -82,7 +82,8 @@ def apply(s):
     for node in s.select('.native-protocol-label, .controller-variant'):
         if node.get_text(strip=True).lower() in ('native sumo', 'mpc (naive)'):
             node.decompose()
-    return s
+    from build_body_replays import apply as apply_body_replays
+    return apply_body_replays(s)
 
 
 if __name__ == '__main__':

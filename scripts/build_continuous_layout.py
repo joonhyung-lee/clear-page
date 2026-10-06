@@ -121,7 +121,7 @@ if not grid.select_one('.execution-controller'):
   if status:trajectory.append(status.extract())
   grid.append(group)
  for wrapper in list(grid.select(':scope > .execution-bodies,:scope > .mpc-process-pair')):wrapper.decompose()
-for viewer in s.select('.execution-body-viewer'):
+for viewer in s.select('#mpc-process .execution-body-viewer'):
  scene=viewer['data-scene']
  if scene=='mpc-optimized':
   viewer['data-scene']='mpc-optimized-full';scene='mpc-optimized-full'
@@ -207,7 +207,7 @@ for tile in s.select('.pushing-gallery .media-tile[data-scene^="mpc-spot-"]'):
  tile['title']=note
 gallery=s.select_one('#method-execution .pushing-gallery')
 for old in s.select('.pushing-motion-legend'):old.decompose()
-gallery.insert_after(frag('''<p class="pushing-motion-legend"><span>Spot overlays</span><span><i class="object-target"></i>Object target</span><span><i class="object-motion"></i>Object motion</span><span><i class="eef-motion"></i>EEF · recent 0.8 s</span></p>'''))
+if gallery:gallery.insert_after(frag('''<p class="pushing-motion-legend"><span>Spot overlays</span><span><i class="object-target"></i>Object target</span><span><i class="object-motion"></i>Object motion</span><span><i class="eef-motion"></i>EEF · recent 0.8 s</span></p>'''))
 s.select_one('.embodiment-controls')['class']=['embodiment-controls','structure-branches']
 for node in list(s.select('.planning-scope')):node.decompose()
 for id in ['method-order','method-flow']:

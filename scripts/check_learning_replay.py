@@ -49,6 +49,10 @@ PLAYING_AFTER_SEEK = r'''() => {
 }'''
 from check_learning_replay_support import FIND
 async def main():
+ from pathlib import Path
+ if 'data-training-layout="unified"' in Path(__file__).resolve().parents[1].joinpath('index.html').read_text():
+     from check_unified_training_browser import main as check_unified
+     return await check_unified()
  async with async_playwright() as p:
   # Match the GPU-capable configuration used by the other native Viser checks.
   b=await p.chromium.launch(args=['--use-angle=vulkan','--enable-features=Vulkan','--disable-vulkan-surface','--enable-gpu','--ignore-gpu-blocklist'])

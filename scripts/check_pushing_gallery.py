@@ -1,96 +1,49 @@
-"""Verify the requested two-by-one controller galleries and real replay assets."""
+"""Check two body rows, their four panels, and matching recorded evidence."""
 import json
 from pathlib import Path
-import tempfile
-
-from bs4 import BeautifulSoup
+from urllib.parse import urlsplit
 import imageio_ffmpeg
-from recording_io import read_recording,validate_binary_arrays
+import numpy as np
+from bs4 import BeautifulSoup
+from recording_io import read_recording, validate_binary_arrays
+from export_spot_eef import export
 
-root=Path(__file__).resolve().parents[1]
-rows=json.loads((root/'assets/controller-gallery.json').read_text())
-assert len(rows)==4
-assert {(r['controller'],r['body']) for r in rows}=={
-    (c,b) for c in ['optimized','baseline'] for b in ['g1','spot_arm']}
-assert len({r['scene'] for r in rows})==4,'Four distinct physical replays are required'
-s=BeautifulSoup((root/'index.html').read_text(),'html.parser')
-gallery=s.select_one('#method-execution .pushing-gallery')
-assert gallery and not s.select_one('#controller-additional')
-assert not gallery.select('.media-unavailable')
-for controller in ['optimized','baseline']:
-    group=gallery.select_one(f'[data-controller="{controller}"]')
-    tiles=group.select('.media-tile')
-    assert len(tiles)==2
-    assert [tile.select_one('span').get_text() for tile in tiles]==['G1','Spot + arm']
-    for tile in tiles:
-        suffix='-contact' if tile.get('data-contact-side')=='true' else ''
-        assert tile.select_one('video source')['src'].split('?')[0]==f"assets/media/{tile['data-scene']}{suffix}.mp4"
-for row in rows:
-    scene=row['scene'];assert scene
-    if row.get('nativeController'):
-        assert not row.get('protocolLabel'), 'Implementation label should not duplicate the heading'
-        assert 'Original CEM' in row['note']
-        if row.get('displayClip'):
-            clip=row['displayClip']
-            assert abs(clip['end']-clip['toppleTime']-5)<1e-6
-            assert 'five seconds after toppling' in row['note']
-        else:
-            assert 'Full attempt from reset' in row['note']
-    elif row.get('protocolLabel'):
-        tile=gallery.select_one(f'[data-scene="{scene}"]')
-        assert row['protocolLabel'] in tile.get_text(' ',strip=True)
-        assert 'not an unmodified upstream SUMO controller' in row['note']
-        assert 'extended-arm push' in row['note']
-    if row.get('variant'):
-        tile=gallery.select_one(f'[data-scene="{scene}"]')
-        assert row['variant'] in tile.get_text(' ',strip=True)
-        assert row['variant'] in tile['data-title']
-        original=row['originalScene']
-        assert (root/f'assets/media/{original}.mp4').is_file()
-        assert gallery.select_one(f'a[href^="assets/media/{original}.mp4"]')
-        assert 'not the original baseline' in row['note']
-        if row.get('gainDiagnostic'):
-            gain=row['gainDiagnostic']
-            assert scene=='mpc-spot-high-kp' and row['variant']=='P gain ×3'
-            assert gain['scale']==3 and {1,16}<=set(gain['verifiedWorldCounts'])
-            assert len(gain['actuators'])==6
-            assert all(v['originalKp']==120 and v['kp']==360 and v['kd']==2 for v in gain['actuators'])
-            assert 'Original cost weights' in row['note'] and not row.get('costAblation')
-            if row.get('failedAttempt'):
-                assert row['interactionComplete'] is False and 'No push' in row['outcome']
-                assert row['failureReason']=='contact reference transition incomplete'
-                assert 'No object push occurred' in row['note']
-        if row.get('costAblation'):
-            cost=row['costAblation']
-            assert scene=='mpc-spot-cost-ablation' and row['variant']=='Cost ablation'
-            assert cost['term']=='controls' and cost['weight']==0 and cost['originalWeight']==2
-            assert {key for key,value in cost['effectiveWeights'].items() if value!=cost['originalWeights'][key]}=={'controls'}
-            assert cost['effectiveWeights']['controls']==0
-            assert 'native command shaping and timing are retained' in row['note']
-        if row.get('commandHoldIntervals'):
-            assert row['scene']=='mpc-spot-variable-delay'
-            assert row['variant']=='Variable-delay actuation stress test'
-            assert row['commandHoldIntervals']==[.1,.8,.2,1.,.16,.6]
-    script=(root/f'assets/recordings/{scene}.hex.js').read_text()
-    binary=bytes.fromhex(json.loads(script.rsplit(' = ',1)[1].rstrip(';\n')))
-    with tempfile.NamedTemporaryFile() as f:
-        f.write(binary);f.flush();record,buffers=read_recording(f.name)
-    validate_binary_arrays(record,buffers)
-    video=imageio_ffmpeg.read_frames(str(root/f'assets/media/{scene}.mp4'))
-    metadata=next(video);video.close()
-    tile=gallery.select_one(f'[data-scene="{scene}"]')
-    published=tile.select_one('video source')['src'].split('?')[0]
-    display=imageio_ffmpeg.read_frames(str(root/published));display_metadata=next(display);display.close()
-    assert display_metadata['fps']>=20
-    assert abs(display_metadata['duration']-record['durationSeconds'])<.1,(scene,'Display timeline must match native replay')
-    assert metadata['fps']>=24
-    assert abs(metadata['duration']-record['durationSeconds'])<.1,(scene,metadata,record['durationSeconds'])
-    if row.get('body')=='spot_arm':
-        ego=imageio_ffmpeg.read_frames(str(root/f'assets/media/{scene}-ego.mp4'))
-        ego_metadata=next(ego);ego.close()
-        assert abs(ego_metadata['duration']-record['durationSeconds'])<.1,(scene,'Ego view must use the same interval')
-        assert (root/f'assets/media/{scene}-ego.png').is_file()
-    assert (root/f'assets/media/{scene}.png').is_file()
-    assert any(t>0 and m['type']=='SetPositionMessage' for t,m in record['messages'])
-    print('PASS',scene,'video and native recording duration',record['durationSeconds'])
-print('PASS G1 and Spot + arm in one row per controller, four distinct moving replays, no unavailable tiles')
+ROOT=Path(__file__).resolve().parents[1]
+s=BeautifulSoup((ROOT/'index.html').read_text(),'html.parser')
+assert not s.select('#method-execution .pushing-gallery, #controller-additional')
+assert [n.get_text() for n in s.select('.replay-body-title')]==['G1','Spot + arm']
+assert len(s.select('#method-execution .controller-summary'))==1
+ids=[n['id'] for n in s.select('[id]')];assert len(ids)==len(set(ids))
+for section,scenes in [('mpc-process',['mpc-optimized-full','mpc-baseline']),('spot-process',['mpc-spot-optimized','mpc-spot-native'])]:
+    root=s.select_one('#'+section)
+    assert [n['data-scene'] for n in root.select('.execution-body-viewer')]==scenes
+    groups=root.select('.execution-controller')
+    assert [s.select_one('#'+g['aria-labelledby']).get_text() for g in groups]==['MPC w/ optimization (ours)','MPC (naive)']
+    for group,scene in zip(groups,scenes):
+        figures=group.select('.execution-controller-panels > figure');assert len(figures)==2
+        assert figures[0].select_one('.execution-body-viewer') and figures[1].select_one('canvas')
+        viewer=figures[0].select_one('.viewer');assert viewer['data-external-timeline']=='true'
+        assert viewer.get('data-clock-group','g1')==('spot' if section=='spot-process' else 'g1')
+        record,buffers=read_recording(ROOT/f'assets/recordings/{scene}.viser')
+        validate_binary_arrays(record,buffers)
+        final_pose=max(t for t,m in record['messages'] if m['type']=='SetPositionMessage')
+        for selector,attr in [('.preview-video source','src'),('.ego-inset video','src')]:
+            path=ROOT/urlsplit(viewer.select_one(selector)[attr]).path
+            reader=imageio_ffmpeg.read_frames(str(path));meta=next(reader);next(reader);reader.close()
+            assert meta['fps']>=25 and abs(meta['duration']-final_pose)<.1,(scene,meta,final_pose)
+        assert (ROOT/urlsplit(viewer.select_one('.preview-video')['poster']).path).is_file()
+        print('PASS',scene,'paired video/Ego/Viser interval',record['durationSeconds'])
+
+actual=json.loads((ROOT/'assets/spot-eef-data.js').read_text().split('=',1)[1].rstrip(';\n'))
+assert actual==export(),'Published plot must exactly match the Viser measurements'
+for key,r in actual.items():
+    assert np.isfinite(r['observed']).all()
+    assert all(a[0]<b[0] for a,b in zip(r['observed'],r['observed'][1:]))
+    assert np.allclose(r['observed'][0][4:6],r['reference'][0][:2],atol=.05)
+    assert r['observed'][0][0]==0 and abs(r['observed'][-1][0]-r['duration'])<1e-6
+protocol=next(r for r in json.loads((ROOT/'assets/native-baseline-protocol.json').read_text()) if r['scene']=='mpc-spot-native')
+assert all(protocol['protocol'][k] is False for k in ['cartesianTracking','addedJointSmoothing','addedJitter','gainOverride','commandHoldOverride'])
+assert abs(actual['baseline']['duration']-actual['baseline']['toppleTime']-5)<1e-6
+from build_body_replays import apply
+before=str(s);apply(s);assert str(s)==before,'Body layout generation must be idempotent'
+print('PASS two four-panel body rows; distinct measured Spot paths, original naive controller and final-frame stop')

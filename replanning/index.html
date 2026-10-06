@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>CLEAR · Replanning</title>
+<style>
+  :root { color-scheme: light; font: 16px/1.5 system-ui, sans-serif; color: #35443e; background: #fafbf8; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; }
+  main { width: min(1440px, 94vw); margin: 40px auto; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  h1 { font-size: 22px; font-weight: 500; margin: 0 0 20px; }
+  nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 20px; }
+  button { font: inherit; color: inherit; border: 1px solid transparent; background: transparent; padding: 7px 14px; border-radius: 4px; cursor: pointer; }
+  button[aria-pressed="true"] { border-color: #9eb2a8; background: #e8eeea; }
+  button:hover { background: #eef1ec; }
+  :focus-visible { outline: 2px solid #387cc2; outline-offset: 3px; }
+  video[hidden] { display: none; }
+  video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #eeeee8; }
+  footer { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 15px; font-size: 14px; }
+  p { margin: 0; max-width: 75ch; }
+  a { color: inherit; text-underline-offset: 3px; }
+  .links { display: flex; gap: 18px; }
+  @media (max-width: 600px) { main { margin-top: 20px; } h1 { margin-bottom: 8px; } header { gap: 4px; } button { padding: 6px 10px; } }
+</style>
+<main>
+  <p id="pending" role="status">Upright palm recordings are unavailable while controller validation is incomplete. The previous crouched recordings have been retired.</p>
+  <header>
+    <h1>CLEAR · Replanning</h1>
+    <nav aria-label="Recorded planning variant">
+      <button disabled type="button" data-method="naive" aria-pressed="true">Naive · fixed plan</button>
+      <button disabled type="button" data-method="replan" aria-pressed="false">Replanning</button>
+      <button disabled type="button" data-method="inpainting" aria-pressed="false">Causal inpainting</button>
+    </nav>
+  </header>
+  <video hidden controls playsinline preload="none" aria-label="CLEAR naive multiview recording"></video>
+  <footer hidden>
+    <p>Third-person · Ego RGB · Ego attention · Minimap. Recorded motion at 2×, with generation pauses.</p>
+    <div class="links">
+      <a id="mp4" href="videos-upright/naive/replanning-multiview.mp4" download>MP4</a>
+      <a id="viser" href="videos-upright/naive/naive.viser" download>Viser</a>
+      <a href="README.md">Recording details</a>
+    </div>
+  </footer>
+</main>
+<script>
+  const video = document.querySelector('video');
+  document.querySelectorAll('[data-method]').forEach(button => {
+    button.addEventListener('click', () => {
+      if (button.getAttribute('aria-pressed') === 'true') return;
+      video.pause();
+      const method = button.dataset.method;
+      document.querySelectorAll('[data-method]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+      video.poster = `videos-upright/${method}/frame-0000.png`;
+      video.src = `videos-upright/${method}/replanning-multiview.mp4`;
+      video.setAttribute('aria-label', `CLEAR ${button.textContent} multiview recording`);
+      document.querySelector('#mp4').href = video.src;
+      document.querySelector('#viser').href = `videos-upright/${method}/${method}.viser`;
+      video.load();
+    });
+  });
+</script>
+</html>

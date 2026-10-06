@@ -32,51 +32,27 @@ async def main():
    await root.locator('.mpc-time-pin').click();assert await root.get_attribute('data-elapsed')=='14.000';assert await root.locator('[data-process=optimized]').get_attribute('data-complete')=='true'
    pin=await root.locator('.mpc-time-pin').evaluate('e=>parseFloat(e.style.left)');assert math.isclose(pin,14/15*100,abs_tol=.001)
    await root.locator('#mpc-full-rollout').check();assert await root.get_attribute('data-play-limit')=='40';assert math.isclose(await root.locator('.mpc-time-pin').evaluate('e=>parseFloat(e.style.left)'),35)
-   await slider.evaluate('e=>{e.value=1;e.dispatchEvent(new Event("input"))}');assert await root.get_attribute('data-elapsed')=='40.000';assert 'After contact loss' in await root.locator('[data-process=baseline] .mpc-recording-status').inner_text()
+   await slider.evaluate('e=>{e.value=1;e.dispatchEvent(new Event("input"))}');assert await root.get_attribute('data-elapsed')=='40.000';assert 'Contact lost' in await root.locator('[data-process=baseline] .mpc-recording-status').inner_text()
    await root.locator('#mpc-full-rollout').uncheck();assert await root.get_attribute('data-elapsed')=='15.000'
    await slider.evaluate('e=>{e.value=.95;e.dispatchEvent(new Event("input"))}');await root.locator('#mpc-process-play').click();await page.wait_for_timeout(700);assert await root.get_attribute('data-elapsed')=='15.000';assert await root.locator('#mpc-process-play').inner_text()=='Play'
    for view in ['2d','3d']:
     await root.locator('[data-mpc-view="'+view+'"]').click();assert await root.get_attribute('data-elapsed')=='15.000'
    objective=page.locator('#training-objective .paper-equation-row');assert await objective.locator('.katex-error').count()==0
    assert await objective.locator('.katex').count()==1
-   groups=page.locator('#method-execution .controller-galleries>.controller-gallery');left=await groups.nth(0).bounding_box();right=await groups.nth(1).bounding_box();assert right['x']>left['x']+left['width']
-   assert await page.locator('#method-execution .controller-galleries').evaluate('e=>e.getBoundingClientRect().width<=innerWidth*.85')
-   assert await page.locator('#controller-additional').count()==0
-   assert await page.locator('#method-execution .media-unavailable').count()==0
-   for i in [0,1]:
-    assert await groups.nth(i).locator('.media-tile').count()==2
-    assert await groups.nth(i).locator('.media-tile>span').all_text_contents()==['G1','Spot + arm']
-    for card in await groups.nth(i).locator('.media-tile').all():
-     inset=card.locator('.ego-inset');assert await inset.count()==1
-     outer=await card.bounding_box();inner=await inset.bounding_box()
-     assert .24<=inner['width']/outer['width']<=.29
-     assert inner['x']>=outer['x'] and inner['x']+inner['width']<=outer['x']+outer['width']+.5
-     assert inner['y']>=outer['y'] and inner['y']+inner['height']<=outer['y']+outer['height']
-    boxes=[await tile.bounding_box() for tile in await groups.nth(i).locator('.media-tile').all()]
-    assert abs(boxes[0]['y']-boxes[1]['y'])<1,'Both embodiments must occupy one row'
-    assert boxes[1]['x']>=boxes[0]['x']+boxes[0]['width']
-    tile=groups.nth(i).locator('.media-tile').first
-    await tile.scroll_into_view_if_needed()
-    await page.mouse.move(2,2)
-    await page.wait_for_timeout(200)
-    tile_box=await tile.bounding_box()
-    await page.mouse.move(tile_box['x']+tile_box['width']/2,tile_box['y']+tile_box['height']/2)
-    overlay=groups.nth(i).locator('.grid-focus')
-    await overlay.wait_for()
-    assert await overlay.get_attribute('data-pinned')=='false'
-    assert await overlay.locator('.focus-viewer>video').evaluate('e=>getComputedStyle(e).pointerEvents')=='auto'
-    enlarged=await overlay.locator('.focus-viewer').bounding_box()
-    assert abs(enlarged['width']/enlarged['height']-4/3)<.03,'Expanded video must preserve its full view'
-    # The enlarged surface itself must remain hoverable and clickable.
-    await page.mouse.move(enlarged['x']+enlarged['width']/2,enlarged['y']+enlarged['height']-25)
-    await page.wait_for_timeout(250)
-    assert await overlay.is_visible()
-    await overlay.locator('.focus-viewer>video').click(position={'x':enlarged['width']/2,'y':enlarged['height']/2})
-    assert await groups.nth(i).locator('.grid-focus').is_visible()
-    assert await overlay.get_attribute('data-pinned')=='true'
-    await groups.nth(i).locator('.focus-close').click()
-   await root.screenshot(path='/tmp/interactive-mpc-final.png');await page.locator('#method-execution .controller-galleries').screenshot(path='/tmp/comparison-layout-final.png');await objective.screenshot(path='/tmp/paper-objective-final.png')
+   for selector in ['#mpc-process','#spot-process']:
+    groups=page.locator(selector+' .execution-controller')
+    assert await groups.count()==2
+    assert await groups.evaluate_all("nodes=>nodes.map(n=>document.getElementById(n.getAttribute('aria-labelledby')).textContent)")==['MPC w/ optimization (ours)','MPC (naive)']
+    figures=page.locator(selector+' .execution-controller-panels>figure')
+    boxes=[await figure.bounding_box() for figure in await figures.all()]
+    assert len(boxes)==4 and max(box['y'] for box in boxes)-min(box['y'] for box in boxes)<2
+    assert all(boxes[i+1]['x']>=boxes[i]['x']+boxes[i]['width'] for i in range(3))
+    assert await groups.locator('.execution-body-viewer .ego-inset').count()==2
+   assert await page.locator('#method-execution .pushing-gallery').count()==0
+   await root.screenshot(path='/tmp/interactive-mpc-final.png')
+   await page.locator('#spot-process').screenshot(path='/tmp/spot-comparison-layout-final.png')
+   await objective.screenshot(path='/tmp/paper-objective-final.png')
    for width in [768,390]:
     await page.set_viewport_size({'width':width,'height':1000});assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth');await root.scroll_into_view_if_needed();await root.screenshot(path=f'/tmp/interactive-mpc-{width}.png')
-   assert not errors,errors;await b.close();print('PASS interactive 3D, follow inset, event pin, contact/full windows, fixed time across views, two embodiments in one row per controller, full enlarged videos, KaTeX objective, responsive layout')
+   assert not errors,errors;await b.close();print('PASS interactive 3D, follow inset, event pin, contact/full windows, fixed time across views, one four-panel row per body, paired robot and EEF views, KaTeX objective, responsive layout')
 asyncio.run(main())

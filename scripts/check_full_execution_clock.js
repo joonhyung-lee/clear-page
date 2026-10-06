@@ -21,14 +21,22 @@ for(const time of [14,20,30,39]) {
  for(const view of views) {
   assert.equal(view.media.currentTime,time); assert.equal(view.media.paused,false);
   assert.equal(view.egoClock.time,time); assert.equal(view.egoClock.playing,true);
-  assert.equal(view.note.textContent,`${time.toFixed(1)} s · Recorded motion`);
  }
 }
 clock(40,false);
-for(const view of views) {assert.equal(view.media.paused,true);assert.equal(view.note.textContent,'Recording complete · Final video frame');}
+for(const view of views) {assert.equal(view.media.paused,true);}
 clock(5,false);
 for(const view of views) {assert.equal(view.media.currentTime,5);assert.equal(view.egoClock.time,5);}
 for(const view of views) view.native={contentWindow:{postMessage:(message)=>{view.command=message;}}};
 clock(30,true);
 for(const view of views) {assert.equal(view.command.time,30);assert.equal(view.media.paused,true);assert.equal(view.egoClock.time,30);}
+const spot=views[1];spot.dataset.clockGroup='spot';spot.media.duration=10.52;
+events['clear-mpc-clock']({detail:{group:'spot',time:7,playing:true,speed:2}});
+assert.equal(spot.media.currentTime,7);assert.equal(views[0].media.currentTime,30);
+clock(5,false);assert.equal(views[0].media.currentTime,5);assert.equal(spot.media.currentTime,7);
+events['clear-mpc-clock']({detail:{group:'spot',time:20,playing:true,speed:2}});
+assert.equal(spot.media.currentTime,10.48);assert.equal(spot.egoClock.playing,false);
+spot.native={contentWindow:{postMessage:message=>{spot.reloadCommand=message;}}};
+events['clear-mpc-clock']({detail:{group:'spot',time:20,playing:false,speed:2}});
+assert.equal(spot.reloadCommand.time,10.48,'New iframe receives the current time even without a clock change');
 console.log('PASS full replay clock: 14–40 s, replay seek, paired Ego and native seek');

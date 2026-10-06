@@ -33,7 +33,7 @@
 .execution-body-viewer .ego-inset{position:absolute;right:10px;top:10px;width:29%;z-index:5;background:white;border:1px solid #dce2d6}
 .ego-inset video{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}.ego-inset>span{position:absolute;top:3px;left:4px;background:#ffffffdc;font-size:9px;padding:1px 4px;z-index:1}
 .execution-body-viewer .viewer-tools{top:auto;bottom:8px;z-index:6}
-.execution-pair #mpc-process{padding:0;margin:0}.execution-pair .mpc-process-pair{grid-template-columns:1fr;gap:24px}
+.execution-pair #mpc-process{padding:0;margin:0;border-top:0}.execution-pair .mpc-process-pair{grid-template-columns:1fr;gap:24px}
 .execution-pair .mpc-process-pair canvas{width:100%;height:auto}.execution-pair #mpc-process>h4{font-size:16px}
 .execution-pair .mpc-process-controls{gap:6px;flex-wrap:wrap}.execution-pair .mpc-phase-note{font-size:11px}
 #method-execution>details{margin-top:26px}
@@ -212,6 +212,47 @@
 #main .controller-gallery .media-tile>span{font-size:17px}
 #main .controller-details{margin-top:28px;padding:0;border:0}
 #main .controller-details>.controller-summary{margin:0 0 22px}
+
+/* One row per body, each containing robot / EEF for both controllers. */
+#method-execution .spot-process{margin-top:36px;min-width:0}
+#main .replay-body-title{font-size:19px;font-weight:500;margin:22px 0 14px}
+#method-execution>.controller-summary{margin:18px 0 24px}
+.spot-process-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px}
+.spot-process-controls>div{display:flex;gap:4px}
+.spot-process-controls button{font:inherit;border:1px solid #d3dccf;background:#fff;color:#46533f;border-radius:4px;padding:5px 10px;cursor:pointer}
+.spot-process-controls button[aria-pressed="true"]{background:#e7eddf;border-color:#87977b}
+.spot-process-controls input{flex:1;min-width:120px;accent-color:#667e59}
+.spot-process-controls output{min-width:105px;font-variant-numeric:tabular-nums}
+.spot-process canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+.spot-process canvas:active{cursor:grabbing}
+.spot-replay-caption,.spot-loading{font-size:14px;color:#64716b;line-height:1.6;margin:10px 0}
+.spot-loading[hidden]{display:none}
+.spot-path-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:#64716b}
+.spot-path-legend span{display:inline-flex;align-items:center;gap:6px}
+.spot-path-legend i{display:inline-block;width:22px;border-top:3px solid #b85c5b}
+.spot-path-legend .object{border-color:#1a7369}
+.spot-path-legend .target{border-color:#3964a3;border-top-style:dashed}
+
+/* Each outlined pair contains its title, robot replay and EEF plot. */
+#main [data-replay-body] .execution-process-grid{align-items:stretch}
+[data-replay-body] .execution-controller{border:1px solid #cbd6c8;border-radius:4px;padding:12px;background:transparent;box-sizing:border-box}
+[data-replay-body] .execution-controller[data-controller-pair="naive"]{border-color:#d0d0ce;border-style:dashed;background:#f3f3f2}
+#main [data-replay-body] .execution-controller>h5{font-size:15px;font-weight:500;line-height:1.5;margin:0 0 10px;padding:0;border:0;color:#53604c}
+#main .replay-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0;font-size:13px}
+#main .replay-toolbar .replay-body-title{flex:none;font-size:15px;line-height:1.5;margin:0 12px 0 0;font-weight:600}
+.replay-toolbar>button{font:inherit;padding:5px 9px;border:1px solid #d8dfd3;background:#fff;color:#53654b;border-radius:3px;cursor:pointer}
+.replay-toolbar [role="group"]{display:flex;gap:0;border:1px solid #d8dfd3;margin:0;border-radius:3px;overflow:hidden}
+.replay-toolbar [role="group"] button{font:inherit;border:0!important;background:transparent!important;padding:5px 8px!important;border-radius:0;color:#64716b}
+.replay-toolbar [role="group"] button[aria-pressed="true"]{background:#edf2e8!important;color:#294832}
+.replay-toolbar .mpc-timeline,.replay-toolbar>input{flex:1;min-width:120px;margin:0}
+.replay-toolbar .mpc-full-control{width:auto;font-size:12px;white-space:nowrap}
+.replay-toolbar .mpc-time-pin{width:8px;height:8px;min-width:0;padding:0;top:50%;bottom:auto;border-radius:50%;background:#69835e!important;border:1px solid #fff!important;transform:translate(-50%,-50%)}
+.replay-toolbar .mpc-time-pin:after{display:none}
+#main [data-replay-body] .execution-process-grid{margin-top:12px}
+#main [data-replay-body] .mpc-recording-status{font-size:12px;min-height:0;margin-top:6px;color:#6c7667}
+[data-replay-body] .mpc-recording-status:empty{display:none}
+#method-execution .spot-process{margin-top:28px;padding-top:22px;border-top:0}
+.spot-path-legend{font-size:12px;margin-top:6px;justify-content:flex-end}
 .experiment-scenes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 40px;margin:26px 0 64px;max-width:1120px;margin-inline:auto}
 .experiment-scenes figure{margin:0;min-width:0}
 .experiment-scenes a{display:block;color:inherit;text-decoration:none}

@@ -1,0 +1,249 @@
+{
+  "scope": "Diagnostic step responses, not benchmark results or completed tasks",
+  "upright_task_successes_before_changes": 0,
+  "upright_task_runs_before_changes": 3,
+  "motor_variants": [
+    {
+      "name": "relative",
+      "qualified": false,
+      "failures": [
+        "stop: velocity tracking failed",
+        "stop: did not stop",
+        "reverse: velocity tracking failed",
+        "settle: velocity tracking failed",
+        "settle: did not stop",
+        "uncommanded heading drift"
+      ],
+      "phases": {
+        "raise_and_settle": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": -0.011124145203752229,
+          "horizontal_speed_m_s": 0.016203136901796464,
+          "minimum_root_height_m": 0.7555053234100342
+        },
+        "forward": {
+          "requested_m_s": 0.15,
+          "measured_forward_m_s": 0.21538391118761657,
+          "horizontal_speed_m_s": 0.22260819438625354,
+          "minimum_root_height_m": 0.7530059814453125
+        },
+        "stop": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.19221757480124166,
+          "horizontal_speed_m_s": 0.20735362281683378,
+          "minimum_root_height_m": 0.7542546987533569
+        },
+        "reverse": {
+          "requested_m_s": -0.15,
+          "measured_forward_m_s": 0.7374617040793819,
+          "horizontal_speed_m_s": 0.7592120192154127,
+          "minimum_root_height_m": 0.7481192350387573
+        },
+        "settle": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.6842096635128294,
+          "horizontal_speed_m_s": 0.7165197070318589,
+          "minimum_root_height_m": 0.7440935969352722
+        }
+      },
+      "source_sha256": "c23c73e20676897fd55773ba22b565e8109c4bbc41e99798c9a9aa7ce7c0613c"
+    },
+    {
+      "name": "native",
+      "qualified": false,
+      "failures": [
+        "raise_and_settle: velocity tracking failed",
+        "raise_and_settle: did not stop",
+        "forward: upright height lost",
+        "stop: upright height lost",
+        "stop: velocity tracking failed",
+        "stop: did not stop",
+        "reverse: upright height lost",
+        "reverse: velocity tracking failed",
+        "settle: upright height lost",
+        "settle: velocity tracking failed",
+        "settle: did not stop",
+        "uncommanded heading drift"
+      ],
+      "phases": {
+        "raise_and_settle": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.3300830876772932,
+          "horizontal_speed_m_s": 0.38656313590512786,
+          "minimum_root_height_m": 0.7209934592247009
+        },
+        "forward": {
+          "requested_m_s": 0.15,
+          "measured_forward_m_s": 0.0897615211069818,
+          "horizontal_speed_m_s": 0.2734031893769222,
+          "minimum_root_height_m": 0.12139790505170822
+        },
+        "stop": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.1513814891300616,
+          "horizontal_speed_m_s": 0.25141209168795664,
+          "minimum_root_height_m": 0.11912377923727036
+        },
+        "reverse": {
+          "requested_m_s": -0.15,
+          "measured_forward_m_s": 0.0702322901319921,
+          "horizontal_speed_m_s": 0.31096439754800753,
+          "minimum_root_height_m": 0.1226479709148407
+        },
+        "settle": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.11504577440567335,
+          "horizontal_speed_m_s": 0.3698071246383673,
+          "minimum_root_height_m": 0.11105122417211533
+        }
+      },
+      "source_sha256": "1aab7d44642c1872e1da844b009d8e63ccafc6be4a2b689fa71db357950a5a78"
+    },
+    {
+      "name": "supported",
+      "qualified": false,
+      "failures": [
+        "forward: velocity tracking failed",
+        "stop: velocity tracking failed",
+        "stop: did not stop",
+        "reverse: velocity tracking failed",
+        "settle: velocity tracking failed",
+        "settle: did not stop"
+      ],
+      "phases": {
+        "raise_and_settle": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": -0.021511287543258574,
+          "horizontal_speed_m_s": 0.03719197038673292,
+          "minimum_root_height_m": 0.7528825402259827
+        },
+        "forward": {
+          "requested_m_s": 0.15,
+          "measured_forward_m_s": 0.4798116859024919,
+          "horizontal_speed_m_s": 0.48629502557519644,
+          "minimum_root_height_m": 0.7510244250297546
+        },
+        "stop": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.9442776680371472,
+          "horizontal_speed_m_s": 0.9676423274104881,
+          "minimum_root_height_m": 0.7373616695404053
+        },
+        "reverse": {
+          "requested_m_s": -0.15,
+          "measured_forward_m_s": 0.8852012274884722,
+          "horizontal_speed_m_s": 0.9280119346331352,
+          "minimum_root_height_m": 0.7388667464256287
+        },
+        "settle": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.8807464399944982,
+          "horizontal_speed_m_s": 0.917432621902668,
+          "minimum_root_height_m": 0.7407641410827637
+        }
+      },
+      "source_sha256": "9a6ac9be059e57b236e94584d2a9f5e57002a27030c4413826c3e23ec2f612a9"
+    },
+    {
+      "name": "adapted",
+      "qualified": false,
+      "failures": [
+        "raise_and_settle: upright height lost",
+        "raise_and_settle: did not stop",
+        "forward: upright height lost",
+        "forward: velocity tracking failed",
+        "stop: upright height lost",
+        "stop: did not stop",
+        "reverse: upright height lost",
+        "reverse: velocity tracking failed",
+        "settle: upright height lost",
+        "settle: did not stop",
+        "uncommanded heading drift"
+      ],
+      "phases": {
+        "raise_and_settle": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.051331826232239884,
+          "horizontal_speed_m_s": 0.6480575972072793,
+          "minimum_root_height_m": 0.07672499120235443
+        },
+        "forward": {
+          "requested_m_s": 0.15,
+          "measured_forward_m_s": -0.026349219839576575,
+          "horizontal_speed_m_s": 0.20927243644715396,
+          "minimum_root_height_m": 0.07403038442134857
+        },
+        "stop": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.03280404846853963,
+          "horizontal_speed_m_s": 0.2222920748299328,
+          "minimum_root_height_m": 0.07597623765468597
+        },
+        "reverse": {
+          "requested_m_s": -0.15,
+          "measured_forward_m_s": 0.05249511267474914,
+          "horizontal_speed_m_s": 0.32323324025543865,
+          "minimum_root_height_m": 0.07234092801809311
+        },
+        "settle": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.006166346677625301,
+          "horizontal_speed_m_s": 0.2783778937808635,
+          "minimum_root_height_m": 0.07643087953329086
+        }
+      },
+      "source_sha256": "81ba29ec9ea78451c7d0726132cd430942a7866c776b7084d12cf2623e4c8608"
+    },
+    {
+      "name": "adapted-supported",
+      "qualified": false,
+      "failures": [
+        "raise_and_settle: upright height lost",
+        "raise_and_settle: velocity tracking failed",
+        "raise_and_settle: did not stop",
+        "forward: upright height lost",
+        "forward: velocity tracking failed",
+        "stop: upright height lost",
+        "stop: did not stop",
+        "reverse: upright height lost",
+        "reverse: velocity tracking failed",
+        "settle: upright height lost",
+        "settle: did not stop",
+        "uncommanded heading drift"
+      ],
+      "phases": {
+        "raise_and_settle": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": -1.0838908539985834,
+          "horizontal_speed_m_s": 1.1911595183040125,
+          "minimum_root_height_m": 0.07650646567344666
+        },
+        "forward": {
+          "requested_m_s": 0.15,
+          "measured_forward_m_s": 0.017443943205236134,
+          "horizontal_speed_m_s": 0.18501587555186355,
+          "minimum_root_height_m": 0.07484370470046997
+        },
+        "stop": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": 0.04533559314119043,
+          "horizontal_speed_m_s": 0.19010859534940067,
+          "minimum_root_height_m": 0.07707202434539795
+        },
+        "reverse": {
+          "requested_m_s": -0.15,
+          "measured_forward_m_s": -0.0017579468246303972,
+          "horizontal_speed_m_s": 0.33285975670038004,
+          "minimum_root_height_m": 0.07337064296007156
+        },
+        "settle": {
+          "requested_m_s": 0.0,
+          "measured_forward_m_s": -0.010134544973701955,
+          "horizontal_speed_m_s": 0.10783368011356742,
+          "minimum_root_height_m": 0.07380907982587814
+        }
+      },
+      "source_sha256": "770731b07d6f109d68b799a371f55f5995b24c3484d0296ff435d11aca71e11d"
+    }
+  ]
+}
