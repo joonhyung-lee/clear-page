@@ -210,7 +210,7 @@
   new ResizeObserver(drawCurves).observe(root.querySelector('[data-curriculum-curves]'));
   function playCheckpoint(stage) {
     select(stage, true);
-    host.querySelector('.launch')?.click();
+    if(!stage.replay.video)host.querySelector('.launch')?.click();
   }
   function renderSteps(data) {
     const controls=root.querySelector('[data-curriculum-steps]');
@@ -237,6 +237,22 @@
       return;
     }
     root.dataset.replayUpdates = stage.replay.cumulativeUpdates;
+    if(stage.replay.video){
+      host.querySelector('.viewer')?.dispatchEvent(new Event('reset-viewer'));
+      let movie=host.querySelector('video[data-checkpoint-video]');
+      if(!movie){
+        movie=document.createElement('video');movie.dataset.checkpointVideo='';
+        movie.controls=true;movie.muted=true;movie.playsInline=true;movie.loop=true;
+        movie.style.cssText='width:100%;display:block;aspect-ratio:1;object-fit:contain';
+        movie.poster=clearAssetURL(`assets/media/${stage.replay.scene}.png`);
+        host.replaceChildren(movie);prepareManualVideo(movie);
+      }
+      const url=clearAssetURL(stage.replay.video);
+      if(movie.src!==new URL(url,location.href).href)movie.src=url;
+      currentScene=stage.replay.scene;
+      if(play)movie.play().catch(()=>{});
+      drawCurves();return;
+    }
     const seek=()=>{
       const frame=host.querySelector('iframe.scene-ready');
       if(!frame)return;
@@ -322,24 +338,20 @@
     attemptedBodies.add(body);
     loading = true;
     const requestedBody = body;
-    const script = document.createElement('script');
     const filename=['g1','spot_arm'].includes(requestedBody)?`${requestedBody}-restored-data.js`:`${requestedBody}-curriculum-data.js`;
-    script.src = clearAssetURL(`assets/${filename}`);
-    script.onload = () => {
-      loading = false; script.remove();
+    loadScript(`assets/${filename}`,()=>!!window.CLEAR_BODY_CURRICULA?.[requestedBody]).then(() => {
+      loading = false;
       if (requestedBody !== body) { refresh(); return; }
       if (window.CLEAR_BODY_CURRICULA?.[body]) render(window.CLEAR_BODY_CURRICULA[body]);
-    };
-    script.onerror = () => {
-      loading = false; script.remove();
+    }).catch(() => {
+      loading = false;
       if (requestedBody !== body) { refresh(); return; }
       if (!currentScene) {
         status.hidden=false;status.textContent = 'Training record could not load. ';
         const retry=document.createElement('button');retry.type='button';retry.textContent='Retry';
         retry.onclick=()=>{attemptedBodies.delete(body);retry.remove();refresh();};status.append(retry);
       }
-    };
-    document.head.append(script);
+    });
   }
   window.addEventListener('message', event => {
     if (event.source !== host.querySelector('iframe')?.contentWindow || event.data?.type !== 'clear-playback-time' || !Number.isFinite(event.data.time)) return;
@@ -354,7 +366,7 @@
       return;
     }
   });
-  new IntersectionObserver(entries => { near = entries[0].isIntersecting; if (near) refresh(); }, {rootMargin:'200px'}).observe(root);
+  new IntersectionObserver(entries => { near = entries[0].isIntersecting; if (near) refresh(); }, {rootMargin:'700px'}).observe(root);
   document.addEventListener('visibilitychange', refresh);
 
 })();

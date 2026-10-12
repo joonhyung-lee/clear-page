@@ -4,11 +4,6 @@ const hoverAvailable = matchMedia('(hover: hover) and (pointer: fine)');
 const teaser = document.querySelector('#teaser');
 const heroToggle = document.querySelector('#hero-toggle');
 function updateHero() { heroToggle.textContent = teaser.paused ? 'Play teaser' : 'Pause teaser'; }
-if (teaser && heroToggle) {
-  if (reduced.matches) teaser.pause();
-  heroToggle.addEventListener('click', () => teaser.paused ? teaser.play().catch(updateHero) : teaser.pause());
-  teaser.addEventListener('play', updateHero); teaser.addEventListener('pause', updateHero); updateHero();
-}
 // Download media only after an explicit playback action. Keep posters on failure.
 const manualMedia = new Map();
 function syncManualMedia(video, state) {
@@ -23,9 +18,10 @@ const manualVisibility = new IntersectionObserver(entries => {
 });
 function prepareManualVideo(video) {
   if (manualMedia.has(video)) return;
-  video.preload = 'none'; video.removeAttribute('autoplay');
+  if(video !== teaser){video.preload = 'none'; video.removeAttribute('autoplay');}
   if (video !== teaser && !video.closest('.media-tile') && !video.closest('.ego-inset')) video.controls = true;
-  manualMedia.set(video, {visible:false,resume:false}); manualVisibility.observe(video);
+  const box=video.getBoundingClientRect();
+  manualMedia.set(video, {visible:box.bottom>0&&box.top<innerHeight,resume:video===teaser&&!video.paused}); manualVisibility.observe(video);
   let retry;
   const failed = () => {
     manualMedia.get(video).resume = false;
@@ -41,6 +37,18 @@ function prepareManualVideo(video) {
 }
 document.querySelectorAll('video').forEach(prepareManualVideo);
 document.addEventListener('visibilitychange', () => { for (const [video,state] of manualMedia) syncManualMedia(video,state); });
+// Restore full previews after the first screen, without delaying playback controls.
+const previewObserver=new IntersectionObserver(entries=>{
+  if(!entries.some(entry=>entry.isIntersecting))return;
+  previewObserver.disconnect();
+  loadScript(window.CLEAR_PAGE_PREVIEW_PATH,()=>!!window.CLEAR_PAGE_PREVIEWS_READY).then(()=>{
+    document.querySelectorAll('[data-preview-src]').forEach(element=>{
+      const key=element.dataset.previewSrc.split('?')[0].replace(/^\.\.\//,'');
+      if(window.CLEAR_PREVIEWS[key])element[element.tagName==='VIDEO'?'poster':'src']=window.CLEAR_PREVIEWS[key];
+    });
+  }).catch(()=>{});
+},{rootMargin:'100px'});
+document.querySelectorAll('[data-preview-src]:not(#teaser)').forEach(element=>previewObserver.observe(element));
 // Kept as an API for dynamically created galleries; inspection is user initiated.
 function observeAutomaticScene() {}
 
@@ -141,7 +149,8 @@ function requestScript(path, ready) {
         error ? reject(error) : resolve();
       };
       const timeout = setTimeout(() => finish(new Error('Scene request timed out')), 45000);
-      script.onload = () => finish(ready() ? null : new Error('Incomplete scene response'));
+      script.onload = () => Promise.resolve(window.CLEAR_DATA_READY?.[path]).then(
+        () => finish(ready() ? null : new Error('Incomplete scene response')), finish);
       script.onerror = () => finish(new Error('Scene request failed'));
       script.src = clearAssetURL(path);
       document.head.append(script);
@@ -150,6 +159,7 @@ function requestScript(path, ready) {
   });
 }
 function loadScript(path, ready) {
+  if(typeof DecompressionStream==='function'&&/^assets\/(learning-samples(?:-grounding|-ordering)?|g1-restored-data|spot_arm-restored-data|spot-curriculum-data|training-loss-data)\.js$/.test(path))path=path.replace('.js','.packed.js');
   if (ready()) return Promise.resolve();
   if (!scriptLoads.has(path)) {
     const pending = requestScript(path, ready);

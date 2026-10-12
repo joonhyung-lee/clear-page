@@ -31,6 +31,8 @@
     const ticket=(excerptTickets.get(card)||0)+1;excerptTickets.set(card,ticket);
     const guide=catalog?.nodes.find(n=>n.id===card.dataset.node)||catalog?.guides.find(g=>g.id===card.dataset.component),status=card.querySelector('.code-status');
     if(!guide){status.textContent='Source index unavailable. Reload to retry.';return;}
+    if(card.dataset.prerenderedNode===guide.id&&card.dataset.scope!=='file')return;
+    delete card.dataset.prerenderedNode;
     status.textContent='Loading code…';
     card.querySelector('[data-copy-source]').disabled=true;
     try{
@@ -157,6 +159,7 @@
     return (bytes/unit).toFixed(1)+' '+({1000:'KB',1000000:'MB',1000000000:'GB'}[unit]);
   }
   for(const region of document.querySelectorAll('[data-archive-tree]')){
+    if(region.dataset.prerendered==='true')continue;
     const archive=window.CLEAR_CODE_ARCHIVES?.[region.dataset.archiveTree];
     if(!archive?.members){region.textContent='Archive contents unavailable. Reload to retry.';continue;}
     const root={children:new Map(),bytes:0,count:0};

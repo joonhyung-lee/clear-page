@@ -231,3 +231,8 @@ video.media-ready{animation:media-dissolve .4s ease-out}
 /* Explicit recovery remains reachable above the retained poster. */
 .media-retry{position:relative;z-index:6;padding:.55rem .8rem;cursor:pointer}
 .viewer>.media-retry{position:absolute;left:1rem;bottom:1rem}
+#main #tldr.wrap{width:min(1440px,calc(100% - 64px));max-width:none}
+#tldr>.summary-sentence{max-width:none;font-size:clamp(16px,1.3vw,18px);text-wrap:wrap}
+#motivation .academic-copy{max-width:none;text-wrap:wrap}
+.motivation-sentence{display:block}
+@media(max-width:800px){#main #tldr.wrap{width:calc(100% - 40px)}#tldr>.summary-sentence{font-size:17px}.motivation-sentence+.motivation-sentence{margin-top:.5em}}

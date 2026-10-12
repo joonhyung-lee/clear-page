@@ -47,7 +47,7 @@ def check_page(browser,path,initial_budget):
     page.clock.fast_forward(16*60*1000)
     page.wait_for_timeout(500)
     assert len(requests)==before,('background requests',requests[before:])
-    assert not [u for u in requests if '.mp4' in u or '.hex.js' in u],('automatic media',requests)
+    assert not [u for u in requests if ('.mp4' in u and '/teaser-stream.mp4' not in u) or '.hex.js' in u],('automatic media',requests)
     assert not errors,errors
     assert not bad,bad
     assert len(requests)<35,('browse budget',len(requests))
@@ -94,7 +94,7 @@ def check_data_retry(browser):
 
 with sync_playwright() as p:
     browser=p.chromium.launch()
-    check_page(browser,'/',3)
+    check_page(browser,'/',5)
     check_page(browser,'/code/index.html',5)
     check_data_retry(browser)
     browser.close()

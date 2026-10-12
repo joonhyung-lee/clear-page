@@ -1,5 +1,9 @@
 /* Paper equations, with descriptive underbraces on the combined objective. */
 (() => {
+ const fonts=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){
+  fonts.disconnect();loadScript('assets/math-fonts.js',()=>!!window.CLEAR_MATH_FONTS).catch(()=>{});
+ }},{rootMargin:'200px'});
+ document.querySelectorAll('[data-tex]').forEach(el=>fonts.observe(el));
  document.querySelectorAll('[data-tex]').forEach(el => {
   let tex=el.dataset.tex;
   if(el.dataset.objectiveAnnotations){

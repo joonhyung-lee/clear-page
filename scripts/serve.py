@@ -12,7 +12,7 @@ class Handler(SimpleHTTPRequestHandler):
         path=unquote(urlsplit(self.path).path)
         relative=Path(path.lstrip('/'))
         resolved=(ROOT/relative).resolve()
-        code_public = path in ('/code', '/code/', '/code/index.html', '/code/code.css', '/code/code.js', '/code/catalog.js', '/code/page-bundle.js', '/code/page-bundle.css') or (
+        code_public = path in ('/code', '/code/', '/code/index.html', '/code/code.css', '/code/code.js', '/code/catalog.js', '/code/page-bundle.js', '/code/page-core.js', '/code/page-previews.js', '/code/page-previews-core.js', '/code/page-bundle.css') or (
             path.startswith('/code/source/') and resolved.suffix == '.js')
         attention_public = path.startswith('/attention/') and resolved.suffix in {'.html','.js','.json','.png','.webp','.mp4','.pdf'}
         replanning_public = path in ('/replanning/', '/replanning/index.html', '/replanning/README.md') or (

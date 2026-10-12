@@ -129,6 +129,11 @@
 .learning-pair #training-objective>h4{display:none}
 .learning-pair #training-objective{margin-top:0;padding-top:0;border:0}
 .learning-pair .loss-chart-grid{grid-auto-columns:minmax(240px,1fr)}
+/* Keep late chart/sample data from moving a replay out of the viewport. */
+.learning-explorer{min-height:900px}
+#training-losses .loss-content[hidden]{display:block!important;visibility:hidden}
+#controller-pretraining{min-height:740px}
+@media(max-width:600px){.learning-explorer{min-height:1550px}#controller-pretraining{min-height:1050px}}
 /* Method finish: aligned inputs, connected body modes and compact reading rows. */
 #method .method-part{margin-top:32px;padding-top:18px}
 #method .method-part>h3{margin-bottom:12px}

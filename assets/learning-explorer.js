@@ -131,7 +131,7 @@
    const status=root.querySelector('.learning-loading');status.textContent='Preparing scene samples…';
    try{
     if(root.dataset.kind==='ordering')await loadScript('assets/ordering-map.js',()=>!!window.clearOrderingMap);
-    await loadScript('assets/learning-samples.js',()=>!!window.CLEAR_LEARNING_SAMPLES);
+    await loadScript(`assets/learning-samples-${root.dataset.kind}.js`,()=>!!window.CLEAR_LEARNING_SAMPLES?.[root.dataset.kind]);
     const data=window.CLEAR_LEARNING_SAMPLES;samples=data[root.dataset.kind];
     const xs=samples.map(s=>s.xy[0]),ys=samples.map(s=>s.xy[1]),lo=[Math.min(...xs),Math.min(...ys)],hi=[Math.max(...xs),Math.max(...ys)];
     const svg=root.querySelector('.sample-scatter');
@@ -167,7 +167,7 @@
      const point=new DOMPoint(event.clientX,event.clientY).matrixTransform(svg.getScreenCTM().inverse());
      let closest=-1,distance=18;
      dots.forEach((dot,i)=>{if(!matches(samples[i]))return;const d=Math.hypot(point.x-dot.cx.baseVal.value,point.y-dot.cy.baseVal.value);if(d<distance){distance=d;closest=i;}});
-     if(closest>=0&&closest!==index)select(closest);
+     svg.style.cursor=closest>=0?'pointer':'';
     });
     const layouts=new Set(samples.map(s=>JSON.stringify([s.scene.walls,s.scene.terrain,s.scene.objects]))).size,heights=samples.flatMap(s=>s.scene.terrain.map(t=>t.height_m??t.end_height_m??0));
     const queryCount=samples.filter(s=>s.queryOnly).length;root.querySelector('.sample-count').textContent=queryCount?`${samples.length-queryCount} recorded samples + ${queryCount} scene queries · ${layouts} scene layouts`:`${samples.length} samples · ${layouts} scene layouts`;
@@ -179,6 +179,7 @@
    }catch{initialized=false;status.textContent='Samples are taking longer to load. ';const button=document.createElement('button');button.type='button';button.textContent='Retry samples';button.onclick=()=>initialize(true);status.append(button);}
   }
   const observer=new IntersectionObserver(entries=>{visible=entries.at(-1).isIntersecting;root.classList.toggle('is-visible',visible);if(visible){initialize();connect();schedule();if(movie&&movieVisible&&playing&&movie.readyState>=2)movie.play().catch(()=>{});}else{cancelAnimationFrame(frame);frame=0;last=0;movie?.pause();}},{rootMargin:'0px'});observer.observe(root);
+  const preload=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){preload.disconnect();initialize();}},{rootMargin:'700px'});preload.observe(root);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;movie?.pause();}else{schedule();if(movie&&movieVisible&&playing)movie.play().catch(()=>{});}});
   play.addEventListener('click',()=>{playing=!playing;if(movie){if(playing&&movieVisible)movie.play().catch(()=>{});else movie.pause();}render();schedule();});range.addEventListener('input',()=>{progress=+range.value;playing=false;if(movie){movie.pause();const f=samples[index].rollout;if(movie.readyState)movie.currentTime=progress*(f.at(-1)[0]-f[0][0]);}render();});
   function advance(direction){for(let step=1;step<=samples.length;step++){const i=(index+direction*step+samples.length)%samples.length;if(matches(samples[i])){select(i);break;}}}

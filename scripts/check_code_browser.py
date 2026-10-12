@@ -112,7 +112,7 @@ def static_checks():
         assert str(page.select_one('#'+stage+' .result svg')) == str(main.select_one('#'+original+' .sequence-explanation svg'))
     bundle_sources = json.loads((ROOT/'scripts/site_bundle_manifest.json').read_text())['code/index.html']['scripts']
     assert 'assets/method-illustration.js' in bundle_sources
-    bundle = (ROOT/'code/page-bundle.js').read_text()
+    bundle = (ROOT/'code/page-core.js').read_text()
     assert all((ROOT/source).read_text() in bundle for source in bundle_sources)
     assert len(page.select('[data-grounding-panel]')) == 3
     assert len(page.select('[data-grounding-panel=embodiment] video')) == 4
@@ -123,7 +123,7 @@ def static_checks():
     assert 'route to the goal' in page.select_one('#validation figcaption').get_text()
     assert not page.select('.sidebar, #file-tree, #guide-nav')
     for link in page.select('a[download]'):
-        assert (ROOT / 'code' / (link.get('href') or link['data-local-download'])).is_file()
+        assert (ROOT / 'code' / (link.get('href') or link['data-local-download']).split('?')[0]).is_file()
     archives = json.loads((ROOT / 'assets/code-archives.js').read_text().removeprefix('window.CLEAR_CODE_ARCHIVES=').removesuffix(';\n'))
     assert {node['data-archive-tree'] for node in page.select('[data-archive-tree]')} == set(archives)
     for archive in archives.values():
