@@ -39,7 +39,13 @@
  });
  document.querySelectorAll('[data-input-panel]').forEach(button=>button.onclick=()=>{
   document.querySelectorAll('[data-input-panel]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
-  document.querySelectorAll('[data-input-content]').forEach(panel=>panel.hidden=panel.dataset.inputContent!==button.dataset.inputPanel);
+  document.querySelectorAll('[data-input-content]').forEach(panel=>{
+   panel.hidden=panel.dataset.inputContent!==button.dataset.inputPanel;
+   if(panel.hidden){
+    panel.querySelectorAll('.media-grid').forEach(grid=>grid.dispatchEvent(new Event('close-preview')));
+    panel.querySelectorAll('video').forEach(video=>{video.pause();if(manualMedia.has(video))manualMedia.get(video).resume=false;});
+   }
+  });
  });
  document.querySelectorAll('.all-methods-toggle').forEach(button=>button.onclick=()=>{
   const expanded=button.getAttribute('aria-expanded')!=='true';button.setAttribute('aria-expanded',String(expanded));button.textContent=expanded?'Fewer methods':'All methods';button.closest('.experiment').classList.toggle('show-all-methods',expanded);

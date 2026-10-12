@@ -151,11 +151,11 @@
 .structure-branches button::before{content:'';position:absolute;top:-5px;left:50%;height:8px;border-left:1px solid #cad5c3}
 #embodiment-demo .embodiment-gallery{margin:0;gap:12px}
 #encoding .media-tile{overflow:hidden}
-#encoding .media-tile video{object-fit:cover;transform:scale(1.16);transform-origin:50% 46%}
+#encoding .media-tile video{object-fit:contain;transform:none}
 #encoding .media-tile>span{position:relative;z-index:1;background:#fff}
 #encoding #input-objects>.viewer{height:auto;aspect-ratio:4/3}
-#encoding #input-objects>.viewer>video{object-fit:cover;transform:scale(1.12)}
-#encoding .focus-viewer>video{object-fit:cover;transform:scale(1.1)}
+#encoding #input-objects>.viewer>video{object-fit:contain;transform:none}
+#encoding .focus-viewer>video{object-fit:contain;transform:none}
 .grounding-columns :is(p,figcaption){font-size:14px!important;line-height:1.5;margin-top:10px;margin-bottom:10px}
 #encoding .three-up+.section-intro{margin:12px 0 0}
 #encoding .viewer-note{font-size:12px!important;line-height:1.5;margin:7px 0}
@@ -180,12 +180,12 @@
 #encoding .section-heading h2{margin:0}
 #encoding .input-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
 #encoding .media-grid{height:auto;grid-auto-rows:auto}
-#encoding .media-tile video{height:auto;aspect-ratio:560/440;object-fit:contain;transform:scale(1.10)}
+#encoding .media-tile video{height:auto;aspect-ratio:560/440;object-fit:contain;transform:none}
 #encoding .media-tile>span{flex-shrink:0}
 #encoding .section-intro{max-width:none;width:100%;text-wrap:pretty}
 #encoding #input-scene .media-tile video{transform-origin:0 50%}
 #encoding #input-objects>.viewer{aspect-ratio:560/440}
-#encoding #input-objects>.viewer>video{object-fit:contain;transform:scale(1.06)}
+#encoding #input-objects>.viewer>video{object-fit:contain;transform:none}
 #method-execution .controller-summary{max-width:none;width:100%;margin:14px 0 20px}
 #method-execution .controller-summary p{max-width:none;width:100%;margin:0;font-size:15px;line-height:1.55}
 /* Paper-aligned formulation: diagrams, equations, mechanism, then a concrete case. */
@@ -283,3 +283,11 @@
 @media(max-width:480px){.experiment-scenes{grid-template-columns:1fr}.experiment-scenes img{max-height:280px}}
 
 #experiment-horizon .horizon-scene .experiment-matrix article>h4{min-height:2.8em;font-size:16px;line-height:1.4;margin-bottom:10px}
+
+/* Keep native video controls inside the frame and separate from 3D actions. */
+.viewer:has(>video[controls])>.launch{top:10px;bottom:auto;left:auto;right:10px;transform:none}
+.execution-body-viewer:has(>video[controls])>.launch{left:10px;right:auto}
+#encoding .focus-viewer{height:100%}
+.grid-focus .focus-viewer>video{position:absolute;top:40px;left:0;width:100%;height:calc(100% - 92px);padding:0;object-fit:contain;transform:none}
+.grid-focus .focus-viewer:has(>video[controls])>.launch{top:auto;bottom:8px;left:50%;right:auto;transform:translateX(-50%)}
+.grid-focus .focus-title{max-width:calc(100% - 64px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

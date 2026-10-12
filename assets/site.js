@@ -341,9 +341,9 @@ for (const grid of document.querySelectorAll('.media-grid')) {
   overlay.addEventListener('pointerenter',keepOpen);
   grid.addEventListener('pointerleave',leave);
   overlay.addEventListener('pointerleave',leave);
-  overlay.addEventListener('click',event=>{
-    if(!event.target.closest('button')&&!pinned){pinOverlay(true);video.play().catch(()=>{});}
-  });
+  // Native video controls own play/pause; playing pins the hover preview.
+  video.addEventListener('play',()=>pinOverlay(true));
+  grid.addEventListener('close-preview',()=>close());
   overlay.querySelector('.focus-close').addEventListener('click', () => close(true));
   grid.addEventListener('keydown', event => { if(event.key==='Escape') {event.preventDefault();close(true);} });
 }
