@@ -18,6 +18,7 @@ p.add_argument('--initial-frame', action='store_true', help='Record reset at t=0
 p.add_argument('--deterministic', action='store_true', help='Evaluate the policy mean without exploration noise')
 p.add_argument('--arm-motion', action='store_true', help='Evaluate commanded arm posture changes during locomotion')
 p.add_argument('--bare-spot', action='store_true', help='Use the distinct arm-free physical model and policy')
+p.add_argument('--heading-tracking', action='store_true', help='Evaluate a 0.5 m/s world-forward command with heading feedback and record telemetry')
 p.add_argument('--device', default='cuda:0')
 p.add_argument('--consistent-commands', action='store_true', help='Use the corrected per-episode Spot torso commands')
 a = p.parse_args()
@@ -68,6 +69,19 @@ twist.ranges.heading = None
 twist.rel_heading_envs = 0.
 twist.rel_standing_envs = 0.
 twist.resampling_time_range = (2., 4.)
+if a.heading_tracking:
+    cfg.events['reset_base'].params['pose_range'] = {'x': (0., 0.), 'y': (0., 0.), 'z': (.02, .02), 'yaw': (0., 0.)}
+    cfg.events['reset_base'].params['velocity_range'] = {}
+    twist.heading_command = True
+    twist.ranges.heading = (0., 0.)
+    twist.heading_control_stiffness = 1.
+    twist.rel_heading_envs = twist.rel_world_envs = 1.
+    twist.rel_standing_envs = twist.rel_forward_envs = 0.
+    twist.init_velocity_prob = 0.
+    twist.ranges.lin_vel_x = (.5, .5)
+    twist.ranges.lin_vel_y = (0., 0.)
+    twist.ranges.ang_vel_z = (-.8, .8)
+    twist.resampling_time_range = (1000., 1000.)
 env = ManagerBasedRlEnv(cfg=cfg, device=a.device)
 # One independent simulated environment per terrain tile avoids visual overlap.
 t = env.scene.terrain
@@ -104,6 +118,7 @@ np.savez_compressed(a.output / (a.body + '-geometry.npz'),
                     body_names=np.asarray([model.body(i).name for i in range(model.nbody)]),
                     **{k: np.asarray(getattr(model, k)) for k in fields})
 frames = []
+telemetry = []
 audit = []
 for stage in stages:
     checkpoint = Path(stage['checkpoint'])
@@ -118,6 +133,7 @@ for stage in stages:
         env.reset()
         obs = env.observation_manager.compute()
     poses = []
+    telemetry_stage = []
     for i in range(a.steps):
         if a.arm_motion:
             from mjlab.tasks.velocity.config.spot import spot_mdp
@@ -133,24 +149,38 @@ for stage in stages:
             quat = env.sim.data.xquat.cpu().numpy().copy()
             assert np.isfinite(pos).all() and np.isfinite(quat).all()
             poses.append((pos, quat))
+            if a.heading_tracking:
+                robot=env.scene['robot']
+                telemetry_stage.append(dict(
+                    command_world=np.tile([.5,0.,0.],(32,1)),
+                    command_body=env.command_manager.get_command('twist').cpu().numpy().copy(),
+                    velocity_world=robot.data.root_link_lin_vel_w.cpu().numpy().copy(),
+                    heading=robot.data.heading_w.cpu().numpy().copy(),
+                    root_position=robot.data.root_link_pos_w.cpu().numpy().copy()))
         if a.initial_frame:
             with torch.inference_mode():
                 obs, *_ = wrapped.step(actor(obs, stochastic_output=not a.deterministic))
         if i % 100 == 0:
             print(a.body, stage['iteration'], i, flush=True)
     frames.append(poses)
+    if a.heading_tracking:telemetry.append(telemetry_stage)
     audit.append({**stage, 'sha256': hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
                   'actionLimit': wrapped.clip_actions})
 np.savez_compressed(a.output / (a.body + '-states.npz'),
     positions=np.asarray([[f[0] for f in stage] for stage in frames], dtype=np.float32),
     quaternions=np.asarray([[f[1] for f in stage] for stage in frames], dtype=np.float32),
     origins=t.env_origins.cpu().numpy(), dt=env.step_dt * 2)
+if a.heading_tracking:
+    np.savez_compressed(a.output / (a.body + '-tracking.npz'),
+        **{key:np.asarray([[frame[key] for frame in stage] for stage in telemetry],dtype=np.float32)
+           for key in telemetry[0][0]},dt=env.step_dt*2)
 (a.output / (a.body + '-audit.json')).write_text(json.dumps({
     'stages': audit, 'environments': 32, 'task': task, 'seed': 42,
     'terrains': list(generator.sub_terrains), 'terrainGrid': [generator.num_rows, columns],
     'framesPerStage': len(frames[0]), 'dt': env.step_dt * 2,
     'evaluation': ('Deterministic' if a.deterministic else 'Stochastic') + ' checkpoint reconstruction on a common task terrain bank. Not archived training footage.',
     'initialFrameBeforeAction': a.initial_frame,
+    'headingTracking': dict(commandWorld=[.5,0.,0.],headingTarget=0.,headingGain=1.) if a.heading_tracking else None,
     'device': a.device, 'consistentTorsoCommands': a.consistent_commands,
     'actorNormalization': rl.actor.obs_normalization,
     'physicalBody': 'spot' if a.bare_spot else ('spot_arm' if a.body.startswith('spot') else 'g1'),

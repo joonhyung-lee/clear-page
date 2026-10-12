@@ -233,13 +233,15 @@
     const dialog=document.createElement('dialog');dialog.className='policy-terrain-dialog';
     dialog.setAttribute('aria-label',label+' radial motion illustration');
     const header=document.createElement('header'),title=document.createElement('span'),close=document.createElement('button');
-    title.textContent=label+' · Radial illustration';close.type='button';close.textContent='×';close.setAttribute('aria-label','Close terrain view');
+    title.textContent=label+(stage.replay.headingTracking?' · Heading tracking':' · Radial illustration');close.type='button';close.textContent='×';close.setAttribute('aria-label','Close terrain view');
     header.append(title,close);
     const movie=document.createElement('video');movie.controls=true;movie.muted=true;movie.playsInline=true;movie.loop=true;
     const path=stage.replay.video.replace(/\.mp4$/,'-'+terrain+'.mp4');
     movie.poster=clearAssetURL(path.replace(/\.mp4$/,'.webp'));movie.src=clearAssetURL(path);
     movie.addEventListener('loadedmetadata',()=>{movie.currentTime=Math.min(source.currentTime,movie.duration);movie.play().catch(()=>{});},{once:true});
-    dialog.append(header,movie);document.body.append(dialog);
+    dialog.append(header,movie);
+    const key=host.querySelector('.policy-tracking-key');if(key)dialog.append(key.cloneNode(true));
+    document.body.append(dialog);
     close.onclick=()=>dialog.close();
     dialog.addEventListener('click',event=>{if(event.target===dialog){const box=dialog.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)dialog.close();}});
     dialog.addEventListener('close',()=>{source.currentTime=movie.currentTime;movie.pause();movie.removeAttribute('src');movie.load();dialog.remove();if(wasPlaying)source.play().catch(()=>{});},{once:true});
@@ -247,6 +249,7 @@
   }
   function terrainLinks(stage, movie) {
     host.querySelector('.policy-terrain-links')?.remove();
+    host.querySelector('.policy-tracking-key')?.remove();
     const terrains=[['stairs_up','Stairs up'],['stairs_down','Stairs down'],['slope_up','Slope up'],['slope_down','Slope down'],['flat','Flat']];
     if(stage.replay.scene==='learning-g1')terrains.push(['random_rough','Rough terrain']);
     if(!terrains.some(([key])=>key===terrainMode)&&terrainMode!=='matrix')terrainMode='stairs_up';
@@ -257,7 +260,7 @@
       const option=document.createElement('option');option.value=key;option.textContent=name;menu.append(option);
     }
     menu.value=terrainMode;label.append(menu);
-    const note=document.createElement('span');note.textContent='4-way replay';
+    const note=document.createElement('span');note.textContent=stage.replay.headingTracking?'Heading + velocity':'4-way replay';
     note.title='One recorded motion replayed in four directions from the same initial position; illustrative, not a joint physics simulation.';
     const enlarge=document.createElement('button');enlarge.type='button';enlarge.textContent='↗';enlarge.setAttribute('aria-label','Enlarge terrain view');
     enlarge.onclick=()=>{
@@ -279,6 +282,12 @@
     };
     menu.onchange=()=>{terrainMode=menu.value;apply(true);};
     links.append(label,note,enlarge);host.prepend(links);apply();
+    if(stage.replay.headingTracking){
+      note.title='Deterministic forward-command evaluation with physical heading feedback. One measured rollout per terrain is rotated into four replay directions.';
+      const key=document.createElement('div');key.className='policy-tracking-key';
+      key.innerHTML='<span><i style="color:#d7534e">X</i> forward · <i style="color:#429664">Y</i> left · <i style="color:#537ed0">Z</i> up</span><span><i style="color:#d98727">━</i> Target <i style="color:#14a4b8">━</i> Actual velocity</span>';
+      host.append(key);
+    }
   }
   function select(stage, play = false) {
     selected = stage.id;

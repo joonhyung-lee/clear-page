@@ -23,6 +23,7 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 from recording_io import read_recording, write_recording, compact_buffers
 from policy_matrix_scene import arrange, MATRIX, annotate
+from policy_tracking_overlay import TrackingReplay
 from check_research_visuals import FIND, SEEK
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,7 +60,7 @@ def compact_overview(video, size=960):
     write_poster(video)
 
 
-def write_details(video, views, size, only=None):
+def write_details(video, views, size, only=None, tracking=None, start=0):
     rows=(len(views)+1)//2;scale=size/960
     for index,view in enumerate(views):
         if only is not None and index!=only:continue
@@ -73,7 +74,34 @@ def write_details(video, views, size, only=None):
         subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(),'-y','-v','error','-i',str(video),
             '-vf',f'crop={width}:{height}:{x}:{y}','-an','-c:v','libx264','-preset','fast',
             '-crf','20','-pix_fmt','yuv420p','-movflags','+faststart','-map_metadata','-1',str(output)],check=True)
+        if tracking is not None and len(views)%2 and index==len(views)-1:
+            write_detail_metrics(output,tracking,start,index,size)
         write_poster(output)
+
+
+def write_detail_metrics(video, tracking, start, index, render_size=1920):
+    """Keep metrics visible when the final wide overview cell is center-cropped."""
+    from PIL import ImageDraw,ImageFont
+    frames=imageio_ffmpeg.read_frames(str(video),pix_fmt='rgb24')
+    meta=next(frames);width,height=meta['size'];fps=meta['fps'];scale=render_size/960
+    font=ImageFont.truetype('DejaVuSans.ttf',round(render_size/74))
+    with tempfile.TemporaryDirectory(prefix='clear-detail-metrics-') as temporary:
+        output=Path(temporary)/video.name
+        proc=subprocess.Popen([imageio_ffmpeg.get_ffmpeg_exe(),'-y','-v','error','-f','rawvideo',
+            '-pix_fmt','rgb24','-s',f'{width}x{height}','-r',str(fps),'-i','-','-an','-c:v','libx264',
+            '-preset','fast','-crf','18','-pix_fmt','yuv420p','-movflags','+faststart','-map_metadata','-1',str(output)],stdin=subprocess.PIPE)
+        try:
+            for frame,pixels in enumerate(frames):
+                image=Image.frombytes('RGB',(width,height),pixels);draw=ImageDraw.Draw(image)
+                row=tracking['replay'].metrics(start+frame/fps,tracking['layout'])[index]
+                draw.rectangle((0,0,width,round(42*scale)),fill='white')
+                draw.text((round(6*scale),round(7*scale)),f"Target {row['target']:.2f}  /  Actual {row['actual']:.2f} m/s",font=font,fill='#39434a')
+                draw.text((round(6*scale),round(23*scale)),f"Velocity error {row['velocityError']:.2f} m/s  ·  Heading error {row['headingErrorDegrees']:.1f}°",font=font,fill='#637079')
+                proc.stdin.write(image.tobytes())
+        finally:
+            proc.stdin.close();code=proc.wait();frames.close()
+        assert code==0
+        staged=video.with_suffix('.mp4.tmp');staged.write_bytes(output.read_bytes());staged.replace(video)
 
 
 def outlined_recording(record, buffers, width=0.008):
@@ -113,7 +141,12 @@ def outlined_recording(record, buffers, width=0.008):
 
 
 def render(browser, scene, checkpoints, args):
-    source = ROOT/f'assets/recordings/{scene}.hex.js'
+    source = (args.recordings_dir or ROOT/'assets/recordings')/f'{scene}.hex.js'
+    body='g1' if scene=='learning-g1' else ('spot_arm' if scene=='learning-spot_arm' else 'spot')
+    tracking_path=args.tracking_dir/body/f'{body}-tracking.npz' if args.tracking_dir else None
+    tracking=TrackingReplay(tracking_path) if tracking_path and tracking_path.exists() else None
+    if any(stage['replay'].get('headingTracking') for stage in checkpoints) and (tracking is None or args.recordings_dir is None):
+        raise ValueError('Heading evaluations require --recordings-dir and --tracking-dir; refusing to overwrite measured videos with an unmeasured replay')
     raw = bytes.fromhex(json.loads(source.read_text().rsplit(' = ',1)[1].strip().removesuffix(';')))
     with tempfile.NamedTemporaryFile() as file:
         file.write(raw);file.flush();record,buffers=read_recording(file.name)
@@ -126,7 +159,7 @@ def render(browser, scene, checkpoints, args):
     agents=counts.pop()
     # A closer oblique view fills the square player with the recorded population.
     # All stages for one body retain exactly the same camera for comparison.
-    record,buffers,views,layout=arrange(record,buffers,checkpoints[-1]['replay'].get('startTime',0))
+    record,buffers,views,layout=arrange(record,buffers,checkpoints[-1]['replay'].get('startTime',0),tracking)
     render_raw=outlined_recording(record,buffers)
     page=browser.new_page(viewport={'width':args.size,'height':args.size},device_scale_factor=1)
     def route(request):
@@ -159,9 +192,9 @@ def render(browser, scene, checkpoints, args):
                     '-movflags','+faststart','-map_metadata','-1',str(output)],stdin=subprocess.PIPE)
                 try:
                     for frame in range(frames):
-                        page.evaluate(SEEK,start+frame/args.fps)
+                        page.evaluate(SEEK,start+frame/args.fps+1e-6)
                         page.evaluate(SETTLE)
-                        picture=annotate(page.screenshot(type='jpeg',quality=95,timeout=30000),views,args.size)
+                        picture=annotate(page.screenshot(type='jpeg',quality=95,timeout=30000),views,args.size,tracking.metrics(start+frame/args.fps,layout) if tracking else None)
                         proc.stdin.write(picture)
                         if frame==min(72,frames-1):
                             (Path('/tmp')/(name+'.jpg')).write_bytes(picture)
@@ -173,11 +206,11 @@ def render(browser, scene, checkpoints, args):
                 # Replace only a completely rendered and encoded output.
                 staged=dest.with_suffix('.mp4.tmp');staged.write_bytes(output.read_bytes());staged.replace(dest)
             write_poster(dest)
-            write_details(dest,views,args.size)
+            write_details(dest,views,args.size,tracking={'replay':tracking,'layout':layout} if tracking else None,start=start)
             if args.size>960:compact_overview(dest)
             results.append(dict(file=name,scene=scene,agents=agents,startTime=start,
                 duration=frames/args.fps,fps=args.fps,width=min(args.size,960),height=min(args.size,960),renderWidth=args.size,renderHeight=args.size,
-                renderer='Native Viser',displayMode='radial-replay-illustration',uniqueRecordedAgentsShown=len({item['sourceAgent'] for item in layout}),views=views,displayLayout=layout,displayedAgents=len(layout),outline={'color':'black','widthMeters':0.008,'method':'back-face shell'},sourceSHA256=hashlib.sha256(raw).hexdigest()))
+                renderer='Native Viser',trackingMeasured=tracking is not None,trackingEvidence=f'assets/policy-tracking-{body}.json' if tracking else None,displayMode='radial-heading-evaluation' if tracking else 'radial-replay-illustration',uniqueRecordedAgentsShown=len({item['sourceAgent'] for item in layout}),views=views,displayLayout=layout,displayedAgents=len(layout),outline={'color':'black','widthMeters':0.008,'method':'back-face shell'},sourceSHA256=hashlib.sha256(raw).hexdigest()))
             print('Rendered',name,agents,'recorded agents',dest.stat().st_size,'bytes',flush=True)
     finally:
         page.close()
@@ -187,6 +220,8 @@ def render(browser, scene, checkpoints, args):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--scene',action='append')
+    parser.add_argument('--recordings-dir',type=Path)
+    parser.add_argument('--tracking-dir',type=Path)
     parser.add_argument('--size',type=int,default=1920)
     parser.add_argument('--fps',type=int,default=24)
     parser.add_argument('--base-url',default='http://localhost:8772')

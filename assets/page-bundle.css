@@ -419,6 +419,10 @@ html[data-page-hidden] .learning-dataflow span:before,html[data-page-hidden] .sa
 .policy-terrain-dialog header button{border:1px solid #dce2df;background:white;width:32px;height:32px;font-size:22px;line-height:1}
 .policy-terrain-dialog video{display:block;width:100%;max-height:calc(100vh - 110px);object-fit:contain;background:white}
 
+.policy-tracking-key{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:8px;color:#637079;font-size:11px;line-height:1.6}
+.policy-tracking-key i{font-style:normal;font-weight:650}
+.policy-terrain-dialog:has(.policy-tracking-key) video{max-height:calc(100vh - 150px)}
+
 /* Paper notation, restrained reading width, and recognizable heading rows. */
 #main .wrap,#main .encoding>.wrap{width:min(1120px,85vw);max-width:85vw}
 #main #method-execution,#main #training-objective{width:100%;max-width:85vw;margin-left:0}

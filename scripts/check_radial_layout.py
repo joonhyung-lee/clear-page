@@ -20,7 +20,7 @@ for dataset in ['g1-restored-data','spot_arm-restored-data','spot-curriculum-dat
   def sample(t):
    ref=first['props']['batched_positions']
    for ts,m in record['messages']:
-    if ts<=t and m.get('name')==first['name'] and 'batched_positions' in m.get('updates',{}):ref=m['updates']['batched_positions']
+    if ts<=t+1e-6 and m.get('name')==first['name'] and 'batched_positions' in m.get('updates',{}):ref=m['updates']['batched_positions']
    return np.frombuffer(buffers[ref['__binary_index']],dtype=ref['dtype']).reshape(-1,3)
   initial=sample(start);end=sample(start+6)
   for group in range(len(views)):

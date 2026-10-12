@@ -18,7 +18,7 @@ TITLES = {'flat':'Flat','stairs_up':'Stairs up','stairs_down':'Stairs down',
           'slope_up':'Slope up','slope_down':'Slope down','random_rough':'Rough terrain'}
 
 
-def arrange(record, source_buffers, reference_time):
+def arrange(record, source_buffers, reference_time, tracking=None):
     buffers=list(source_buffers)
     def array(ref, width):
         return np.frombuffer(buffers[ref['__binary_index']],dtype=ref['dtype']).reshape(-1,width)
@@ -36,14 +36,14 @@ def arrange(record, source_buffers, reference_time):
     def sample(time):
         result=positions
         for timestamp,message in messages:
-            if timestamp<=time and message.get('name')==first['name'] and 'batched_positions' in message.get('updates',{}):
+            if timestamp<=time+1e-6 and message.get('name')==first['name'] and 'batched_positions' in message.get('updates',{}):
                 result=array(message['updates']['batched_positions'],3)
         return result
     initial=sample(reference_time)
     movement=sample(reference_time+6)-initial
     selected=[];angles=[];destinations=[];views=[];metadata=[];margins=[];terrain_slots=[]
     tracks=[array(m['updates']['batched_positions'],3) for t,m in messages
-            if reference_time<=t<=reference_time+8 and m.get('name')==first['name'] and 'batched_positions' in m.get('updates',{})]
+            if reference_time-1e-6<=t<reference_time+8-1e-6 and m.get('name')==first['name'] and 'batched_positions' in m.get('updates',{})]
     extent=np.linalg.norm(np.stack(tracks)[:,:,:2]-initial[:,:2],axis=2).max(axis=0)
     for group,(family,y) in enumerate(zip(families,columns)):
         ids=np.flatnonzero(origins[:,1]==y)
@@ -55,6 +55,9 @@ def arrange(record, source_buffers, reference_time):
         for index,agent in enumerate(ids):
             direction=np.pi/4+index*np.pi/2
             heading=np.arctan2(movement[agent,1],movement[agent,0])
+            if tracking is not None:
+                command=tracking.sample(reference_time)['command_world'][agent]
+                heading=np.arctan2(command[1],command[0])
             angle=direction-heading
             center=np.array([group*80,0.,0.])
             selected.append(int(agent));angles.append(angle);destinations.append(center);margins.append(margin)
@@ -141,7 +144,10 @@ def arrange(record, source_buffers, reference_time):
             if 'batched_positions' in updates:updates['batched_positions']=transform_positions(updates['batched_positions'])
             if 'batched_wxyzs' in updates:updates['batched_wxyzs']=transform_quaternions(updates['batched_wxyzs'])
         result['messages'].append((timestamp,message))
-    result['messages']=terrain+result['messages']
+    if tracking is not None:
+        from policy_tracking_overlay import tracking_messages
+        result['messages']+=tracking_messages(tracking,reference_time,metadata,source_origins,pack)
+    result['messages']=sorted(terrain+result['messages'],key=lambda item:item[0])
     return result,buffers,views,metadata
 
 
@@ -170,7 +176,7 @@ MATRIX = r'''views=>{
 }'''
 
 
-def annotate(picture, views, size):
+def annotate(picture, views, size, metrics=None):
     import io
     from PIL import Image,ImageDraw,ImageFont
     image=Image.open(io.BytesIO(picture)).convert('RGB')
@@ -184,5 +190,11 @@ def annotate(picture, views, size):
         draw.text((x+round(14*size/960),y+round(5*size/960)),view['title'],fill='#39434a',font=font)
         text=f"{view['count']} directions"
         draw.text((x+width-round(14*size/960),y+round(8*size/960)),text,fill='#77828a',font=small,anchor='ra')
+        if metrics is not None:
+            row=metrics[index];scale=size/960
+            draw.text((x+round(14*scale),y+round(43*scale)),
+                      f"Target {row['target']:.2f}  /  Actual {row['actual']:.2f} m/s",fill='#39434a',font=small)
+            draw.text((x+round(14*scale),y+round(59*scale)),
+                      f"Velocity error {row['velocityError']:.2f} m/s  ·  Heading error {row['headingErrorDegrees']:.1f}°",fill='#637079',font=small)
     output=io.BytesIO();image.save(output,format='JPEG',quality=95)
     return output.getvalue()
