@@ -1,0 +1,3769 @@
+[
+  {
+    "file": "learning-g1-update-00000.mp4",
+    "scene": "learning-g1",
+    "agents": 32,
+    "startTime": 0,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          1.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          241.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.26717402935026,
+          -6.61746437549591,
+          4.364710545539856
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "random_rough",
+        "title": "Rough terrain",
+        "count": 4,
+        "eye": [
+          401.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          400,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": -84.5774917602539,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": 5.4225006103515625,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": 95.42249298095703,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": 185.4224853515625,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 188.4708709716797,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 278.4708557128906,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 368.47088623046875,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 458.4708557128906,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 152.1294708251953,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 242.12945556640625,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 332.12945556640625,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 422.1294250488281,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 167.7568359375,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 257.7568359375,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 347.7568359375,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 437.7568054199219,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 189.89694213867188,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 279.8969421386719,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 369.89691162109375,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 459.8969421386719,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": -109.21875,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": -19.21875762939453,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 70.78123474121094,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 160.78121948242188,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 24,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "82d0f12ee59a6114906ea451dde6af5ccf8e9507a4bdbad6bff1d04eaecb6fbf",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 6
+  },
+  {
+    "file": "learning-g1-update-05000.mp4",
+    "scene": "learning-g1",
+    "agents": 32,
+    "startTime": 8,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          1.9793684234619142,
+          -10.336701766967774,
+          6.8178245697021485
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.80484735679626,
+          -9.425313974380494,
+          6.216696451187134
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.84677937316894,
+          -9.644292282104491,
+          6.361128952026367
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          242.16402901268006,
+          -11.301040399551392,
+          7.453877710342407
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "random_rough",
+        "title": "Rough terrain",
+        "count": 4,
+        "eye": [
+          401.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          400,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": -95.11116790771484,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": -5.111180305480957,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": 84.88880920410156,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": 174.8887939453125,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 134.5167999267578,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 224.5167999267578,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 314.51678466796875,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 404.51678466796875,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 27.9608097076416,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 117.96080017089844,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 207.96080017089844,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 297.9607849121094,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 183.8540496826172,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 273.8540344238281,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 363.8540344238281,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 453.8540344238281,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 126.06375885009766,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 216.06375122070312,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 306.0637512207031,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 396.0637512207031,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 93.13194274902344,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 183.13194274902344,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 273.1319274902344,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 363.13189697265625,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 24,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "82d0f12ee59a6114906ea451dde6af5ccf8e9507a4bdbad6bff1d04eaecb6fbf",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 6
+  },
+  {
+    "file": "learning-g1-update-17000.mp4",
+    "scene": "learning-g1",
+    "agents": 32,
+    "startTime": 16,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          1.60666982460022,
+          -8.390386861801149,
+          5.534084951400757
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.64204568099976,
+          -8.575127445220946,
+          5.655935123443603
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.71509103012085,
+          -8.956586490631103,
+          5.90753577041626
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          241.88919511413573,
+          -9.86579670715332,
+          6.507227615356446
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "random_rough",
+        "title": "Rough terrain",
+        "count": 4,
+        "eye": [
+          401.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          400,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": -117.9149169921875,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": -27.914926528930664,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": 62.08506393432617,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": 152.08505249023438,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 123.42581176757812,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 213.42581176757812,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 303.4258117675781,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 393.42578125,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 19.392696380615234,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 109.39269256591797,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 199.39266967773438,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 289.3926696777344,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 185.04176330566406,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 275.041748046875,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 365.041748046875,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 455.041748046875,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 164.65065002441406,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 254.650634765625,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 344.6506042480469,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 434.650634765625,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 24.135704040527344,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 114.13569641113281,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 204.13568115234375,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 294.13568115234375,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 24,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "82d0f12ee59a6114906ea451dde6af5ccf8e9507a4bdbad6bff1d04eaecb6fbf",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 6
+  },
+  {
+    "file": "learning-g1-update-22800.mp4",
+    "scene": "learning-g1",
+    "agents": 32,
+    "startTime": 24,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          1.4318442478179931,
+          -7.477408849716186,
+          4.93190796470642
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.77295629501343,
+          -9.2587717628479,
+          6.106849460601807
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.52650973796844,
+          -7.971773076057434,
+          5.257977986335755
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          241.4213552570343,
+          -7.422633008956908,
+          4.895779218673706
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "random_rough",
+        "title": "Rough terrain",
+        "count": 4,
+        "eye": [
+          401.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          400,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": -102.56072235107422,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": -12.560730934143066,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": 77.43926239013672,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 12,
+        "displayRotationDegrees": 167.4392547607422,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 152.7207794189453,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 242.72076416015625,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 332.72076416015625,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 13,
+        "displayRotationDegrees": 422.72076416015625,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 31.216779708862305,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 121.21678161621094,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 211.2167510986328,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 14,
+        "displayRotationDegrees": 301.2167663574219,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 202.2832489013672,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 292.2832336425781,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 382.2832336425781,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 472.2832336425781,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 177.61322021484375,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 267.61322021484375,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 357.61322021484375,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 447.6131896972656,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 38.37540054321289,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 128.37539672851562,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 218.37538146972656,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "random_rough",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 308.3753662109375,
+        "displayCenter": [
+          400.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 24,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "82d0f12ee59a6114906ea451dde6af5ccf8e9507a4bdbad6bff1d04eaecb6fbf",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 6
+  },
+  {
+    "file": "learning-spot_arm-update-13200.mp4",
+    "scene": "learning-spot_arm",
+    "agents": 32,
+    "startTime": 0,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          1.3426287317276,
+          -7.011505599021911,
+          4.624610075950622
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          241.96018614006042,
+          -10.23652762031555,
+          6.75175226020813
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 194.38861083984375,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 284.38861083984375,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 374.38861083984375,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 464.3885803222656,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": -119.97398376464844,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": -29.973997116088867,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 60.02599334716797,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 150.02598571777344,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": -52.04584503173828,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 37.95415115356445,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 127.95413208007812,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 217.95413208007812,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": -34.716697692871094,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 55.283294677734375,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 145.2832794189453,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 235.2832794189453,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": -21.873443603515625,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 68.12654876708984,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 158.1265411376953,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 248.12652587890625,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 20,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "d70b58cf13c0074a00ceb7d3424bb627a6d6f1921423b3cabac0c20b43d93ae4",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 5
+  },
+  {
+    "file": "learning-spot_arm-update-18000.mp4",
+    "scene": "learning-spot_arm",
+    "agents": 32,
+    "startTime": 8,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          2.069048583984375,
+          -10.805031494140625,
+          7.126722900390625
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.74425463294983,
+          -9.108885305404662,
+          6.007988180160522
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.50243852996826,
+          -7.846067878723145,
+          5.175066047668458
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          241.96009066200256,
+          -10.236029012680055,
+          6.751423391342164
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": -73.83113098144531,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 16.168859481811523,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 106.16885375976562,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 196.16883850097656,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 59.449459075927734,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 149.44944763183594,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 239.44944763183594,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 329.4494323730469,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 15.884382247924805,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 105.8843765258789,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 195.88436889648438,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 285.8843688964844,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 217.578857421875,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 307.578857421875,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 397.5788269042969,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 487.5788269042969,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 49.77195358276367,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 139.77194213867188,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 229.77194213867188,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 319.77191162109375,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 20,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "d70b58cf13c0074a00ceb7d3424bb627a6d6f1921423b3cabac0c20b43d93ae4",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 5
+  },
+  {
+    "file": "learning-spot_arm-update-22600.mp4",
+    "scene": "learning-spot_arm",
+    "agents": 32,
+    "startTime": 16,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          1.6126141834259033,
+          -8.421429624557495,
+          5.554559965133667
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.30044025325775,
+          -6.791187989234924,
+          4.479294205665588
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.28751471805572,
+          -6.723687972068786,
+          4.434772917747498
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          241.97217945098876,
+          -10.299159355163575,
+          6.793062553405762
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.2595583410263,
+          -6.577693558692932,
+          4.338478730201722
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": -113.73795318603516,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": -23.737966537475586,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 66.26202392578125,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 156.2620086669922,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 71.12590026855469,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 161.1259002685547,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 251.12588500976562,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 341.1258850097656,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": -16.419038772583008,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 73.5809555053711,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 163.58094787597656,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 253.58091735839844,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": -70.98821258544922,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 19.011775970458984,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 109.01176452636719,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 199.0117645263672,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 3.9469032287597656,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 93.9468994140625,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 183.94688415527344,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 273.9468688964844,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 20,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "d70b58cf13c0074a00ceb7d3424bb627a6d6f1921423b3cabac0c20b43d93ae4",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 5
+  },
+  {
+    "file": "learning-spot_arm-update-28000.mp4",
+    "scene": "learning-spot_arm",
+    "agents": 32,
+    "startTime": 24,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          1.5611818685531618,
+          -8.152838646888734,
+          5.377404213905335
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.24864572429657,
+          -6.520705449104309,
+          4.300890828132629
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.27596357250215,
+          -6.663365323066711,
+          4.394985638618469
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          241.95845888328552,
+          -10.227507501602172,
+          6.7458028202056886
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": -117.66456604003906,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": -27.664573669433594,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 62.335418701171875,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 152.3354034423828,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 74.66851043701172,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 164.6685028076172,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 254.6685028076172,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 344.6684875488281,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": -11.243300437927246,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 78.7566909790039,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 168.75668334960938,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 258.7566833496094,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": -67.12860107421875,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 22.87139320373535,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 112.87138366699219,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 202.87136840820312,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 9.89627456665039,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 99.8962631225586,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 189.89625549316406,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 279.896240234375,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 20,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "d70b58cf13c0074a00ceb7d3424bb627a6d6f1921423b3cabac0c20b43d93ae4",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 5
+  },
+  {
+    "file": "learning-spot-scratch-initialization-000000-update-00000.mp4",
+    "scene": "learning-spot-scratch-initialization-000000",
+    "agents": 32,
+    "startTime": 0,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          1.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          241.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 35.388038635253906,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 125.38803100585938,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 215.3880157470703,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 305.38800048828125,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 65.53230285644531,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 155.53228759765625,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 245.53228759765625,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 335.53228759765625,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": -75.00213623046875,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 14.997851371765137,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 104.99784088134766,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 194.99783325195312,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 177.9745330810547,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 267.97454833984375,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 357.9745178222656,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 447.9744873046875,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 208.35276794433594,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 298.3527526855469,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 388.35272216796875,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 478.3527526855469,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 20,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "6302cf7a38b59781d0bbbede72aa4c4985b0a714867da85e617b4fc720b1fd7b",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 5
+  },
+  {
+    "file": "learning-spot-scratch-locomotion-003000-update-03000.mp4",
+    "scene": "learning-spot-scratch-locomotion-003000",
+    "agents": 32,
+    "startTime": 0,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          1.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          241.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": -128.33030700683594,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": -38.330322265625,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 51.6696662902832,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 141.66966247558594,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": -61.14219665527344,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 28.8577938079834,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 118.8577880859375,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 208.85777282714844,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": -105.87389373779297,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": -15.873905181884766,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 74.12608337402344,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 164.12608337402344,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": -71.1895980834961,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 18.810394287109375,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 108.81038665771484,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 198.8103790283203,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 6.357898235321045,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 96.35789489746094,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 186.35787963867188,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 276.3578796386719,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 20,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "085366d3ddb7865fa8f7a90d296eea9fd99ee281a5c46d254149d3c6814dde7f",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 5
+  },
+  {
+    "file": "learning-spot-scratch-terrain-006000-update-09000.mp4",
+    "scene": "learning-spot-scratch-terrain-006000",
+    "agents": 32,
+    "startTime": 0,
+    "duration": 8.0,
+    "fps": 24,
+    "width": 960,
+    "height": 960,
+    "renderWidth": 1920,
+    "renderHeight": 1920,
+    "renderer": "Native Viser",
+    "views": [
+      {
+        "key": "flat",
+        "title": "Flat",
+        "count": 4,
+        "eye": [
+          1.2776866579055786,
+          -6.6723636579513546,
+          4.40092071056366
+        ],
+        "target": [
+          0,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_up",
+        "title": "Stairs up",
+        "count": 4,
+        "eye": [
+          81.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          80,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "stairs_down",
+        "title": "Stairs down",
+        "count": 4,
+        "eye": [
+          161.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          160,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_up",
+        "title": "Slope up",
+        "count": 4,
+        "eye": [
+          241.28558059215547,
+          -6.713587536811828,
+          4.428110928535461
+        ],
+        "target": [
+          240,
+          0,
+          0.65
+        ]
+      },
+      {
+        "key": "slope_down",
+        "title": "Slope down",
+        "count": 4,
+        "eye": [
+          321.17,
+          -6.109999999999999,
+          4.03
+        ],
+        "target": [
+          320,
+          0,
+          0.65
+        ]
+      }
+    ],
+    "displayLayout": [
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 201.84771728515625,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 291.84771728515625,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 381.84771728515625,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "flat",
+        "sourceAgent": 15,
+        "displayRotationDegrees": 471.8476867675781,
+        "displayCenter": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": -77.50653839111328,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 12.493453025817871,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 102.49344635009766,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_up",
+        "sourceAgent": 16,
+        "displayRotationDegrees": 192.49343872070312,
+        "displayCenter": [
+          80.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": -90.80890655517578,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": -0.8089129328727722,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 89.19107818603516,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "stairs_down",
+        "sourceAgent": 17,
+        "displayRotationDegrees": 179.19107055664062,
+        "displayCenter": [
+          160.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": -68.96141052246094,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 21.0385799407959,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 111.03857421875,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_up",
+        "sourceAgent": 18,
+        "displayRotationDegrees": 201.03855895996094,
+        "displayCenter": [
+          240.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": -12.746542930603027,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 77.25344848632812,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 167.25344848632812,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      },
+      {
+        "terrain": "slope_down",
+        "sourceAgent": 19,
+        "displayRotationDegrees": 257.25341796875,
+        "displayCenter": [
+          320.0,
+          0.0,
+          0.0
+        ],
+        "presentation": "Four rotated replays of one recorded agent, aligned to the same initial XY; illustrative, not a joint physics rollout"
+      }
+    ],
+    "displayedAgents": 20,
+    "outline": {
+      "color": "black",
+      "widthMeters": 0.008,
+      "method": "back-face shell"
+    },
+    "sourceSHA256": "4d937af30c1b6d1d9f217bc199f2885cfcadca6255a9c8f06986dc86bb6cf070",
+    "displayMode": "radial-replay-illustration",
+    "uniqueRecordedAgentsShown": 5
+  }
+]

@@ -54,11 +54,11 @@
 
 .curriculum-comparison{display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 10px;margin:2px 0 12px;font-size:10px;line-height:1.5;color:#63705c;font-variant-numeric:tabular-nums}.curriculum-comparison span:last-child{color:#35443d}.curriculum-baseline-note{margin:0 0 12px}
 
-/* Keep the checkpoint replay compact beside the two metric views. */
-#controller-pretraining .scratch-layout{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:32px}
+/* Give the population replay and its measured curves equal column widths. */
+#controller-pretraining .scratch-layout{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}
 #controller-pretraining .loco-rollout{width:100%;max-width:none;justify-self:stretch}
-#controller-pretraining [data-curriculum-view]{width:100%;max-width:390px;margin-inline:auto}
-#controller-pretraining .scratch-viewer{width:100%;max-width:390px;aspect-ratio:1;height:auto}
+#controller-pretraining [data-curriculum-view]{width:100%;max-width:none;margin-inline:auto}
+#controller-pretraining .scratch-viewer{width:100%;max-width:none;aspect-ratio:1;height:auto}
 .curriculum-timeline{display:flex;gap:3px;margin:20px 12px 0 43px}
 .curriculum-phase{flex:var(--duration) 1 0;min-width:0;color:#596358;cursor:default}
 .curriculum-phase strong{display:block;margin-top:10px;font-size:11px;font-weight:500;line-height:1.5;color:var(--phase);text-wrap:balance}
@@ -74,12 +74,12 @@
 .curriculum-phase-caption{min-height:2.8em;margin:12px 12px 4px 43px;font-size:11px;line-height:1.4;color:#6a7567}
 #spot-curriculum .loco-chart canvas{height:128px}
 [data-curriculum-reset]{font:inherit;font-size:12px;padding:5px 9px;border:1px solid #d4dece;background:#fff;color:#455741;cursor:pointer}
-@media(max-width:800px){#controller-pretraining .scratch-layout{grid-template-columns:1fr}#controller-pretraining [data-curriculum-view]{max-width:340px}}
+@media(max-width:800px){#controller-pretraining .scratch-layout{grid-template-columns:1fr}#controller-pretraining [data-curriculum-view]{max-width:none}}
 .curriculum-scale-note { display:block; color:#63705c; font-size:11px; margin-top:4px; }
 .curriculum-scale-note[hidden] { display:none; }
 
 /* Shared toolbar and a compact stack of three measured curves. */
-#spot-curriculum>.policy-controls{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:32px;align-items:start;margin-bottom:12px}
+#spot-curriculum>.policy-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;align-items:start;margin-bottom:12px}
 #spot-curriculum .policy-controls .loco-metrics{margin:0;align-self:start}
 #spot-curriculum .policy-controls button{min-height:30px;padding:5px 9px;font-size:11px;box-sizing:border-box}
 #spot-curriculum>.method-small-copy,#spot-curriculum>.scratch-status{margin:4px 0;font-size:11px;line-height:1.5}
@@ -102,3 +102,16 @@
 #spot-curriculum .curriculum-steps button:focus-visible{outline:2px solid #829775;outline-offset:2px}
 #spot-curriculum .curriculum-timeline{margin-bottom:14px}
 #spot-curriculum .curriculum-phase[data-state=complete] small{display:none}
+
+/* Terrain headings open a larger, independently controlled crop of the same time. */
+#controller-pretraining [data-curriculum-view]{position:relative}
+.policy-terrain-links{display:flex;align-items:center;gap:10px;padding:5px 0 9px;color:#59686c;font-size:12px}
+.policy-terrain-links label{display:flex;align-items:center;gap:7px;margin-right:auto}
+.policy-terrain-links select{font:inherit;color:#394a50;background:white;border:1px solid #dce2df;padding:5px 8px;max-width:160px}
+.policy-terrain-links button{border:1px solid #dce2df;background:#fff;color:#45535b;padding:3px 9px;cursor:zoom-in;font-size:17px;min-height:30px}
+.policy-terrain-links button:focus-visible,.policy-terrain-links select:focus-visible{outline:2px solid #89999f;outline-offset:2px}
+.policy-terrain-dialog{width:min(960px,calc(100vw - 32px));max-height:calc(100vh - 32px);padding:14px;border:1px solid #dce2df;background:white;color:#39434a}
+.policy-terrain-dialog::backdrop{background:#15202799}
+.policy-terrain-dialog header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:16px}
+.policy-terrain-dialog header button{border:1px solid #dce2df;background:white;width:32px;height:32px;font-size:22px;line-height:1}
+.policy-terrain-dialog video{display:block;width:100%;max-height:calc(100vh - 110px);object-fit:contain;background:white}

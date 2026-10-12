@@ -37,18 +37,7 @@ function prepareManualVideo(video) {
 }
 document.querySelectorAll('video').forEach(prepareManualVideo);
 document.addEventListener('visibilitychange', () => { for (const [video,state] of manualMedia) syncManualMedia(video,state); });
-// Restore full previews after the first screen, without delaying playback controls.
-const previewObserver=new IntersectionObserver(entries=>{
-  if(!entries.some(entry=>entry.isIntersecting))return;
-  previewObserver.disconnect();
-  loadScript(window.CLEAR_PAGE_PREVIEW_PATH,()=>!!window.CLEAR_PAGE_PREVIEWS_READY).then(()=>{
-    document.querySelectorAll('[data-preview-src]').forEach(element=>{
-      const key=element.dataset.previewSrc.split('?')[0].replace(/^\.\.\//,'');
-      if(window.CLEAR_PREVIEWS[key])element[element.tagName==='VIDEO'?'poster':'src']=window.CLEAR_PREVIEWS[key];
-    });
-  }).catch(()=>{});
-},{rootMargin:'100px'});
-document.querySelectorAll('[data-preview-src]:not(#teaser)').forEach(element=>previewObserver.observe(element));
+// Full-resolution posters are embedded in the initial HTML, including offline/fallback use.
 // Kept as an API for dynamically created galleries; inspection is user initiated.
 function observeAutomaticScene() {}
 

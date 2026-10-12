@@ -10,6 +10,7 @@
     terrain: 'Progressive stair and slope traversal.',
     arm: 'Balance across arm postures during locomotion.'
   };
+  let terrainMode = 'stairs_up';
   let selected = 'initialization', currentScene, loading = false, near = false, body = root.closest('#controller-pretraining').dataset.body || 'g1';
   let requestedStage = null;
   const bodyName = () => ({g1:'G1',spot:'Spot',spot_arm:'Spot + arm'})[body];
@@ -226,6 +227,59 @@
       controls.append(button);
     });
   }
+  function openTerrainDetail(stage, terrain, label, source) {
+    const wasPlaying=!source.paused;
+    source.pause();
+    const dialog=document.createElement('dialog');dialog.className='policy-terrain-dialog';
+    dialog.setAttribute('aria-label',label+' radial motion illustration');
+    const header=document.createElement('header'),title=document.createElement('span'),close=document.createElement('button');
+    title.textContent=label+' · Radial illustration';close.type='button';close.textContent='×';close.setAttribute('aria-label','Close terrain view');
+    header.append(title,close);
+    const movie=document.createElement('video');movie.controls=true;movie.muted=true;movie.playsInline=true;movie.loop=true;
+    const path=stage.replay.video.replace(/\.mp4$/,'-'+terrain+'.mp4');
+    movie.poster=clearAssetURL(path.replace(/\.mp4$/,'.webp'));movie.src=clearAssetURL(path);
+    movie.addEventListener('loadedmetadata',()=>{movie.currentTime=Math.min(source.currentTime,movie.duration);movie.play().catch(()=>{});},{once:true});
+    dialog.append(header,movie);document.body.append(dialog);
+    close.onclick=()=>dialog.close();
+    dialog.addEventListener('click',event=>{if(event.target===dialog){const box=dialog.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)dialog.close();}});
+    dialog.addEventListener('close',()=>{source.currentTime=movie.currentTime;movie.pause();movie.removeAttribute('src');movie.load();dialog.remove();if(wasPlaying)source.play().catch(()=>{});},{once:true});
+    dialog.showModal();close.focus();
+  }
+  function terrainLinks(stage, movie) {
+    host.querySelector('.policy-terrain-links')?.remove();
+    const terrains=[['stairs_up','Stairs up'],['stairs_down','Stairs down'],['slope_up','Slope up'],['slope_down','Slope down'],['flat','Flat']];
+    if(stage.replay.scene==='learning-g1')terrains.push(['random_rough','Rough terrain']);
+    if(!terrains.some(([key])=>key===terrainMode)&&terrainMode!=='matrix')terrainMode='stairs_up';
+    const links=document.createElement('div');links.className='policy-terrain-links';
+    const label=document.createElement('label');label.textContent='Terrain ';
+    const menu=document.createElement('select');menu.setAttribute('aria-label','Terrain view');
+    for(const [key,name] of [...terrains,['matrix','All terrains']]){
+      const option=document.createElement('option');option.value=key;option.textContent=name;menu.append(option);
+    }
+    menu.value=terrainMode;label.append(menu);
+    const note=document.createElement('span');note.textContent='4-way replay';
+    note.title='One recorded motion replayed in four directions from the same initial position; illustrative, not a joint physics simulation.';
+    const enlarge=document.createElement('button');enlarge.type='button';enlarge.textContent='↗';enlarge.setAttribute('aria-label','Enlarge terrain view');
+    enlarge.onclick=()=>{
+      if(terrainMode==='matrix'){movie.requestFullscreen?.();return;}
+      openTerrainDetail(stage,terrainMode,terrains.find(([key])=>key===terrainMode)[1],movie);
+    };
+    const apply=(keepTime=false)=>{
+      const playing=!movie.paused,time=keepTime?movie.currentTime:0;
+      const path=terrainMode==='matrix'?stage.replay.video:stage.replay.video.replace(/\.mp4$/,'-'+terrainMode+'.mp4');
+      movie.poster=clearAssetURL(path.replace(/\.mp4$/,'.webp'));
+      movie.style.aspectRatio=terrainMode==='matrix'?'1':'928 / 552';
+      const url=clearAssetURL(path);
+      if(movie.src!==new URL(url,location.href).href){
+        movie.src=url;
+        movie.addEventListener('loadedmetadata',()=>{movie.currentTime=Math.min(time,movie.duration);},{once:true});
+        if(keepTime)movie.load();
+        if(playing)movie.play().catch(()=>{});
+      }
+    };
+    menu.onchange=()=>{terrainMode=menu.value;apply(true);};
+    links.append(label,note,enlarge);host.prepend(links);apply();
+  }
   function select(stage, play = false) {
     selected = stage.id;
     if (!stage.replay) {
@@ -244,11 +298,9 @@
         movie=document.createElement('video');movie.dataset.checkpointVideo='';
         movie.controls=true;movie.muted=true;movie.playsInline=true;movie.loop=true;
         movie.style.cssText='width:100%;display:block;aspect-ratio:1;object-fit:contain';
-        movie.poster=clearAssetURL(`assets/media/${stage.replay.scene}.png`);
         host.replaceChildren(movie);prepareManualVideo(movie);
       }
-      const url=clearAssetURL(stage.replay.video);
-      if(movie.src!==new URL(url,location.href).href)movie.src=url;
+      terrainLinks(stage,movie);
       currentScene=stage.replay.scene;
       if(play)movie.play().catch(()=>{});
       drawCurves();return;
