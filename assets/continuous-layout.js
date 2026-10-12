@@ -1,4 +1,4 @@
-/* Start nearby evidence automatically, retain true failures and preserve clocks. */
+/* User-started evidence shares the recorded playback clocks. */
 (() => {
  document.querySelectorAll('.viewer[data-autostart]').forEach(observeAutomaticScene);
  document.querySelectorAll('.media-tile[data-scene^="mpc-"]').forEach(tile=>attachEgoVideo(tile,tile.dataset.scene));
@@ -27,6 +27,7 @@
  function synchronize(){for(const view of views){
   const clock=clocks[view.dataset.clockGroup||'g1'];if(!clock)continue;
   const video=view.querySelector('.preview-video'),ego=view.querySelector('.ego-inset video');
+  if (!clock.playing && clock.time === 0 && video.readyState === 0) continue;
   const limit=Number.isFinite(video.duration)?Math.max(0,video.duration-.04):Infinity;
   const target=Math.min(clock.time,limit),finished=clock.time>=limit;
   for(const media of [video]){

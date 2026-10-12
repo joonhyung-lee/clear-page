@@ -2,7 +2,7 @@
 (() => {
  const root=document.querySelector('#spot-process');if(!root)return;
  const panels=[...root.querySelectorAll('[data-spot-process]')],play=root.querySelector('[data-spot-play]'),slider=root.querySelector('input'),counter=root.querySelector('[data-spot-time]'),status=root.querySelector('.spot-loading');
- let data=null,loading=false,visible=false,playing=!reduced.matches,elapsed=0,end=0,last=0,frame=0,mode='3d',bounds=null;
+ let data=null,loading=false,visible=false,playing=false,elapsed=0,end=0,last=0,frame=0,mode='3d',bounds=null;
  const camera={yaw:Math.PI/6,pitch:.6,zoom:1,pan:[0,0]},W=560,colors={eef:'#b85c5b',object:'#1a7369',reference:'#3964a3'};
  function at(rows,t){let lo=0,hi=rows.length-1;while(lo<hi){const m=Math.ceil((lo+hi)/2);if(rows[m][0]<=t)lo=m;else hi=m-1;}const a=rows[lo],b=rows[Math.min(lo+1,rows.length-1)],u=b[0]>a[0]?Math.max(0,Math.min(1,(t-a[0])/(b[0]-a[0]))):0;return a.map((v,i)=>i?v+(b[i]-v)*u:t);}
  function local(p,r){return [p[0]-r.reference[0][0],p[1]-r.reference[0][1],p[2]];}
@@ -39,11 +39,12 @@
  }
  function tick(now){frame=0;if(!data||!visible||!playing||document.hidden)return;if(last)elapsed=Math.min(end,elapsed+2*(now-last)/1000);last=now;if(elapsed>=end)playing=false;render();schedule();}
  function schedule(){if(data&&visible&&playing&&!document.hidden&&!frame){frame=requestAnimationFrame(tick);}}
- async function initialize(){if(data||loading)return;loading=true;status.textContent='Loading recorded EEF motion…';try{
+ let attempted=false;
+ async function initialize(retry=false){if(data||loading||(attempted&&!retry))return;attempted=true;loading=true;status.textContent='Loading recorded EEF motion…';try{
   await loadScript('assets/spot-eef-data.js',()=>!!window.CLEAR_SPOT_EEF);data=window.CLEAR_SPOT_EEF;end=Math.max(...Object.values(data).map(r=>r.duration));
   const ext=[[0,0],[0,0],[0,0]];for(const r of Object.values(data)){const include=p=>local(p,r).forEach((v,a)=>{ext[a][0]=Math.min(ext[a][0],v);ext[a][1]=Math.max(ext[a][1],v);});r.reference.forEach(include);r.observed.forEach(row=>{include(row.slice(1,4));include(row.slice(4,7));});}
   bounds=ext.map(([lo,hi])=>[Math.floor(lo*5)/5-.15,Math.ceil(hi*5)/5+.15]);status.hidden=true;render();schedule();
- }catch(error){data=null;status.textContent='Could not load recorded paths. ';const retry=document.createElement('button');retry.textContent='Retry';retry.onclick=initialize;status.append(retry);}finally{loading=false;}}
+ }catch(error){data=null;status.textContent='Could not load recorded paths. ';const retry=document.createElement('button');retry.textContent='Retry';retry.onclick=()=>initialize(true);status.append(retry);}finally{loading=false;}}
  function stopFrame(){cancelAnimationFrame(frame);frame=0;last=0;}
  new IntersectionObserver(entries=>{visible=entries.at(-1).isIntersecting;if(visible){initialize();last=0;render();schedule();}else{stopFrame();render();}},{rootMargin:'0px'}).observe(root);
  play.onclick=()=>{if(!data){playing=true;initialize();return;}playing=!playing;if(playing&&elapsed>=end)elapsed=0;last=0;render();schedule();};

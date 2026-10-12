@@ -14,6 +14,8 @@ import json
 import re
 import struct
 import subprocess
+import zipfile
+import posixpath
 import msgpack
 from pathlib import Path
 import zstandard
@@ -28,6 +30,7 @@ paths = subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others'
 files = sorted({ROOT / s.decode() for s in paths if s and (ROOT / s.decode()).is_file()})
 failed = set()
 decoded = 0
+archive_members = 0
 patterns = [rb'/' + rb'home/[a-z0-9_-]+', rb'/' + rb'mnt/[^\s"<>]+', rb'[a-z0-9_.+-]+@[a-z0-9.-]+\.[a-z]{2,}']
 
 def fail(label, reason):
@@ -142,10 +145,68 @@ def scan_recording(raw, label):
         cursor += length
     if cursor != len(raw): fail(label, 'unparsed recording bytes')
 
+
+def scan_archive(data, label, depth=0):
+    """Inspect ZIP/NPZ/checkpoint members without executing serialized code."""
+    global archive_members
+    if depth >= 8:
+        fail(label, 'archive nesting exceeds audit limit'); return
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        scan(archive.comment, label+':comment', text=True)
+        names = set()
+        for member in archive.infolist():
+            name = member.filename
+            member_label = label+'::'+name
+            archive_members += 1
+            if name in names: fail(member_label, 'duplicate archive member')
+            names.add(name)
+            if name.startswith('/') or '..' in Path(name).parts:
+                fail(member_label, 'unsafe archive member path')
+            scan(name.encode()+member.comment+member.extra, member_label, text=True)
+            if member.is_dir(): continue
+            payload = archive.read(member)
+            if (member.external_attr >> 16) & 0o170000 == 0o120000:
+                target = payload.decode('utf-8')
+                resolved = posixpath.normpath(posixpath.join(posixpath.dirname(name), target))
+                if target.startswith('/') or resolved.startswith('../') or not any(
+                    n == resolved or n.startswith(resolved+'/') for n in archive.namelist()
+                ):
+                    fail(member_label, 'unsafe archive symlink')
+                scan(payload, member_label, text=True)
+                continue
+            if zipfile.is_zipfile(io.BytesIO(payload)):
+                scan_archive(payload, member_label, depth+1)
+            elif payload.startswith(b'\x1f\x8b'):
+                scan(gzip.decompress(payload), member_label+':gunzip', text=True)
+            else:
+                suffix=Path(name).suffix.lower()
+                scan(payload, member_label, text=suffix in {
+                    '.py','.md','.txt','.json','.yaml','.yml','.toml','.xml',
+                    '.csv','.html','.js','.css','.sh','.cfg','.ini','.obj','.mtl',
+                    '.jsonl','.tex','.bib','.sha256',
+                } or Path(name).name in {'LICENSE','NOTICE'})
+                if suffix == '.npy':
+                    import numpy as np
+                    try:
+                        array = np.load(io.BytesIO(payload), allow_pickle=False)
+                        scan(str(array.dtype).encode(), member_label+':dtype', text=True)
+                        if array.dtype.kind in {'U', 'S'}:
+                            scan(str(array.tolist()).encode(), member_label+':strings', text=True)
+                    except ValueError:
+                        fail(member_label, 'object array requires review')
+                if suffix in {'.png','.webp'}:
+                    image = Image.open(io.BytesIO(payload))
+                    if set(image.info) - {'srgb','gamma','chromaticity','transparency','aspect','loop','background'}:
+                        fail(member_label, 'image ancillary metadata')
+
+
 for path in files:
     label = str(path.relative_to(ROOT))
     if path.is_symlink(): fail(label, 'symlink')
     data = path.read_bytes()
+    if path.suffix in {'.zip', '.npz', '.pt', '.pth'} and zipfile.is_zipfile(io.BytesIO(data)):
+        scan_archive(data, label)
+        continue
     if path.suffix == '.viser':
         data = zstandard.ZstdDecompressor().decompress(data[8:]); decoded += 1
         scan_recording(data, label + ':decoded')
@@ -170,6 +231,8 @@ for path in files:
     if path.suffix == '.pdf':
         import pymupdf
         document = pymupdf.open(stream=data, filetype='pdf')
+        if any(document.metadata.get(k) for k in ('author','creator','producer','creationDate','modDate')):
+            fail(label, 'PDF identifying metadata')
         scan(json.dumps(document.metadata).encode(), label+':metadata', text=True)
         scan(document.get_xml_metadata().encode(), label+':xmp', text=True)
         if document.embfile_count(): fail(label, 'PDF attachments require review')
@@ -179,4 +242,4 @@ for path in files:
 if failed:
     for label, reason in sorted(failed): print(f'FAIL {label}: {reason}')
     raise SystemExit(1)
-print(f'PASS: {len(files)} publishable files, {decoded} decompressed payloads; identifiers, metadata, and video-only tracks checked.')
+print(f'PASS: {len(files)} publishable files, {decoded} decompressed payloads, {archive_members} archive members; identifiers, metadata, and video-only tracks checked.')

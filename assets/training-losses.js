@@ -64,7 +64,7 @@
   function inspect(chart, target) { index = nearest(target); hovered = chart; schedule(); }
   function initialize() {
     if (data) return Promise.resolve();
-    if (!pendingLoad) pendingLoad = loadData().finally(() => { pendingLoad = null; });
+    if (!pendingLoad) pendingLoad = loadData();
     return pendingLoad;
   }
   async function loadData() {
@@ -97,7 +97,7 @@
       new ResizeObserver(schedule).observe(root); render();
     } catch {
       data = null; const node = root.querySelector('.loss-loading'); node.textContent = 'Training curves could not load. ';
-      const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = 'Retry'; retry.onclick = initialize; node.append(retry);
+      const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = 'Retry'; retry.onclick = () => { pendingLoad = null; retry.remove(); initialize(); }; node.append(retry);
     }
   }
   function highlight(key) { key ??= pinnedTerm; const keys=Array.isArray(key)?key:[key]; charts.forEach(chart => chart.classList.toggle('loss-term-active', keys.includes(chart.dataset.loss))); root.querySelectorAll('[data-loss-term]').forEach(button => button.classList.toggle('loss-term-active', keys.includes(button.dataset.lossTerm))); }

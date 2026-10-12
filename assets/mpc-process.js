@@ -2,7 +2,7 @@
 (() => {
  const root=document.querySelector('#mpc-process');if(!root)return;
  const play=root.querySelector('#mpc-process-play'),slider=root.querySelector('#mpc-process-update'),panels=[...root.querySelectorAll('[data-process]')];
- const W=560,H=560,cache=new Map();let data=null,loading=false,visible=false,playing=!reduced.matches,elapsed=0,duration=0,axisEnd=45,mode='3d',last=0,frame=0,bounds=[],screenBounds=[],playEnd=15;
+ const W=560,H=560,cache=new Map();let data=null,loading=false,visible=false,playing=false,elapsed=0,duration=0,axisEnd=45,mode='3d',last=0,frame=0,bounds=[],screenBounds=[],playEnd=15;
  const camera={yaw:Math.PI/6,pitch:.6,zoom:1,pan:[0,0]},pointers=new Map();let baseScale=1,paintPending=false,robotOverlay=false,lastContextTime=-1;
  const rotate=p=>[Math.cos(camera.yaw)*p[0]+Math.sin(camera.yaw)*p[1],Math.sin(camera.pitch)*(Math.sin(camera.yaw)*p[0]-Math.cos(camera.yaw)*p[1])-Math.cos(camera.pitch)*p[2]];
  const format=n=>String(Number(n.toPrecision(2)));
@@ -96,7 +96,8 @@
  }
  function tick(now){frame=0;if(!visible||!playing||!data||document.hidden)return;if(last)elapsed=Math.min(playEnd,elapsed+2*(now-last)/1000);last=now;if(elapsed>=playEnd)playing=false;render();if(playing)frame=requestAnimationFrame(tick);}
  function schedule(){if(!frame&&visible&&playing&&data&&!document.hidden){last=0;frame=requestAnimationFrame(tick);}}
- async function initialize(){if(data||loading)return;loading=true;const status=root.querySelector('.mpc-process-loading');status.textContent='Preparing recorded trajectories…';
+ let attempted=false;
+ async function initialize(retry=false){if(data||loading||(attempted&&!retry))return;attempted=true;loading=true;const status=root.querySelector('.mpc-process-loading');status.textContent='Preparing recorded trajectories…';
   try{await loadScript('assets/mpc-process-data.js',()=>!!window.CLEAR_MPC_PROCESS);data=window.CLEAR_MPC_PROCESS;duration=Math.max(...Object.values(data).map(r=>r.observed.at(-1)[0]-r.updates[0].time));axisEnd=Math.ceil((duration+Math.max(...Object.values(data).map(r=>r.horizon)))/5)*5;
    const ext=[[0,0],[0,0],[0,0]];
    for(const r of Object.values(data)){const d=r.reference.at(-1).slice(0,2).map((v,i)=>v-r.reference[0][i]),length=Math.hypot(...d)||1;r.direction=d.map(v=>v/length);r.origin=[(r.observed[0][1]+r.observed[0][4])/2,(r.observed[0][2]+r.observed[0][5])/2,0];
@@ -108,7 +109,7 @@
    const corners=[];for(const x of bounds[0])for(const y of bounds[1])for(const z of bounds[2])corners.push(oblique([x,y,z]));screenBounds=[0,1].map(a=>[Math.min(...corners.map(p=>p[a])),Math.max(...corners.map(p=>p[a]))]);
    baseScale=Math.min(440/(screenBounds[0][1]-screenBounds[0][0]),300/(screenBounds[1][1]-screenBounds[1][0]));
    status.hidden=true;root.querySelector('.mpc-process-content').hidden=false;render();schedule();
-  }catch(error){data=null;status.textContent='Trajectories are taking longer to load. ';const b=document.createElement('button');b.textContent='Retry';b.onclick=initialize;status.append(b);}finally{loading=false;}
+  }catch(error){data=null;status.textContent='Trajectories are taking longer to load. ';const b=document.createElement('button');b.textContent='Retry';b.onclick=()=>initialize(true);status.append(b);}finally{loading=false;}
  }
  new IntersectionObserver(entries=>{visible=entries.at(-1).isIntersecting;if(visible){initialize();schedule();}else{cancelAnimationFrame(frame);frame=0;last=0;render();}},{rootMargin:'0px'}).observe(root);
  play.onclick=()=>{playing=!playing;if(playing&&elapsed>=playEnd)elapsed=0;render();schedule();};slider.oninput=()=>{elapsed=+slider.value*playEnd;render();};

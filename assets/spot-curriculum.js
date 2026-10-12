@@ -1,10 +1,9 @@
-/* From-scratch policy checkpoints and measured PPO traces for each body. */
+/* Recorded policy checkpoints and measured PPO traces for each body. */
 (() => {
   const root = document.querySelector('#spot-curriculum');
   if (!root) return;
   const host = root.querySelector('[data-curriculum-view]');
   const status = root.querySelector('[data-curriculum-status]');
-  const caption = root.querySelector('[data-curriculum-caption]');
   const explanations = {
     initialization: 'Random policy before the first optimizer update.',
     locomotion: 'Balance and velocity tracking on flat ground.',
@@ -40,7 +39,7 @@
     const low=transform(Math.min(0,...values)),high=transform(Math.max(0,...values)),pad=(high-low||1)*.08;
     return {logarithmic,transform,inverse,minimum:low<0?low-pad:0,maximum:high+pad};
   }
-  const stageColors = {locomotion:'#306b91', terrain:'#ae632d', arm:'#6c5795'};
+  const stageColors = {locomotion:'#306b91', terrain:'#ae632d', regularization:'#6c5795', arm:'#6c5795'};
   const number = n => Number(n.toPrecision(5)).toString();
   const nearest = (rows, step) => rows.reduce((best, row, i) => Math.abs(row.update-step)<Math.abs(rows[best].update-step)?i:best, 0);
   function curves(data) {
@@ -102,6 +101,7 @@
   }
   function drawCurves() {
     if(!chartData)return;
+    root.querySelectorAll('[data-checkpoint-stage]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.checkpointStage===selected)));
     const rows=chartData.curves||[];
     const keys=metricMode==='optimization'?['value','policy','entropy']:['return','terrain',body==='spot_arm'?'arm':'tracking'];
     root.querySelector('[data-curriculum-metric-note]').textContent=metricMode==='optimization'
@@ -160,27 +160,23 @@
       });
       ctx.fillStyle='#65715f';ctx.textAlign='left';ctx.fillText('0',left,h-5);ctx.textAlign='right';ctx.fillText(fmt(maximum)+' recorded updates',right,h-5);
       const replayUpdate=Number(root.dataset.replayUpdates||0);
-      // Replay selection lives on the time axis, not in a second stage-card UI.
-      if(i===0){
-        const replayCheckpoints=checkpoints(chartData);
-        const existing=new Map([...figure.querySelectorAll('[data-checkpoint-stage]')].map(button=>[button.dataset.checkpointStage,button]));
-        replayCheckpoints.forEach((stage,index)=>{
-          let button=existing.get(stage.id);
-          if(!button){button=document.createElement('button');button.type='button';button.className='curriculum-checkpoint';button.dataset.checkpointStage=stage.id;figure.append(button);}
-          const update=stage.replay.cumulativeUpdates;
-          button.textContent=index+1;button.title=`${stage.label} · Update ${fmt(update)}`;
-          button.setAttribute('aria-label',`Replay ${stage.label}, update ${fmt(update)}`);
-          button.setAttribute('aria-pressed',String(stage.id===selected));
-          button.style.left=(x(update)-8)+'px';button.style.top=(canvas.offsetTop+bottom+5)+'px';
-          button.onclick=()=>select(stage);
-          existing.delete(stage.id);
-        });
-        existing.forEach(button=>button.remove());
-      }
-      ctx.strokeStyle='#abb3aa';ctx.beginPath();ctx.moveTo(x(Math.min(replayUpdate,maximum)),top);ctx.lineTo(x(Math.min(replayUpdate,maximum)),bottom+4);ctx.stroke();
+      checkpoints(chartData).forEach((stage,index)=>{
+        const update=stage.replay.cumulativeUpdates;
+        if(update<0||update>maximum)return;
+        const position=x(update),active=stage.id===selected;
+        ctx.save();
+        ctx.strokeStyle=active?'#344b39':'#a6afa3';ctx.lineWidth=active?1.6:1;
+        ctx.setLineDash(active?[]:[3,3]);ctx.beginPath();
+        ctx.moveTo(position,top);ctx.lineTo(position,bottom+3);ctx.stroke();
+        ctx.setLineDash([]);ctx.beginPath();ctx.arc(position,bottom+12,7.5,0,2*Math.PI);
+        ctx.fillStyle=active?'#344b39':'#edf0e9';ctx.fill();
+        ctx.fillStyle=active?'#fff':'#596752';ctx.textAlign='center';
+        ctx.textBaseline='middle';ctx.fillText(String(index+1),position,bottom+12);
+        ctx.restore();
+      });
       const row=rows.length?rows[nearest(rows,inspectedStep??replayUpdate)]:null;
       figure.dataset.inspected=JSON.stringify(row?{step:row.update,phase:row.stage,metric:key,value:Number.isFinite(row[key])?row[key]:null}:null);
-      if(row){ctx.strokeStyle='#99a48e';ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(x(row.update),top);ctx.lineTo(x(row.update),bottom);ctx.stroke();ctx.setLineDash([]);if(Number.isFinite(row[key])){ctx.beginPath();ctx.arc(x(row.update),y(row[key]),3.5,0,2*Math.PI);ctx.fillStyle=stageColors[row.stage];ctx.fill();ctx.strokeStyle='#fff';ctx.stroke();}}
+      if(row){if(inspectedStep!=null){ctx.strokeStyle='#99a48e';ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(x(row.update),top);ctx.lineTo(x(row.update),bottom);ctx.stroke();ctx.setLineDash([]);}if(Number.isFinite(row[key])){ctx.beginPath();ctx.arc(x(row.update),y(row[key]),3.5,0,2*Math.PI);ctx.fillStyle=stageColors[row.stage];ctx.fill();ctx.strokeStyle='#fff';ctx.stroke();}}
       const missing=key==='terrain'?'Not recorded · flat-ground phase':'Not recorded';
       if(!vals.length){ctx.fillStyle='#63705c';ctx.textAlign='center';ctx.fillText(missing,(left+right)/2,(top+bottom)/2);}
       const first=rows.find(r=>Number.isFinite(r[key]));
@@ -212,23 +208,40 @@
     hoveredChart=null;drawCurves();
   });
   new ResizeObserver(drawCurves).observe(root.querySelector('[data-curriculum-curves]'));
-  function select(stage) {
+  function playCheckpoint(stage) {
+    select(stage, true);
+    host.querySelector('.launch')?.click();
+  }
+  function renderSteps(data) {
+    const controls=root.querySelector('[data-curriculum-steps]');
+    controls.replaceChildren();
+    checkpoints(data).forEach((stage,index)=>{
+      const button=document.createElement('button');button.type='button';
+      button.dataset.checkpointStage=stage.id;
+      button.textContent=`Step ${index+1}`;
+      button.title=`${stage.label} · Update ${fmt(stage.replay.cumulativeUpdates)}`;
+      button.setAttribute('aria-label',`Play step ${index+1}, update ${fmt(stage.replay.cumulativeUpdates)}`);
+      button.setAttribute('aria-pressed',String(stage.id===selected));
+      button.onclick=()=>playCheckpoint(stage);
+      controls.append(button);
+    });
+  }
+  function select(stage, play = false) {
     selected = stage.id;
     if (!stage.replay) {
       host.querySelector('.viewer')?.dispatchEvent(new Event('reset-viewer'));
       currentScene = null;
       const note = document.createElement('p'); note.className = 'scratch-pending';
       note.textContent = 'This body’s checkpoint replay is being prepared. It will appear here automatically.';
-      host.replaceChildren(note); caption.textContent = 'Waiting for this body’s own checkpoint replay.';
+      host.replaceChildren(note);
       return;
     }
     root.dataset.replayUpdates = stage.replay.cumulativeUpdates;
-    caption.textContent = `${stage.label} · ${fmt(stage.replay.cumulativeUpdates)} cumulative PPO updates · Replay 0.0 s`;
     const seek=()=>{
       const frame=host.querySelector('iframe.scene-ready');
       if(!frame)return;
       pendingReplayTime=stage.replay.startTime||0;
-      frame.contentWindow.postMessage({type:'clear-playback-command',time:pendingReplayTime+.001,playing:!matchMedia('(prefers-reduced-motion: reduce)').matches},'*');
+      frame.contentWindow.postMessage({type:'clear-playback-command',time:pendingReplayTime+.001,playing:play||!matchMedia('(prefers-reduced-motion: reduce)').matches},'*');
     };
     if (currentScene === stage.replay.scene) {
       host.querySelector('.viewer')._checkpointSeek=seek;
@@ -244,19 +257,22 @@
     viewer._checkpointSeek=seek;
     viewer.addEventListener('scene-settled',event=>{if(!event.detail?.failed)viewer._checkpointSeek();});
     const poster = document.createElement('img');
-    poster.className = 'preview-image'; poster.src = `assets/media/${currentScene}.png`;
+    poster.className = 'preview-image'; poster.src = clearAssetURL(`assets/media/${currentScene}.png`);
     poster.alt = bodyName() + ' policy evaluated on the common terrain bank';
     const launch = document.createElement('button'); launch.className = 'launch';
     launch.type = 'button'; launch.textContent = 'Play in 3D';
     viewer.append(poster, launch); host.replaceChildren(viewer);
     wireViewer(viewer);
     observeAutomaticScene(viewer);
-    caption.textContent = `${stage.label} · ${fmt(stage.replay.cumulativeUpdates)} cumulative PPO updates · Replay 0.0 s`;
     root.dataset.replayUpdates = stage.replay.cumulativeUpdates;
     drawCurves();
   }
   function render(data) {
     if (data.body !== body) return;
+    if (chartData?.body !== body) {
+      metricMode=data.defaultMetricMode||'optimization';
+      root.querySelectorAll('[data-curriculum-metrics]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.curriculumMetrics===metricMode)));
+    }
     const initialScene=data.stages.find(stage=>stage.id==='initialization')?.replay?.scene;
     const previousInitial=chartData?.body===body?chartData.stages.find(stage=>stage.id==='initialization')?.replay?.scene:null;
     if(previousInitial&&initialScene!==previousInitial){
@@ -266,27 +282,14 @@
     root.dataset.body = body;
     const stages = data.stages;
     curves(data);
-    root.querySelector('[data-curriculum-intro]').textContent = data.intro || (body === 'g1'
-      ? 'G1 starts from random initialization, with flat locomotion followed by planned terrain adaptation.'
-      : body === 'spot_arm'
-      ? 'Spot + arm starts from random initialization with the arm physically present. Its own policy learns locomotion, terrain traversal and arm posture adaptation.'
-      : 'An arm-free Spot starts from random initialization, learns flat locomotion and then adapts to stairs and slopes. Its physics and policy are independent of Spot + arm.');
-    const archived=data.source==='archived-controller';
-    root.querySelector('[data-curriculum-reset]').textContent=archived?'Replay first checkpoint':'Replay from update 0';
-    root.querySelector('[data-curriculum-reset]').nextElementSibling.textContent=data.replayNote || 'Update 0 shows the random policy before its first action, including the recorded loss of balance.';
-    root.querySelector('.curriculum-baseline-note').textContent=data.baselineNote || 'Loss logging begins with PPO update 1. Dashed lines mark the first logged value.';
-    const active = stages.find(stage => stage.state === 'training');
-    const stopped=stages.find(stage=>['stopped','failed'].includes(stage.state));
-    const unknown=stages.some(stage=>stage.state==='unknown');
-    status.textContent = active ? `${active.label} in progress · ${fmt(data.numEnvironments)} parallel environments` : stopped ? `Training stopped at update ${fmt(stopped.cumulativeUpdates)}. Later phases have no recorded training.` : unknown ? 'Waiting for the next training status update.' : data.complete ? 'Training schedule complete.' : 'Recorded training progress.';
-    if(archived)status.textContent='Recorded controller · 28,000 updates';
-    if(stopped&&metricScale(data.curves.map(r=>r.value).filter(Number.isFinite)).logarithmic)
-      status.textContent+=' Large recorded loss excursions remain visible on a symmetric log axis.';
+    renderSteps(data);
+    status.textContent='';status.hidden=true;
+    root.querySelector('.curriculum-baseline-note').textContent=data.baselineNote || 'Curves show recorded training values.';
     // New exports do not interrupt a camera interaction or an active replay.
     if (requestedStage) {
       const stage=checkpoints(data).find(stage=>stage.id===requestedStage);
       requestedStage=null;
-      if(stage){select(stage);host.querySelector('.launch')?.click();}
+      if(stage)playCheckpoint(stage);
     } else if (!currentScene) select(checkpoints(data).find(stage=>stage.id===(data.defaultCheckpoint||selected)) || checkpoints(data)[0] || stages[0]);
   }
   root.addEventListener('policy-select-checkpoint',event=>{
@@ -294,13 +297,6 @@
     if(chartData?.body===body)render(chartData);
     else refresh();
   });
-  root.querySelector('[data-curriculum-reset]').onclick=()=>{
-    const stage=chartData&&checkpoints(chartData)[0];if(!stage)return;
-    select(stage);
-    const frame=host.querySelector('iframe.scene-ready');
-    if(frame)frame.contentWindow.postMessage({type:'clear-playback-command',time:stage.replay.startTime||0,playing:true},'*');
-    else host.querySelector('.launch')?.click();
-  };
   root.closest('#controller-pretraining').addEventListener('policy-body-change', event => {
     const changed = body !== event.detail.body;
     body = event.detail.body;
@@ -310,21 +306,25 @@
       chartData=null; inspectedStep=null; hoveredChart=null;highlightedPhase=null;
       root.querySelector('[data-curriculum-curves]').replaceChildren();
       delete root.dataset.body;
-      status.textContent = 'Loading this robot’s training record.';
-      caption.textContent = '';
+      status.textContent = 'Loading…';status.hidden=false;
+      root.querySelector('[data-curriculum-steps]').replaceChildren();
       selected = 'initialization'; currentScene = null;
       pendingReplayTime=null;
     }
     if (window.CLEAR_BODY_CURRICULA?.[body]) render(window.CLEAR_BODY_CURRICULA[body]);
     refresh();
   });
+  const attemptedBodies = new Set();
   function refresh() {
     if (!near || document.hidden || loading) return;
+    if (window.CLEAR_BODY_CURRICULA?.[body]) { render(window.CLEAR_BODY_CURRICULA[body]); return; }
+    if (attemptedBodies.has(body)) return;
+    attemptedBodies.add(body);
     loading = true;
     const requestedBody = body;
     const script = document.createElement('script');
-    const filename=requestedBody==='spot_arm'?'spot_arm-restored-data.js':`${requestedBody}-curriculum-data.js`;
-    script.src = `assets/${filename}?t=${Math.floor(Date.now()/30000)}`;
+    const filename=['g1','spot_arm'].includes(requestedBody)?`${requestedBody}-restored-data.js`:`${requestedBody}-curriculum-data.js`;
+    script.src = clearAssetURL(`assets/${filename}`);
     script.onload = () => {
       loading = false; script.remove();
       if (requestedBody !== body) { refresh(); return; }
@@ -333,7 +333,11 @@
     script.onerror = () => {
       loading = false; script.remove();
       if (requestedBody !== body) { refresh(); return; }
-      if (!currentScene) status.textContent = 'Training progress is temporarily unavailable.';
+      if (!currentScene) {
+        status.hidden=false;status.textContent = 'Training record could not load. ';
+        const retry=document.createElement('button');retry.type='button';retry.textContent='Retry';
+        retry.onclick=()=>{attemptedBodies.delete(body);retry.remove();refresh();};status.append(retry);
+      }
     };
     document.head.append(script);
   }
@@ -347,13 +351,10 @@
       const stage=checkpoints(chartData).findLast(s=>event.data.time+1e-6>=s.replay.startTime);
       if(!stage)return;
       if(selected!==stage.id){selected=stage.id;root.dataset.replayUpdates=stage.replay.cumulativeUpdates;drawCurves();}
-      caption.textContent=`${stage.label} · ${fmt(stage.replay.cumulativeUpdates)} cumulative PPO updates · Replay ${(event.data.time-stage.replay.startTime).toFixed(1)} s`;
       return;
     }
-    const label = explanations[selected] ? ({initialization:'Initialization',locomotion:'Locomotion',terrain:'Terrain adaptation',arm:'Arm adaptation'})[selected] : selected;
-    caption.textContent = `${label} · ${fmt(Number(root.dataset.replayUpdates))} cumulative PPO updates · Replay ${event.data.time.toFixed(1)} s`;
   });
   new IntersectionObserver(entries => { near = entries[0].isIntersecting; if (near) refresh(); }, {rootMargin:'200px'}).observe(root);
   document.addEventListener('visibilitychange', refresh);
-  setInterval(refresh, 30000);
+
 })();

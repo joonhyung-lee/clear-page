@@ -1,4 +1,4 @@
-/* One from-scratch training history per physical robot. */
+/* One recorded training history per physical robot. */
 (() => {
  const root=document.querySelector('#controller-pretraining');if(!root)return;
  let body='g1';

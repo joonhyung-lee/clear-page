@@ -69,7 +69,7 @@ for ci,case in enumerate(d['cases']):
 fig.suptitle('CLEAR attention on recorded observations',fontsize=17)
 fig.colorbar(plt.cm.ScalarMappable(norm=plt.Normalize(0,vmax),cmap=cmap),ax=axs.ravel().tolist(),shrink=.45,aspect=40,label='Mean attention weight · fixed scale across frames')
 fig.supxlabel('Object queries averaged across 4 layers and 4 heads. Geometry-token footprints, not pixel saliency.\nEmbodiment-token mass is retained in the interactive inspector. Attention is recomputed offline.',fontsize=9)
-for ext in ['png','pdf']:fig.savefig(a.output/f'attention-overview.{ext}',dpi=180,bbox_inches='tight',metadata={'Creator':'CLEAR attention export'})
+for ext in ['png','pdf']:fig.savefig(a.output/f'attention-overview.{ext}',dpi=180,bbox_inches='tight',metadata=({'Creator':None,'Producer':None,'CreationDate':None,'ModDate':None} if ext=='pdf' else {'Software':None}))
 plt.close(fig)
 
 available=[c for c in d['cases'] if c['frames'][0]['flow']]
@@ -84,7 +84,7 @@ for i,case in enumerate(available):
 fig.suptitle('Object-path generation attention',fontsize=16)
 fig.supxlabel('Selected object queries, mean of 4 layers and 4 heads. Flow time is integration time, not execution time.\nOnly observed spatial tokens are projected. Whole-path decision tokens remain in the inspector.',fontsize=9)
 fig.colorbar(plt.cm.ScalarMappable(norm=plt.Normalize(0,flowmax),cmap=cmap),ax=axs.ravel().tolist(),shrink=.7,label='Mean attention weight')
-for ext in ['png','pdf']:fig.savefig(a.output/f'attention-flow.{ext}',dpi=180,bbox_inches='tight',metadata={'Creator':'CLEAR attention export'})
+for ext in ['png','pdf']:fig.savefig(a.output/f'attention-flow.{ext}',dpi=180,bbox_inches='tight',metadata=({'Creator':None,'Producer':None,'CreationDate':None,'ModDate':None} if ext=='pdf' else {'Software':None}))
 plt.close(fig)
 template=Path(__file__).with_name('attention_inspector.html').read_text()
 for name in ('attention-overview.png', 'attention-flow.png'):

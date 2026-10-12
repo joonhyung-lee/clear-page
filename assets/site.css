@@ -227,3 +227,7 @@ video.media-ready{animation:media-dissolve .4s ease-out}
 @media(max-width:900px){.loss-chart-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.loss-chart-grid figcaption{min-height:0}.loss-chart-grid h5{font-size:14px}.loss-chart-grid figcaption p{font-size:11px}}
 @media(max-width:700px){#training-objective{width:calc(100vw - 40px);margin-left:calc((100% - 100vw + 40px)/2)}.loss-objective-map{font-size:14px}.loss-objective-map>div{gap:6px}.loss-objective-map button{padding:6px}}
 @media(max-width:500px){.loss-chart-grid{grid-template-columns:1fr;gap:18px}}
+
+/* Explicit recovery remains reachable above the retained poster. */
+.media-retry{position:relative;z-index:6;padding:.55rem .8rem;cursor:pointer}
+.viewer>.media-retry{position:absolute;left:1rem;bottom:1rem}

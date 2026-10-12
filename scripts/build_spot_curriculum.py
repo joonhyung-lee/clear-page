@@ -27,31 +27,29 @@ for button in soup.select('[data-loco-metrics]'):
     button.append(labels[key])
 controls = ''.join(f'<button type="button" data-curriculum-metrics="{key}" aria-pressed="{str(key == "optimization").lower()}">{icons[key]}{label}</button>' for key, label in labels.items())
 html = f'''<div id="spot-curriculum">
-<p class="method-small-copy" data-curriculum-intro>A new PPO training run starts from random initialization.</p>
-<p class="scratch-status" data-curriculum-status role="status">Training progress loads nearby.</p>
+<p class="scratch-status" data-curriculum-status role="status" hidden></p>
 <div class="loco-row scratch-layout">
 <div class="loco-rollout">
 <div data-curriculum-view></div>
-<div class="scratch-description">
-<p data-curriculum-caption>Initialization · 0 cumulative PPO updates</p>
-<button type="button" data-curriculum-reset>Replay from update 0</button>
-<p>Update 0 shows the random policy before its first action, including the recorded loss of balance.</p>
-</div></div>
+<div class="loco-stages curriculum-steps" data-curriculum-steps role="group" aria-label="Replay checkpoints"></div>
+</div>
 <div class="loco-evidence">
 <div class="loco-metrics" role="group" aria-label="Training metrics">{controls}</div>
 <div class="curriculum-timeline" data-curriculum-phases role="group" aria-label="Training phases"></div>
-<p class="curriculum-phase-caption" data-curriculum-explanations aria-live="polite"></p>
+<p class="loco-status" data-curriculum-explanations aria-live="polite"></p>
 <div class="scratch-curves" data-curriculum-curves></div>
 <details class="curriculum-notes"><summary>About these plots</summary>
 <p class="loco-evidence-note curriculum-baseline-note">Loss logging begins with PPO update 1. Dashed lines mark the first logged value.</p>
 <p class="loco-evidence-note" data-curriculum-metric-note></p>
-<p class="loco-evidence-note">The ribbon shows the planned schedule. Plots show recorded updates. Numbered markers open checkpoint replays.</p>
+<p class="loco-evidence-note">The ribbon shows the planned schedule. Plots show recorded updates. Step buttons play the corresponding checkpoints.</p>
 </details>
 <p class="loco-status" data-curriculum-readout aria-live="polite"></p>
 </div></div></div>'''
 section = soup.select_one('#controller-pretraining')
 section.select_one('#pretraining-title').string = 'Low-level policy training'
-section.select_one(':scope > .method-small-copy').string = 'Select a robot to inspect its recorded PPO training and checkpoint replays.'
+intro = section.select_one(':scope > .method-small-copy')
+if intro:
+    intro.decompose()
 section['data-training-layout'] = 'unified'
 controls = toolbar
 if controls is None:

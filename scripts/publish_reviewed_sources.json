@@ -22,5 +22,37 @@
   "scripts/build_code_native.py": {
     "sha256": "fa27c1f2d8a8013d35d294c6226978292b2a1771e80fa703fe86642105b3f9f0",
     "reason": "Matrix multiplication expression, not an email address"
+  },
+  "assets/code-downloads/clear-source.zip::clear/runtime/clear/maze/contact_palm.py": {
+    "sha256": "870a0ee66a23691aae04f72c88b2ee27c1cb595866689082727e436266166819",
+    "reason": "Matrix multiplication expressions, not email addresses"
+  },
+  "assets/code-downloads/clear-source.zip::clear/runtime/clear/maze/coupled_controller.py": {
+    "sha256": "a27a0f7a90b5c31a22c328c289c037c221938230b566c2563341a819c9b5e863",
+    "reason": "Matrix multiplication expressions, not email addresses"
+  },
+  "assets/code-downloads/clear-source.zip::clear/runtime/clear/maze/palm_clearance.py": {
+    "sha256": "d7d0a9cf5c8f12e0eda39606408ef886a45292a7df02fc546fb880638e846b92",
+    "reason": "Matrix multiplication expressions, not email addresses"
+  },
+  "assets/code-downloads/clear-source.zip::clear/runtime/clear/maze/palm_contact_gate.py": {
+    "sha256": "c8ec390558a5d1edc1b465edabdca98613e8c09a077054104623ac501104bdfd",
+    "reason": "Matrix multiplication expressions, not email addresses"
+  },
+  "assets/code-downloads/clear-source.zip::clear/runtime/clear/maze/palm_surface_target.py": {
+    "sha256": "b538c4eff302af44fc7eadfbe7f88d8c97f4bbc99823410d990ca35bc5e7a191",
+    "reason": "Matrix multiplication expressions, not email addresses"
+  },
+  "assets/code-downloads/clear-source.zip::clear/runtime/clear/maze/physical_controller.py": {
+    "sha256": "ab6067cdbcb769af29f0412bd545a1aad61567cc4cbbc46bd4dcb8cee7d8add5",
+    "reason": "Matrix multiplication expressions, not email addresses"
+  },
+  "assets/code-downloads/clear-source.zip::clear/runtime/clear/maze/spot_contact.py": {
+    "sha256": "b853b524272ecf07cd82b31cff7ae339dfd007960aa82680c207de75297c09ec",
+    "reason": "Matrix multiplication expressions, not email addresses"
+  },
+  "assets/code-downloads/clear-source.zip::clear/runtime/outputs/leap2026/PAPER_MAP.md": {
+    "sha256": "23b79ca3e82e314c6be5fadbc896ab95c15634b0031a55515b0227f2a4a6d92e",
+    "reason": "Metric identifiers with at-sign separators, not email addresses"
   }
 }

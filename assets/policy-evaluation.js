@@ -102,24 +102,5 @@ function sync(){
 root.querySelector('[data-eval-example]').onclick=()=>{illustrative=!illustrative;point=null;render()};
 slider.oninput=()=>selectPoint(Number(slider.value));
 section.addEventListener('policy-body-change',sync);sync();
-let nearby=false,refreshing=false;
-function refreshScratch(){
- if(!nearby||document.hidden||body!=='g1_scratch'||refreshing)return;
- refreshing=true;
- const previous=rows(),selectedUpdate=previous[point]?.update;
- const follow=point===previous.length-1&&document.activeElement?.tagName.toLowerCase()!=='svg';
- const script=document.createElement('script');
- script.src='assets/g1_scratch-evaluation-data.js?t='+Math.floor(Date.now()/30000);
- script.onload=()=>{
-  refreshing=false;script.remove();
-  if(body==='g1_scratch'){
-   point=follow?null:Math.max(0,rows().findIndex(row=>row.update===selectedUpdate));render();
-  }
- };
- script.onerror=()=>{refreshing=false;script.remove()};
- document.head.append(script);
-}
-new IntersectionObserver(entries=>{nearby=entries[0].isIntersecting;if(nearby)refreshScratch()},{rootMargin:'200px'}).observe(root);
-setInterval(refreshScratch,30000);
-document.addEventListener('visibilitychange',refreshScratch);
+// Published evaluation data is a fixed snapshot; no background polling.
 })();

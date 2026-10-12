@@ -43,8 +43,9 @@
   }
   function tick(now){raf=0;if(!visible||!playing||!data||document.hidden){last=0;return;}if(last)time=Math.min(1,time+(now-last)/(flow?8000:16000));last=now;if(time===1)playing=false;draw();if(playing)raf=requestAnimationFrame(tick);}
   function schedule(){if(visible&&playing&&data&&!raf&&!document.hidden)raf=requestAnimationFrame(tick);}
-  async function load(){
-   if(data||loading)return;loading=true;
+  let attempted=false;
+  async function load(retry=false){
+   if(data||loading||(attempted&&!retry))return;attempted=true;loading=true;
    try{
     await loadScript('assets/failure-geometry.js',()=>!!window.CLEAR_FAILURE_GEOMETRY);
     await loadScript(flow?'assets/teaser-flow-data.js':'assets/failure-planning-data.js',()=>flow?!!window.CLEAR_TEASER_FLOW:!!window.CLEAR_FAILURE_PLANNING);
@@ -56,7 +57,7 @@
    }catch(error){status.textContent='Could not load recorded states. Select Replay to retry.';data=null;}finally{loading=false;}
   }
   play.onclick=()=>{playing=!playing;if(playing&&time===1)time=0;last=0;draw();schedule();};
-  replay.onclick=()=>{time=0;playing=true;last=0;if(!data)load();else{draw();schedule();}};
+  replay.onclick=()=>{time=0;playing=true;last=0;if(!data)load(true);else{draw();schedule();}};
   slider.oninput=()=>{time=Number(slider.value);playing=false;last=0;draw();};
   document.addEventListener('visibilitychange',()=>{last=0;if(document.hidden){cancelAnimationFrame(raf);raf=0;}else schedule();});
   new ResizeObserver(draw).observe(canvas);

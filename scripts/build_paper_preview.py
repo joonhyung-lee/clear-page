@@ -30,13 +30,14 @@ main{overflow:auto;height:calc(100vh - 53px);padding:1rem;text-align:center}img{
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 </style></head><body><nav aria-label="Paper pages"><button id="previous" disabled>Previous</button><output id="position" aria-live="polite">Loading paper…</output><button id="next" disabled>Next</button><button id="zoom" aria-pressed="false">Zoom in</button></nav>
 <main tabindex="0" aria-label="Paper page"><img id="page" alt=""/><div id="text" class="sr-only"></div></main>
+<script id="paper-pages" type="application/json">PAPER_PAGES_JSON</script>
 <script>
 let pages=[],index=0;
 const main=document.querySelector('main'),picture=document.querySelector('#page'),position=document.querySelector('#position'),previous=document.querySelector('#previous'),next=document.querySelector('#next');
 function show(){const page=pages[index];picture.src=page.image;picture.alt=`Anonymous CLEAR paper, page ${index+1} of ${pages.length}`;picture.width=page.width;picture.height=page.height;document.querySelector('#text').textContent=page.text;position.textContent=`${index+1} / ${pages.length}`;previous.disabled=index===0;next.disabled=index===pages.length-1;main.scrollTo(0,0);}
 previous.onclick=()=>{if(index>0){index--;show();}};next.onclick=()=>{if(index<pages.length-1){index++;show();}};
 document.querySelector('#zoom').onclick=e=>{const zoomed=main.classList.toggle('zoomed');e.currentTarget.setAttribute('aria-pressed',String(zoomed));e.currentTarget.textContent=zoomed?'Fit width':'Zoom in';};
-document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();previous.click();}if(e.key==='ArrowRight'){e.preventDefault();next.click();}if(e.key==='Escape')parent.postMessage({type:'clear-paper-close'},location.origin);});
-fetch('paper/manifest.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{pages=data.pages;show();}).catch(()=>{position.textContent='Preview unavailable. Use Download PDF above.';});
-</script></body></html>\n''')
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();previous.click();}if(e.key==='ArrowRight'){e.preventDefault();next.click();}if(e.key==='Escape')parent.postMessage({type:'clear-paper-close'},'*');});
+pages=JSON.parse(document.querySelector('#paper-pages').textContent);show();
+</script></body></html>\n'''.replace('PAPER_PAGES_JSON', json.dumps(pages, ensure_ascii=False).replace('<', '\\u003c')))
 print(f'Rendered {len(pages)} complete anonymous paper pages')

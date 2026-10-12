@@ -110,7 +110,10 @@ def static_checks():
     assert [n['data-method-illustration'] for n in page.select('[data-method-illustration]')] == ['ordering','generation']
     for stage, original in [('ordering','method-order'),('generation','method-flow')]:
         assert str(page.select_one('#'+stage+' .result svg')) == str(main.select_one('#'+original+' .sequence-explanation svg'))
-    assert any('assets/method-illustration.js' in n['src'] for n in page.select('script[src]'))
+    bundle_sources = json.loads((ROOT/'scripts/site_bundle_manifest.json').read_text())['code/index.html']['scripts']
+    assert 'assets/method-illustration.js' in bundle_sources
+    bundle = (ROOT/'code/page-bundle.js').read_text()
+    assert all((ROOT/source).read_text() in bundle for source in bundle_sources)
     assert len(page.select('[data-grounding-panel]')) == 3
     assert len(page.select('[data-grounding-panel=embodiment] video')) == 4
     assert len(page.select('[data-grounding-panel=scene] video')) == 4
@@ -147,11 +150,13 @@ def static_checks():
     for viewer in page.select('.viewer'):
         assert (ROOT / 'assets/recordings' / (viewer['data-scene']+'.hex.js')).is_file()
     for media in page.select('video source, img'):
-        assert (ROOT / 'code' / media['src'].split('?')[0]).is_file()
+        url=media.get('data-preview-src') or media['src']
+        assert (ROOT / 'code' / url.split('?')[0]).is_file()
     for el in page.select('[src], link[href]'):
         url = el.get('src') or el.get('href')
         assert not url.startswith(('http:', 'https:', '//')), url
-        assert (ROOT / 'code' / url.split('?')[0]).is_file(), url
+        if not url.startswith('data:'):
+            assert (ROOT / 'code' / url.split('?')[0]).is_file(), url
     assert not page.select('[data-native-example]')
     assert page.select_one('[data-shared-validation]')
     assert not page.select('.component-features, .selection-logic')
@@ -176,7 +181,7 @@ def static_checks():
         connection = MemoryConnection(path, headers)
         Handler(connection, ('localhost', 0), SimpleNamespace(server_name='localhost', server_port=8765))
         return bytes(connection.output)
-    for url in ['/code/index.html', '/code/catalog.js', '/code/code.js', '/code/'+data['files'][0]['url']]:
+    for url in ['/code/index.html', '/code/catalog.js', '/code/code.js', '/code/page-bundle.js', '/code/page-bundle.css', '/code/'+data['files'][0]['url']]:
         assert request(url).startswith(b'HTTP/1.0 200'), url
     for url in ['/clear-standalone/index.html', '/clear-standalone-anonymous/README.md',
                 '/code/../clear-standalone-anonymous/README.md', '/code/%2e%2e/.git/config', '/.git/config']:

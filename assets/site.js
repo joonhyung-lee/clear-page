@@ -1,4 +1,4 @@
-function clearAssetURL(path) { const base=path.split('?')[0], version=window.CLEAR_ASSET_REVISIONS?.[base]; const url=version ? base+'?v='+version : path; return window.CLEAR_ASSET_BASE ? new URL(url,window.CLEAR_ASSET_BASE).href : url; }
+function clearAssetURL(path) { const base=path.split('?')[0]; if(window.CLEAR_PREVIEWS?.[base])return window.CLEAR_PREVIEWS[base]; const version=window.CLEAR_ASSET_REVISIONS?.[base]; const url=version ? base+'?v='+version : path; return window.CLEAR_ASSET_BASE ? new URL(url,window.CLEAR_ASSET_BASE).href : url; }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const hoverAvailable = matchMedia('(hover: hover) and (pointer: fine)');
 const teaser = document.querySelector('#teaser');
@@ -9,89 +9,7 @@ if (teaser && heroToggle) {
   heroToggle.addEventListener('click', () => teaser.paused ? teaser.play().catch(updateHero) : teaser.pause());
   teaser.addEventListener('play', updateHero); teaser.addEventListener('pause', updateHero); updateHero();
 }
-// Warm only nearby previews, with two media preparations at a time.
-// Sources are retained after preparation so scrolling back never resets playback.
-const mediaQueue = new Set(), mediaStates = new Map();
-let preparingMedia = 0;
-function drainMedia() {
-  if (document.hidden) return;
-  for (const video of mediaQueue) {
-    if (preparingMedia >= 2) break;
-    mediaQueue.delete(video);
-    const state = mediaStates.get(video);
-    if (!state.near || state.loaded || state.loading || state.attempts >= 3 || reduced.matches) continue;
-    state.loading = true; state.attempts = (state.attempts || 0) + 1; preparingMedia++;
-    let timeout, finished = false;
-    const done = event => {
-      if (finished) return;
-      finished = true;
-      clearTimeout(timeout);
-      video.removeEventListener('loadeddata', done); video.removeEventListener('error', done, true);
-      state.loading = false; state.loaded = video.readyState >= 2;
-      preparingMedia--; drainMedia();
-      if (state.visible && !document.hidden && !reduced.matches && state.loaded && !video.closest('.viewer')?.querySelector('iframe')) video.play().catch(() => {});
-      if ((event?.type === 'error' || video.error) && state.attempts < 3) {
-        clearTimeout(state.timer);
-        state.timer = setTimeout(() => { if (state.near) { mediaQueue.add(video); drainMedia(); } }, state.attempts === 1 ? 1000 : 4000);
-      }
-    };
-    video.addEventListener('loadeddata', done, {once:true}); video.addEventListener('error', done, {once:true,capture:true});
-    timeout = setTimeout(done, 15000);
-    if (video.readyState >= 2) done();
-    else {
-      const restart = video.preload === 'auto' || !!video.error || video.networkState === 3;
-      video.preload = 'auto';
-      // Changing preload starts the first request; load() is needed only for a retry.
-      if (restart) video.load();
-    }
-  }
-}
-const nearbyMedia = new IntersectionObserver(entries => {
-  for (const {target:video,isIntersecting} of entries) {
-    const state = mediaStates.get(video); state.near = isIntersecting;
-    clearTimeout(state.timer);
-    if (!isIntersecting) { mediaQueue.delete(video); continue; }
-    if (state.attempts >= 3 && !state.loaded) continue;
-    // Do not start downloads for sections passed during a quick scroll.
-    state.timer = setTimeout(() => { mediaQueue.add(video); drainMedia(); }, 350);
-  }
-}, {rootMargin:'240px 0px'});
-const visibleMedia = new IntersectionObserver(entries => {
-  for (const {target:video,isIntersecting} of entries) {
-    const state = mediaStates.get(video); state.visible = isIntersecting;
-    if (!isIntersecting) video.pause();
-    else if (state.loaded && !document.hidden && !reduced.matches && !video.closest('.viewer')?.querySelector('iframe')) video.play().catch(() => {});
-  }
-}, {threshold:.05});
-document.querySelectorAll('video[data-autoplay]').forEach(video => {
-  mediaStates.set(video, {near:false,visible:false,loaded:false,loading:false});
-  video.addEventListener('loadeddata', () => {
-    const state = mediaStates.get(video); state.loaded = true;
-    if (state.visible && !document.hidden && !reduced.matches && !video.closest('.viewer')?.querySelector('iframe')) video.play().catch(() => {});
-  });
-  nearbyMedia.observe(video); visibleMedia.observe(video);
-});
-// A native poster remains visible until decoding produces a frame.
-document.querySelectorAll('video').forEach(video => {
-  video.addEventListener('playing', () => video.classList.add('media-ready'));
-});
-const heroVisibility = new IntersectionObserver(entries => {
-  if (!entries.at(-1).isIntersecting) teaser.pause();
-  else if (!document.hidden && !reduced.matches && !heroManuallyPaused) teaser.play().catch(updateHero);
-});
-let heroManuallyPaused = false;
-heroToggle?.addEventListener('click', () => { heroManuallyPaused = teaser.paused; });
-if(teaser)heroVisibility.observe(teaser);
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { teaser?.pause(); for (const video of mediaStates.keys()) video.pause(); }
-  else {
-    drainMedia();
-    for (const [video,state] of mediaStates) if (state.visible && state.loaded && !reduced.matches && !video.closest('.viewer')?.querySelector('iframe')) video.play().catch(() => {});
-    if (teaser && !heroManuallyPaused && !reduced.matches && teaser.getBoundingClientRect().bottom > 0 && teaser.getBoundingClientRect().top < innerHeight) teaser.play().catch(updateHero);
-  }
-});
-
-// User-started videos and enlarged previews pause outside the viewport, too.
+// Download media only after an explicit playback action. Keep posters on failure.
 const manualMedia = new Map();
 function syncManualMedia(video, state) {
   if ((!state.visible || document.hidden) && !video.paused) { state.resume = true; video.pause(); }
@@ -103,53 +21,28 @@ const manualVisibility = new IntersectionObserver(entries => {
     syncManualMedia(entry.target, state);
   }
 });
-document.querySelectorAll('video[controls],.focus-viewer video').forEach(video => {
+function prepareManualVideo(video) {
+  if (manualMedia.has(video)) return;
+  video.preload = 'none'; video.removeAttribute('autoplay');
+  if (video !== teaser && !video.closest('.media-tile') && !video.closest('.ego-inset')) video.controls = true;
   manualMedia.set(video, {visible:false,resume:false}); manualVisibility.observe(video);
-});
+  let retry;
+  const failed = () => {
+    manualMedia.get(video).resume = false;
+    video.classList.remove('media-ready');
+    if (retry || video.closest('.media-tile')) return;
+    retry = document.createElement('button'); retry.type = 'button'; retry.className = 'media-retry';
+    retry.textContent = 'Retry video';
+    retry.onclick = () => { retry.remove(); retry = null; video.load(); video.play().catch(failed); };
+    video.after(retry);
+  };
+  video.addEventListener('error', failed, true);
+  video.addEventListener('playing', () => { video.classList.add('media-ready'); retry?.remove(); retry = null; });
+}
+document.querySelectorAll('video').forEach(prepareManualVideo);
 document.addEventListener('visibilitychange', () => { for (const [video,state] of manualMedia) syncManualMedia(video,state); });
-
-// Automatic scenes must remain nearby and start one at a time.
-const autoScenes = new Set();
-let startingScene = false, sceneRetryAfter = 0;
-function drainScenes() {
-  if (startingScene || document.hidden || Date.now() < sceneRetryAfter) return;
-  for (const viewer of autoScenes) {
-    autoScenes.delete(viewer);
-    if (!viewer._sceneNearby || viewer.querySelector('iframe,.viewer-status') || reduced.matches) continue;
-    startingScene = true; viewer._automaticStarting = true;
-    const done = event => {
-      viewer.removeEventListener('scene-settled', done); startingScene = false; viewer._automaticStarting = false;
-      if (event.detail?.failed) { sceneRetryAfter = Date.now() + 60000; setTimeout(drainScenes, 60000); }
-      drainScenes();
-    };
-    viewer.addEventListener('scene-settled', done);
-    viewer.querySelector('.launch').click();
-    return;
-  }
-}
-function observeAutomaticScene(viewer) {
-  if(viewer._automaticObserved)return;viewer._automaticObserved=true;
-  let timer, attempted = false;
-  viewer.addEventListener('scene-evicted',()=>{attempted=false;});
-  const observer = new IntersectionObserver(entries => {
-    viewer._sceneNearby = entries.at(-1).isIntersecting;
-    clearTimeout(timer);
-    if (!viewer._sceneNearby) {
-      autoScenes.delete(viewer);
-      if (viewer._automaticStarting && !viewer.querySelector('iframe')) {
-        attempted = false; viewer.dispatchEvent(new Event('reset-viewer'));
-      }
-      return;
-    }
-    if (!attempted && !reduced.matches) timer = setTimeout(() => {
-      if (viewer.querySelector('iframe,.viewer-status')) return;
-      autoScenes.add(viewer); drainScenes();
-    }, 550);
-  }, {rootMargin:'0px'});
-  viewer.querySelector('.launch').addEventListener('click', () => { attempted = true; });
-  observer.observe(viewer);
-}
-document.addEventListener('visibilitychange', drainScenes);
+// Kept as an API for dynamically created galleries; inspection is user initiated.
+function observeAutomaticScene() {}
 
 // Runs inside each native player, including opaque-origin anonymous embeds.
 function sceneLifecycle() {
@@ -259,14 +152,7 @@ function requestScript(path, ready) {
 function loadScript(path, ready) {
   if (ready()) return Promise.resolve();
   if (!scriptLoads.has(path)) {
-    const pending = (async () => {
-      // Bound retries so a rate-limited host is not flooded with requests.
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (attempt) await new Promise(resolve => setTimeout(resolve, attempt === 1 ? 1000 : 4000));
-        try { await requestScript(path, ready); return; }
-        catch (error) { if (attempt === 2) throw error; }
-      }
-    })();
+    const pending = requestScript(path, ready);
     scriptLoads.set(path, pending);
     const forget = () => { if (scriptLoads.get(path) === pending) scriptLoads.delete(path); };
     pending.then(forget, forget);
@@ -414,14 +300,14 @@ for (const grid of document.querySelectorAll('.media-grid')) {
     viewer.querySelector('.launch').setAttribute('aria-label',`Play ${tile.dataset.title} in 3D`);
     const preview=tile.querySelector('video');
     video.poster=preview.poster;
-    video.preload='auto';
+    video.preload='none';
     const syncPreview=()=>{if(current===tile&&Number.isFinite(preview.currentTime))video.currentTime=preview.currentTime;};
     video.onloadedmetadata=syncPreview;
     const source=tile.querySelector('source').src;
     if(video.src!==source)video.src=source;
     else if(video.readyState>=1)syncPreview();
     overlay.hidden=false; grid.classList.add('has-focus');
-    if(!reduced.matches || pin) video.play().catch(()=>{});
+    video.controls=true;
   }
   function close(restoreFocus=false) {
     clearTimeout(closeTimer);
@@ -527,6 +413,7 @@ function syncEgoClock(viewer,clock,mode='video'){
  const expected=same?previous.time+(previous.playing?(now-previous.wall)*previous.rate:0):clock.time;
  const jump=!!clock.seek||(same&&Math.abs(clock.time-expected)>.5);
  viewer._egoClockMode=mode;viewer._egoClock={...clock,rate,wall:now};
+ if(!clock.playing && clock.time === 0 && ego.readyState === 0)return;
  if(ego.preload!=='auto')ego.preload='auto';
  if(!ego.readyState)return;
  const end=Number.isFinite(ego.duration)?Math.max(0,ego.duration-.001):Infinity;

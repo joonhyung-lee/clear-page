@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import zipfile
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -82,10 +83,19 @@ def check_anonymity(terms):
     for line in failures:
         label, reason = line[5:].rsplit(': ', 1)
         entry = reviewed.get(label)
-        if not entry or reason != 'private path or email' or not (ROOT/label).is_file():
+        if not entry or reason != 'private path or email':
             unexpected.append(line)
             continue
-        actual = hashlib.sha256((ROOT/label).read_bytes()).hexdigest()
+        if '::' in label:
+            archive, member = label.split('::', 1)
+            with zipfile.ZipFile(ROOT/archive) as package:
+                reviewed_bytes = package.read(member)
+        elif (ROOT/label).is_file():
+            reviewed_bytes = (ROOT/label).read_bytes()
+        else:
+            unexpected.append(line)
+            continue
+        actual = hashlib.sha256(reviewed_bytes).hexdigest()
         if actual != entry['sha256']:
             unexpected.append(line+' (reviewed file changed)')
     if unexpected:
@@ -119,15 +129,16 @@ def main():
     if args.checkpoint_url:
         url = check_url(args.checkpoint_url, terms)
         LOCATIONS.write_text('window.CLEAR_CODE_DOWNLOADS='+json.dumps({'checkpoints': url})+';\n')
-    if args.push or args.checkpoint_url:
+    if args.checkpoint_url:
         run(sys.executable, 'scripts/build_asset_revisions.py')
-        run(sys.executable, 'scripts/build_code_browser.py')
+        run(sys.executable, 'scripts/build_site_bundle.py')
     locations = json.loads(LOCATIONS.read_text().split('window.CLEAR_CODE_DOWNLOADS=', 1)[1].strip().removesuffix(';'))
     if locations.get('checkpoints'):
         check_url(locations['checkpoints'], terms)
     paths = files_to_publish()
     check_payloads(paths)
     run('git', 'diff', '--check')
+    run(sys.executable, 'scripts/build_site_bundle.py', '--check')
     run(sys.executable, 'scripts/check_code_browser.py')
     run(sys.executable, 'scripts/check_publish_page.py')
     run('node', 'scripts/check_code_clearance.js')
@@ -157,7 +168,7 @@ def main():
     run('git', 'add', '--all', '--', '.')
     changed = run('git', 'diff', '--cached', '--quiet', check=False).returncode
     if changed == 1:
-        run('git', 'commit', '-m', 'feat: add anonymous code explorer')
+        run('git', 'commit', '-m', 'fix: reduce anonymous page requests')
     elif changed:
         raise ValueError('Could not inspect staged changes')
     run(*git, 'push', 'origin', 'HEAD:main', env=env)

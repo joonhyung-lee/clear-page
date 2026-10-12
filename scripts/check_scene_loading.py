@@ -3,10 +3,11 @@
 Requires Playwright and Chromium. Faults are injected into local requests only.
 """
 import asyncio
+import os
 from pathlib import Path
 from playwright.async_api import async_playwright
 
-BASE = 'http://localhost:8765'
+BASE = os.environ.get('CLEAR_PREVIEW_URL', 'http://localhost:8765')
 FIXTURE = '''<!doctype html><link rel="stylesheet" href="/assets/site.css">
 <video id="teaser"></video><button id="hero-toggle"></button>
 <article><h3>Scene</h3><div class="viewer" data-scene="objects">
@@ -45,23 +46,23 @@ async def scenario(browser, fault):
         assert await viewer.locator('iframe,.viewer-status').count() == 0
         assert await viewer.locator('.launch').is_enabled()
     else:
-        if fault == 'exhausted':
-            await page.get_by_role('button', name='Retry 3D', exact=True).wait_for(timeout=10000)
-            assert counts['recording'] == 3, counts
-            assert await viewer.locator('.preview-image').is_visible()
-            assert await viewer.locator('.viewer-status').is_visible()
-            recover = True
-            # A real click catches overlays that cover the recovery control.
-            await page.get_by_role('button', name='Retry 3D', exact=True).click()
+        await page.get_by_role('button', name='Retry 3D', exact=True).wait_for(timeout=10000)
+        assert counts['recording'] == 1, counts
+        assert await viewer.locator('.preview-image').is_visible()
+        assert await viewer.locator('.viewer-status').is_visible()
+        await page.wait_for_timeout(6000)
+        assert counts['recording'] == 1, counts
+        recover = True
+        await page.get_by_role('button', name='Retry 3D', exact=True).click()
         await viewer.frame_locator('iframe').locator('input').wait_for(timeout=10000)
         await page.wait_for_function("!document.querySelector('.viewer-status')")
         assert counts['runtime'] == 1, counts
-        assert counts['recording'] == (4 if fault == 'exhausted' else 2), counts
+        assert counts['recording'] == 2, counts
         await viewer.locator('.viewer-tools').click()
         await viewer.locator('.launch').click()
         await viewer.frame_locator('iframe').locator('input').wait_for()
         assert counts['runtime'] == 1, counts
-        assert counts['recording'] == (4 if fault == 'exhausted' else 2), counts
+        assert counts['recording'] == 2, counts
     await page.close()
     print(f'{fault}: PASS', flush=True)
 
@@ -93,13 +94,17 @@ async def media_requests(browser):
     videos = []
     page.on('request', lambda r: videos.append(r.url) if '.mp4' in r.url else None)
     await page.goto(BASE + '/', wait_until='networkidle')
-    assert not [u for u in videos if '/teaser.mp4' not in u], videos
+    assert not videos, videos
+    await page.locator('[data-input-panel=scene]').click()
     grid = page.locator('.media-grid').first
     preview = grid.locator('.grid-focus video')
     await preview.evaluate("v=>{window.previewStarts=0;v.addEventListener('loadstart',()=>window.previewStarts++)}")
     tile = grid.locator('.media-tile').first
     await tile.focus()
     await page.keyboard.press('Enter')
+    await page.wait_for_timeout(400)
+    assert not videos, videos
+    await preview.evaluate('v=>v.play()')
     await page.wait_for_function("document.querySelector('.grid-focus video').readyState>=1")
     await grid.locator('.focus-close').click()
     await tile.focus()

@@ -12,14 +12,15 @@ class Handler(SimpleHTTPRequestHandler):
         path=unquote(urlsplit(self.path).path)
         relative=Path(path.lstrip('/'))
         resolved=(ROOT/relative).resolve()
-        code_public = path in ('/code', '/code/', '/code/index.html', '/code/code.css', '/code/code.js', '/code/catalog.js') or (
+        code_public = path in ('/code', '/code/', '/code/index.html', '/code/code.css', '/code/code.js', '/code/catalog.js', '/code/page-bundle.js', '/code/page-bundle.css') or (
             path.startswith('/code/source/') and resolved.suffix == '.js')
+        attention_public = path.startswith('/attention/') and resolved.suffix in {'.html','.js','.json','.png','.webp','.mp4','.pdf'}
         replanning_public = path in ('/replanning/', '/replanning/index.html', '/replanning/README.md') or (
             path.startswith('/replanning/videos-upright/') and resolved.suffix in {'.mp4', '.viser', '.js', '.png', '.json'}) or path in (
             '/replanning/previews/upright-palm-probe.mp4', '/replanning/previews/upright-palm-probe.png')
         if (any(part.startswith('.') or part=='..' for part in relative.parts)
             or not resolved.is_relative_to(ROOT)
-            or not (path in ('/','/index.html','/.nojekyll') or path.startswith('/assets/') or replanning_public or code_public)):
+            or not (path in ('/','/index.html','/.nojekyll') or path.startswith('/assets/') or replanning_public or code_public or attention_public)):
             self.send_error(404);return None
         self.range_remaining=None
         if resolved.is_file() and resolved.suffix in {'.mp4', '.zip'}:
@@ -61,12 +62,15 @@ class Handler(SimpleHTTPRequestHandler):
             pass
     def list_directory(self,path): self.send_error(404);return None
     def end_headers(self):
+        if getattr(self.server, 'anonymous_sandbox', False):
+            self.send_header('Content-Security-Policy', 'sandbox allow-scripts allow-popups allow-forms allow-modals')
         self.send_header('Referrer-Policy','no-referrer')
         self.send_header('X-Content-Type-Options','nosniff')
         self.send_header('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' blob: data:; worker-src 'self' blob:; media-src 'self' blob:; font-src 'self' data:; frame-src 'self'; object-src 'none'; base-uri 'self'")
         super().end_headers()
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--port',type=int,default=8765);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--port',type=int,default=8765);p.add_argument('--anonymous-sandbox',action='store_true');a=p.parse_args()
     server=ThreadingHTTPServer(('127.0.0.1',a.port),Handler)
+    server.anonymous_sandbox=a.anonymous_sandbox
     print(f'Preview: http://localhost:{a.port}',flush=True)
     server.serve_forever()

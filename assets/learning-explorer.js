@@ -9,12 +9,12 @@
  const splitLabel=sample=>sample.queryOnly?'Scene query':sample.split==='train'?'Training':sample.split==='evaluation'?'Evaluation replay':'Validation';
  function element(name,attrs){const el=document.createElementNS(ns,name);for(const [key,value]of Object.entries(attrs))el.setAttribute(key,value);return el;}
  for(const root of document.querySelectorAll('.learning-explorer')){
-  let initialized=false,visible=false,playing=!reduced.matches,index=0,progress=0,last=0,frame=0,samples=[],dots=[],filter='all',colorBy='terrain';
+  let initialized=false,visible=false,playing=false,index=0,progress=0,last=0,frame=0,samples=[],dots=[],filter='all',colorBy='terrain';
   const canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d'),range=root.querySelector('.sample-progress'),play=root.querySelector('.sample-play');
   const grid=root.querySelector('.sample-explorer-grid');
   let mediaTimer, movieVisible=false;
   const movie=root.dataset.kind==='grounding'?document.createElement('video'):null;
-  if(movie){movie.className='sample-video';movie.muted=true;movie.loop=true;movie.playsInline=true;movie.preload='metadata';movie.setAttribute('aria-label','Recorded physical robot attempt');canvas.before(movie);movie.after(root.querySelector('.sample-controls'));const map=document.createElement('div');map.className='sample-map-details';const title=document.createElement('h5');title.textContent='Trajectory map';map.append(title);canvas.after(map);map.append(canvas);movie.addEventListener('loadeddata',()=>{if(movieVisible&&playing&&!document.hidden)movie.play().catch(()=>{});});}
+  if(movie){movie.className='sample-video';movie.muted=true;movie.loop=true;movie.playsInline=true;movie.preload='none';movie.setAttribute('aria-label','Recorded physical robot attempt');canvas.before(movie);movie.after(root.querySelector('.sample-controls'));const map=document.createElement('div');map.className='sample-map-details';const title=document.createElement('h5');title.textContent='Trajectory map';map.append(title);canvas.after(map);map.append(canvas);movie.addEventListener('loadeddata',()=>{if(movieVisible&&playing&&!document.hidden)movie.play().catch(()=>{});});}
 
   const factors=document.createElement('div');factors.className='sample-factors';factors.setAttribute('role','group');factors.setAttribute('aria-label','Match observed inputs to dataset points');
   const factorNote=document.createElement('p');factorNote.className='sample-factor-note';
@@ -105,7 +105,7 @@
   function select(i){
    index=(i+samples.length)%samples.length;progress=0;const sample=samples[index];play.disabled=range.disabled=!!sample.queryOnly;
    if(root.dataset.kind==='ordering')root.querySelector('.sample-map-legend').textContent=sample.queryOnly?'Colored paths: model predictions · Objects remain at their observed positions':'Dashed green: recorded route · Colored objects: reference interactions';
-   if(movie){clearTimeout(mediaTimer);movie.pause();movie.removeAttribute('src');movie.load();const file='assets/media/attempts/attempt-'+String(index).padStart(3,'0');movie.poster=clearAssetURL(file+'.png');mediaTimer=setTimeout(()=>{movie.src=clearAssetURL(file+'.mp4');movie.load();},150);}
+   if(movie){clearTimeout(mediaTimer);movie.pause();movie.removeAttribute('src');movie.load();const file='assets/media/attempts/attempt-'+String(index).padStart(3,'0');movie.poster=clearAssetURL(file+'.png');movie.src=clearAssetURL(file+'.mp4');playing=false;}
 
    dots.forEach((dot,j)=>{dot.classList.toggle('selected',j===index);dot.setAttribute('tabindex',j===index?'0':'-1');dot.setAttribute('aria-pressed',String(j===index));});
    root.querySelector('.sample-title').textContent=`Sample ${index+1} · ${sample.body==='g1'?'G1':'Spot + arm'} · ${splitLabel(sample)}`;
@@ -125,8 +125,9 @@
    }
    render();connect(true);schedule();
   }
-  async function initialize(){
-   if(initialized)return;initialized=true;
+  let attempted=false;
+  async function initialize(retry=false){
+   if(initialized||(attempted&&!retry))return;attempted=true;initialized=true;
    const status=root.querySelector('.learning-loading');status.textContent='Preparing scene samples…';
    try{
     if(root.dataset.kind==='ordering')await loadScript('assets/ordering-map.js',()=>!!window.clearOrderingMap);
@@ -175,7 +176,7 @@
     for(const [key,label]of options){const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('aria-pressed',String(key===filter));button.onclick=()=>{filter=key;filters.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));dots.forEach((dot,i)=>{dot.classList.toggle('filtered',!matches(samples[i]));dot.setAttribute('aria-disabled',String(!matches(samples[i])));});const next=samples.findIndex(matches);if(next>=0)select(next);};filters.append(button);}
     svg.before(filters);
     status.hidden=true;root.querySelector('.learning-content').hidden=false;const preferred=samples.findIndex(s=>s.split==='train'&&(root.dataset.kind==='ordering'?s.paths.length>1:s.target===1&&Math.max(...s.rollout.map(f=>f[5]))-Math.min(...s.rollout.map(f=>f[5]))>.3));select(preferred<0?0:preferred);
-   }catch{initialized=false;status.textContent='Samples are taking longer to load. ';const button=document.createElement('button');button.type='button';button.textContent='Retry samples';button.onclick=initialize;status.append(button);}
+   }catch{initialized=false;status.textContent='Samples are taking longer to load. ';const button=document.createElement('button');button.type='button';button.textContent='Retry samples';button.onclick=()=>initialize(true);status.append(button);}
   }
   const observer=new IntersectionObserver(entries=>{visible=entries.at(-1).isIntersecting;root.classList.toggle('is-visible',visible);if(visible){initialize();connect();schedule();if(movie&&movieVisible&&playing&&movie.readyState>=2)movie.play().catch(()=>{});}else{cancelAnimationFrame(frame);frame=0;last=0;movie?.pause();}},{rootMargin:'0px'});observer.observe(root);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;movie?.pause();}else{schedule();if(movie&&movieVisible&&playing)movie.play().catch(()=>{});}});

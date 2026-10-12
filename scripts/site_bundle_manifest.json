@@ -1,0 +1,57 @@
+{
+  "index.html": {
+    "scripts": [
+      "assets/asset-revisions.js",
+      "assets/site.js",
+      "assets/katex/katex.min.js",
+      "assets/method.js",
+      "assets/overview.js",
+      "assets/embodiments.js",
+      "assets/maze-method-trace.js",
+      "assets/maze-method.js",
+      "assets/learning-explorer.js",
+      "assets/mpc-process.js",
+      "assets/context-encoding.js",
+      "assets/context-formation.js",
+      "assets/ordering-view.js",
+      "assets/page-structure.js",
+      "assets/controller-pretraining.js",
+      "assets/flow-learning.js",
+      "assets/spot-curriculum.js",
+      "assets/research-layout.js",
+      "assets/method-illustration.js",
+      "assets/continuous-layout.js",
+      "assets/failure-map.js",
+      "assets/spot-eef.js",
+      "assets/training-losses.js"
+    ],
+    "styles": [
+      "assets/site.css",
+      "assets/katex/katex.min.css",
+      "assets/page-structure.css",
+      "assets/controller-pretraining.css",
+      "assets/paper-layout.css",
+      "assets/research-layout.css",
+      "assets/continuous-layout.css"
+    ],
+    "js_output": "assets/page-bundle.js",
+    "css_output": "assets/page-bundle.css"
+  },
+  "code/index.html": {
+    "scripts": [
+      "assets/asset-revisions.js",
+      "assets/code-archives.js",
+      "code/catalog.js",
+      "assets/code-download-locations.js",
+      "code/code.js",
+      "assets/site.js",
+      "assets/method-illustration.js",
+      "assets/code-shared-examples.js"
+    ],
+    "styles": [
+      "code/code.css"
+    ],
+    "js_output": "code/page-bundle.js",
+    "css_output": "code/page-bundle.css"
+  }
+}
