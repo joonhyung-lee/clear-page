@@ -111,7 +111,7 @@ data=soup.select_one('#learning-data')
 if not data.select_one('.supervision-map'):
     data.select_one('p').insert_after(fragment('''<div class="supervision-map"><dl><dt>2D Grid</dt><dd>Exact-search solutions supervise selection, order and targets.</dd><dt>Ordered Manipulation</dt><dd>Policy demonstrations provide reference interactions and targets.</dd><dt>Maze Navigation</dt><dd>Reference sequences and object trajectories condition plans on the body.</dd><dt>Affordance labels</dt><dd>Interaction and terrain feasibility provide binary targets.</dd></dl></div>'''))
 if not soup.select_one('.execution-preview'):
-    soup.select_one('#method-execution > details').insert_before(fragment('''<figure class="execution-preview"><video controls playsinline preload="none" poster="assets/media/mpc-optimized.png" aria-label="Recorded G1 object interaction"><source src="assets/media/mpc-optimized.mp4" type="video/mp4"/></video><figcaption>Qualitative replay · Single G1 interaction. This clip illustrates low-level execution. The long-horizon results evaluate high-level replanning separately.</figcaption></figure>'''))
+    soup.select_one('#method-execution > details').insert_before(fragment('''<figure class="execution-preview"><video controls playsinline preload="none" poster="assets/media/mpc-optimized.png" aria-label="Recorded G1 object interaction"><source src="assets/media/mpc-optimized.mp4" type="video/mp4"/></video><figcaption>G1 object interaction · Low-level execution</figcaption></figure>'''))
 if not soup.select_one('[data-input-panel]'):
     inputs=soup.select_one('#encoding .three-up')
     tabs=soup.new_tag('div',attrs={'class':'input-tabs','role':'group','aria-label':'Observed inputs'})

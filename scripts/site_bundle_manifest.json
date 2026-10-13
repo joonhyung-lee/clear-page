@@ -34,7 +34,8 @@
       "assets/paper-layout.css",
       "assets/research-layout.css",
       "assets/continuous-layout.css",
-      "assets/reading-layout.css"
+      "assets/reading-layout.css",
+      "assets/stylized.css"
     ],
     "js_output": "assets/page-bundle.js",
     "css_output": "assets/page-bundle.css"

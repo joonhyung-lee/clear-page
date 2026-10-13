@@ -1,0 +1,120 @@
+/* Shared visual tokens; all assets and interactions remain local to the page. */
+:root{
+  --clear-background:#f8fafc;
+  --clear-foreground:#24282f;
+  --clear-surface:#fff;
+  --clear-muted:#edf2f7;
+  --clear-muted-foreground:#5b6773;
+  --clear-border:#d9e3ed;
+  --clear-primary:#196b24;
+  --clear-ring:#24872e;
+  --clear-accent:#eef4fa;
+  --clear-selected:#eaf4e9;
+  --clear-radius:.5rem;
+  --clear-shadow:0 8px 24px -8px rgb(15 23 42 / .2),0 24px 48px -18px rgb(15 23 42 / .18);
+  --clear-font-sans:'Pretendard Variable',Pretendard,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --clear-font-mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:light;
+  font-family:var(--clear-font-sans);
+  color:var(--clear-foreground);
+  background:var(--clear-background);
+}
+body{font-family:var(--clear-font-sans);color:var(--clear-foreground);background:var(--clear-background);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+::selection{background:#d6ead7;color:#173e20}
+#main :is(h2,h3,h4,h5){background:transparent;color:var(--clear-foreground);padding:0;letter-spacing:-.02em}
+#main h2{font-size:clamp(1.6rem,2.2vw,1.9rem);font-weight:650;line-height:1.25}
+#main h3,#learning h3{font-size:1.375rem;font-weight:600;line-height:1.4}
+#main h4{font-size:1.125rem;font-weight:600;line-height:1.5}
+#main h5{font-size:.9375rem;font-weight:600;line-height:1.5}
+#main .section-heading{border-bottom:1px solid var(--clear-border);padding-bottom:1.125rem;margin-bottom:1.75rem}
+#main .section-heading h2{margin-bottom:0}
+#main :is(.section-intro,.method-lead,.overview-intro,.overview-preview-description p,.method-small-copy,.figure-caption,figcaption,.loss-scope,.sample-count,.sample-phase,.sample-factor-note,.sample-embedding-note){color:var(--clear-muted-foreground)}
+#main :is(.method-small-copy,.loss-scope,.figure-caption,figcaption){font-size:.8125rem;line-height:1.65}
+#main .method-lead,#clear-overview .overview-intro{font-size:1rem;line-height:1.75}
+#main .academic-copy{color:var(--clear-foreground)}
+#main mark{background:linear-gradient(transparent 30%,#dcefdc 30%,#dcefdc 92%,transparent 92%)}
+#main :is(table,output,.loss-contribution-values){font-variant-numeric:tabular-nums}
+#main code{font-family:var(--clear-font-mono)}
+
+/* Navigation is a quiet surface; the current location carries the accent. */
+#research-nav{background:rgb(248 250 252 / .96);border-color:var(--clear-border);backdrop-filter:blur(10px);font-family:var(--clear-font-sans)}
+#research-nav .research-logo{color:var(--clear-foreground);letter-spacing:.04em;font-weight:700}
+#research-nav a{color:var(--clear-muted-foreground)}
+#research-nav .research-links a[aria-current]{color:var(--clear-primary)!important;border-color:var(--clear-primary)}
+#research-nav .research-resources :is(a,button){border-radius:calc(var(--clear-radius) - 2px)}
+#research-nav .research-resources :is(a,button):hover{background:var(--clear-muted);color:var(--clear-primary)}
+#section-rail{background:var(--clear-surface);border-color:var(--clear-border);border-radius:var(--clear-radius)}
+#section-rail .rail-label{color:var(--clear-muted-foreground);font-size:.75rem;letter-spacing:.1em;font-weight:600}
+#section-rail a{border-radius:0 6px 6px 0;color:var(--clear-muted-foreground);transition:background-color .16s ease,color .16s ease}
+#section-rail a:is(:hover,[aria-current]){color:var(--clear-primary);background:var(--clear-selected);border-left-color:var(--clear-primary)}
+#section-rail a[aria-current]{font-weight:600}
+.chapter-links a{color:var(--clear-primary);border-color:var(--clear-border);font-size:.8125rem}
+.chapter-links a:hover{border-color:var(--clear-primary)}
+.hero-copy{background:rgb(255 255 255 / .93);border-color:rgb(255 255 255 / .95);border-radius:var(--clear-radius);backdrop-filter:blur(6px)}
+.hero-copy h1{font-weight:650;letter-spacing:-.025em;color:var(--clear-foreground)}
+.hero-copy p{color:var(--clear-muted-foreground)}
+
+/* Unify controls without changing the geometry of viewers or diagram nodes. */
+#main :is(button,select){font-family:var(--clear-font-sans);color:var(--clear-foreground);border-color:var(--clear-border);border-radius:calc(var(--clear-radius) - 2px);transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease}
+#main :is(button,select):hover:not(:disabled){border-color:#a9bdae}
+#main button[aria-pressed=true]{background:var(--clear-selected);border-color:#83a78a;color:var(--clear-primary)}
+#main button:disabled{opacity:.55;cursor:default}
+#main button:active:not(:disabled){box-shadow:inset 0 1px 2px rgb(15 23 42 / .12)}
+:is(button,a,select,input,summary,[tabindex]):focus-visible{outline:2px solid var(--clear-ring);outline-offset:3px}
+#main input{accent-color:var(--clear-primary)}
+#main :is(.sample-tabs,.input-tabs,.grounding-bodies,.loco-bodies,.loco-metrics){gap:6px}
+#main :is(.sample-tabs,.input-tabs,.grounding-bodies,.loco-bodies,.loco-metrics) button{padding:8px 12px;font-size:.875rem;border:1px solid transparent}
+#main :is(.sample-tabs,.input-tabs,.grounding-bodies,.loco-bodies,.loco-metrics) button:hover{background:var(--clear-muted)}
+#main :is(.sample-tabs,.input-tabs,.grounding-bodies,.loco-bodies,.loco-metrics) button[aria-pressed=true]{background:var(--clear-selected);border-color:#b7cebb}
+#main :is(.sample-filters,.sample-pagination,.sample-controls,.control-row) button{background:var(--clear-surface)}
+#main .sample-filters button[aria-pressed=true]{background:var(--clear-selected)}
+#clear-overview .overview-pin{background:var(--clear-surface);font-weight:500}
+#clear-overview .overview-pin[aria-pressed=true]{background:var(--clear-selected);border-color:#83a78a;color:var(--clear-primary)}
+
+/* Meaningful grouping: one surface for a preview, no nested heading bars. */
+#clear-overview .overview-node,#clear-overview #overview-inputs>div{background:var(--clear-surface);border-color:var(--clear-border);border-radius:var(--clear-radius);color:var(--clear-foreground)}
+#clear-overview .overview-node small,#clear-overview #overview-inputs small{color:var(--clear-muted-foreground)}
+#clear-overview .overview-node:is(:hover,:focus-visible){border-color:#83a78a;background:var(--clear-selected)}
+#clear-overview .overview-preview-inline{background:var(--clear-surface);border:1px solid var(--clear-border);border-radius:var(--clear-radius);padding:18px}
+#clear-overview .overview-preview-inline[data-pinned=true]{border-color:#83a78a}
+#clear-overview .overview-preview-description strong{font-weight:600;color:var(--clear-foreground)}
+#clear-overview .overview-model-name{color:var(--clear-muted-foreground)}
+#clear-overview .overview-category{background:transparent;color:var(--clear-muted-foreground)}
+#clear-overview .overview-wires text{stroke:var(--clear-background);fill:var(--clear-muted-foreground)}
+#main :is(.viewer,.media-tile,.sample-scatter,.sample-video,.sample-scene,.scratch-viewer){border-color:var(--clear-border);border-radius:var(--clear-radius)}
+#main .viewer{background:var(--clear-surface)}
+#main .sample-scatter{background:var(--clear-surface)}
+#main .sample-factors button{background:var(--clear-surface);border-color:var(--clear-border)}
+#main .sample-factors :is(span,strong){color:var(--clear-muted-foreground)}
+#main .sample-factors strong{color:var(--clear-foreground);font-weight:500}
+#main .sample-factors button:hover{background:var(--clear-accent)}
+#main .sample-axis-label,#main .sample-axis-tick{fill:var(--clear-muted-foreground)}
+#main .sample-axis-grid{stroke:var(--clear-border)}
+#main .paper-results table{background:var(--clear-surface)}
+#main .paper-results :is(th,td){border-color:var(--clear-border)}
+#main .paper-results thead{background:var(--clear-muted);color:var(--clear-muted-foreground)}
+#main :is(.research-details,.reading-detail,.training-loss-chart,#learning-data){border-color:var(--clear-border)}
+#main .research-details>summary{color:var(--clear-foreground);font-weight:500}
+#main .training-loss-chart h5{font-weight:600}
+#main .training-loss-chart.loss-term-active{background:var(--clear-selected);outline-color:#83a78a;border-radius:var(--clear-radius);box-shadow:none}
+#main .loss-role-panel{background:var(--clear-surface);border-left-color:var(--clear-primary);border-radius:0 var(--clear-radius) var(--clear-radius) 0}
+#main .loss-role-tabs button{background:var(--clear-surface);font-weight:500}
+#main .loss-role-tabs button[aria-pressed=true]{background:var(--clear-selected);color:var(--clear-primary)}
+#main .objective-term:is(:hover,:focus-visible){background:var(--clear-selected);outline-color:#83a78a}
+.loss-term-help,.loss-tooltip,.flow-map-tooltip,.grid-focus,#resource-dialog{color:var(--clear-foreground);background:var(--clear-surface);border-color:var(--clear-border);border-radius:var(--clear-radius);box-shadow:var(--clear-shadow)}
+.loss-tooltip,.loss-term-help{font-family:var(--clear-font-sans)}
+#resource-dialog::backdrop{background:rgb(15 23 42 / .38)}
+.resource-toolbar{border-color:var(--clear-border)}
+footer{color:var(--clear-muted-foreground);border-color:var(--clear-border)}
+@media(max-width:700px){
+ #clear-overview .overview-preview-inline{padding:12px}
+ #main :is(.loco-bodies,.loco-metrics){flex-wrap:wrap}
+ #main :is(.loco-bodies,.loco-metrics) button{padding:7px 9px;font-size:.8125rem}
+ #main .section-heading{margin-bottom:1.25rem}
+}
+@media(prefers-reduced-motion:reduce){
+ #main :is(button,select),#section-rail a{transition:none}
+}
+@media(prefers-reduced-transparency:reduce){
+ #research-nav,.hero-copy{background:var(--clear-surface);backdrop-filter:none}
+}

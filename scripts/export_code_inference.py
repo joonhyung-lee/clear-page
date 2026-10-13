@@ -99,7 +99,7 @@ def main():
   states=states,checks=checks,referencePaths=[dict(object=p.object_id,poses=p.poses) for p in final.paths],routes=routes,
   execution=dict(duration=episode['elapsed_sim_s'],status=episode['status'],
    attempts=[dict(object=e['object_id'],approachEnd=e['approach_end_time_s'],end=e['end_time_s'],push=e['info']['push_window_s'],success=e['success']) for e in episode['attempt_log']]),
-  provenance=dict(observation='Recorded G1 two-passage scene',decoding='raw',referenceDecoding='Recorded chord decoder and 0.15 m push margin',selection='model sampled',generation='Fresh CPU draw on the recorded observation. The archived executed reference is shown separately.',
+  provenance=dict(observation='Recorded G1 two-passage scene',decoding='raw',referenceDecoding='Recorded chord decoder and 0.15 m push margin',selection='model sampled',generation='Generated plan from the recorded observation.',
    validation='Object collision, approach routes and post-interaction goal route under the recorded geometric navigation contract.'))
  (ROOT/'assets/code-native-data.js').write_text('window.CLEAR_CODE_NATIVE='+json.dumps(result,separators=(',',':'),allow_nan=False)+';\n')
  print('PASS CPU flow draw',chosen,'and recorded reference',recorded_candidate,'attention normalized, blocked route opens after two interactions, recorded goal reached',flush=True)

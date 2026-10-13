@@ -41,7 +41,7 @@ CLEAR|91.1|91.1|95.6|93.3|93.3|66.7|96.7|100.0
  ('horizon','IV',7,['Method','Nominal S/R ↑','Placement S/R ↑','Access S/R ↑'],'''
 CLEAR-No-Replanning|83.3 ± 4.8|81.9 ± 0.0|50.0 ± 14.4
 CLEAR|88.9 ± 4.8|87.2 ± 14.4|91.7 ± 8.3
-''','Mean ± SD success rates (%) for G1 on 12 MuJoCo scenes with three execution seeds. Aggregate trials are separate from the additional qualitative replays above.',
+''','Mean ± SD success rates (%) for G1 on 12 MuJoCo scenes with three execution seeds.',
  'Can the plan recover after the scene changes?',
  'Replanning has its largest measured benefit when disturbances change access to later interactions, from 50.0% to 91.7% mean success.')
 ]
@@ -95,13 +95,13 @@ for key, number, page, headers, data, protocol, question, takeaway in tables:
             if not card.select_one('.record-scope'):
                 scope=soup.new_tag('p',attrs={'class':'record-scope'})
                 text=card.get_text(' ',strip=True)
-                scope.string=('Qualitative replay · Not part of aggregate evaluation' if key=='horizon'
+                scope.string=('Qualitative replay' if key=='horizon'
                     else 'No valid plan · No execution recorded' if 'Static scene only' in text
                     else 'Recorded simulation · Single episode')
                 card.append(scope)
         if not section.select_one('.result-replay-label'):
             label=soup.new_tag('p',attrs={'class':'result-replay-label'})
-            label.string='Qualitative replay · Not part of aggregate evaluation' if key=='horizon' else 'Recorded simulation · Individual episodes'
+            label.string='Qualitative replay' if key=='horizon' else 'Recorded simulation · Individual episodes'
             matrix.insert_before(label)
     button=soup.new_tag('button',type='button',attrs={'class':'all-methods-toggle','aria-expanded':'false'})
     button.string='All methods';section.select_one('.experiment-claim').insert_after(button)

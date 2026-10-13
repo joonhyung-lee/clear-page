@@ -54,6 +54,6 @@ for record in json.loads((a.training/'checkpoints.json').read_text()):
     print('Exported training step',record['step'],'target distance',stages[-1]['targetError'],flush=True)
 output=dict(grid=row['environment']['grid'],start=row['robot']['start'] if 'start' in row['robot'] else row.get('start'),
             goal=row['goal']['cell'],objects=np.asarray(example.x0).tolist(),targets=target.tolist(),order=list(order),
-            stages=stages,scope='Independent CPU training run using the original CLEAR objective. Same scene, reference order and Gaussian seed at every checkpoint.')
+            stages=stages,scope='CLEAR objective · Fixed scene, reference order and Gaussian seed across checkpoints.')
 root=Path(__file__).resolve().parents[1]
 (root/'assets/flow-learning-data.js').write_text('window.CLEAR_FLOW_LEARNING='+json.dumps(output,separators=(',',':'),allow_nan=False)+';\n')
