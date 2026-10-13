@@ -3,7 +3,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 root=Path(__file__).resolve().parents[1]
 content='''<section id="clear-overview" class="clear-overview" data-active="grounding" aria-label="CLEAR architecture overview">
-<h3>From the body to a plan.</h3>
+<h3>Embodiment-aware interaction planning.</h3>
 <p class="overview-intro">Robot structure and scene geometry determine which interactions can achieve the goal.</p>
 <div class="overview-flow">
 <svg class="overview-wires" aria-hidden="true"><defs><marker id="overview-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"/></marker></defs><g class="overview-edges"></g></svg>
@@ -14,7 +14,7 @@ content='''<section id="clear-overview" class="clear-overview" data-active="grou
 <div class="overview-column"><span class="overview-category">Execution</span><div class="overview-node" id="overview-execution">Validate and execute <span>→</span><small>Update the observation</small></div></div>
 </div>
 <div class="overview-stages" role="group" aria-label="Explore the architecture"><button type="button" data-overview-stage="grounding" aria-pressed="true">Grounding</button><button type="button" data-overview-stage="ordering" aria-pressed="false">Ordering</button><button type="button" data-overview-stage="generation" aria-pressed="false">Generation</button><button type="button" data-overview-stage="execution" aria-pressed="false">Execution</button></div>
-<div class="overview-explanation" aria-live="polite" aria-atomic="true"><strong>Ground the scene in the robot’s body.</strong><p>Structure, object states, and scene geometry form a planning context that represents the robot’s capabilities and accessible interactions.</p><a href="#method-grounding">Explore grounding</a></div>
+<div class="overview-explanation" aria-live="polite" aria-atomic="true"><strong>Embodiment-aware scene grounding.</strong><p>Structure, object states, and scene geometry form a planning context that represents the robot’s capabilities and accessible interactions.</p><a href="#method-grounding">Explore grounding</a></div>
 </section>'''
 soup=BeautifulSoup((root/'index.html').read_text(),'html.parser');old=soup.find(id='clear-overview')
 if old:old.decompose()

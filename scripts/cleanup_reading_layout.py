@@ -67,9 +67,9 @@ def apply(s):
             img = article.select_one('.failure-visual img')
             if img:
                 img.replace_with(s.new_tag('canvas', attrs={'data-planning-failure': '', 'aria-label': 'Recorded planning candidates and rejection decisions'}))
-            article.select_one('p').string = 'Archived proposals and recorded rejection decisions. No physical execution.'
+            article.select_one('p').string = 'Candidate rejection during feasibility checking.'
         else:
-            article.select_one('p').string = 'Saved flow predictions for three objects. Red paths fail geometric clearance and are not executed.'
+            article.select_one('p').string = 'Red segments indicate geometric clearance violations.'
         badge = article.select_one('.failure-status')
         if badge:
             badge.decompose()

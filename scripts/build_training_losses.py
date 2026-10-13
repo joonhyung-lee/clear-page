@@ -21,16 +21,14 @@ components = ''.join(plot(*p) for p in [
     ('kl', '(c) Regularization', 'Gaussian KL before weighting'),
     ('flow', '(d) Flow', 'Conditional velocity regression'),
     ('affordance', '(e) Affordance', 'Interaction capability BCE')])
-html = f'''<h4>The full training objective</h4>
-<section id="training-losses" aria-label="Interactive training losses">
-<p class="method-small-copy">CLEAR jointly learns object selection, interaction order, conditional targets and embodiment conditioned affordances.</p>
+html = f'''<section id="training-losses" aria-label="Interactive training losses">
+<p class="method-small-copy">CLEAR jointly learns object selection, interaction order, motion references, and embodiment-conditioned affordances.</p>
 <div class="paper-equation-row"><div class="equation" data-tex="{formula}" data-objective-annotations="true"></div></div>
-<p class="loss-scope">The plotted run uses λflow = 1, λKL = 0.001, λaff = 1 and λavail = 0. The availability term is inactive in this run. Hover a curve to inspect its recorded values.</p>
-<div class="loss-loading" role="status">Loading recorded losses…</div>
+<p class="loss-scope">Objective weights: λflow = 1, λKL = 0.001, λaff = 1, λavail = 0.</p>
+<div class="loss-loading" role="status">Loading training losses…</div>
 <div class="loss-content" hidden>
 {plot('loss', 'Full objective loss', 'Original CLEAR objective · 100,000 training steps')}
 <div class="loss-chart-grid" tabindex="0" role="region" aria-label="Five component loss plots, scroll horizontally">{components}</div>
-<p class="loss-scope loss-band-note">One training run. The line shows a local mean over 21 logged samples. Shading shows ±1 standard deviation within that window, not variation across seeds. Windows are shortened at the endpoints. Hover or tap to inspect the raw loss and local statistics. Training loss does not measure task performance.</p>
 <p class="loss-keyboard-status" aria-live="polite"></p></div></section>'''
 objective.append(BeautifulSoup(html, 'html.parser'))
 for link in s.select('.training-loss-jump'):

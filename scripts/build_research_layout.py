@@ -67,11 +67,11 @@ if not soup.select_one('#research-nav'):
     experiments.wrap(results)
     experiments.select_one('h2').string = 'Results'
     experiments.select_one('.section-heading').insert_after(fragment('''<nav class="chapter-links" aria-label="Result sections"><a href="#experiment-grid">2D Grid</a><a href="#experiment-manipulation">Ordered Manipulation</a><a href="#experiment-maze">Embodiment-aware navigation</a><a href="#experiment-horizon">Long-horizon replanning</a><a href="#failure-cases">Failure cases</a></nav>'''))
-    failures = fragment('''<article id="failure-cases" class="experiment"><h3>Failure cases and limitations</h3>
+    failures = fragment('''<article id="failure-cases" class="experiment"><h3>Failure analysis</h3>
     <p>The teaser transfer does not produce a valid plan. OrderNet selects no objects, and generation conditioned on a supplied order fails the clearance check. These predictions were not executed.</p>
     <p>Recorded execution can also fail after contact loss. The G1 naive controller replay in <a href="#controller-trajectories">Controller details</a> shows the observed continuation.</p></article>''').article
     experiments.append(failures)
-    for id, title in [('ordering-context','Inspect teaser object selection'),('flow-learning','Inspect reference-conditioned generation')]:
+    for id, title in [('ordering-context','Object selection analysis'),('flow-learning','Reference-conditioned generation')]:
         failures.append(disclosure(title, soup.find(id=id)))
     # The method example is explicitly explanatory, not a relabelled failed transfer.
     for id, text in [('method-order','Object 1 → Object 2'),('method-flow','Generate Object 1, then Object 2')]:

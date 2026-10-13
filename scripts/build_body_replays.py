@@ -19,7 +19,7 @@ def apply(s):
         panel = BeautifulSoup('''<section id="spot-process" data-replay-body="spot" class="spot-process">
 <h4 class="replay-body-title">Spot + arm</h4>
 <div class="spot-process-controls"><div role="group" aria-label="Spot EEF view"><button type="button" data-spot-view="2d" aria-pressed="false">2D View</button><button type="button" data-spot-view="3d" aria-pressed="true">3D View</button></div><button type="button" data-spot-play>Play</button><button type="button" data-spot-replay>Replay</button><input type="range" min="0" max="1" step="0.0001" value="0" aria-label="Spot replay time"><output data-spot-time>0.0 s</output><span>2× replay</span></div>
-<p class="spot-loading" role="status">Recorded trajectories load when nearby.</p>
+<p class="spot-loading" role="status">Loading trajectories…</p>
 <div class="execution-process-grid" role="region" tabindex="0" aria-label="Spot robot and end effector comparison"></div>
 <p class="spot-replay-caption">Recorded EEF motion and object paths share the video clock. Each recording stops at its own endpoint.</p></section>''', 'html.parser').section
         for key, scene, label in [('optimized', 'mpc-spot-optimized', 'MPC w/ optimization (ours)'), ('baseline', 'mpc-spot-native', 'MPC (naive)')]:

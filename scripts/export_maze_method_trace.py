@@ -73,7 +73,7 @@ if reference_data.get('scope'):
   value['referenceFlow'].append(dict(seed=seed,rank=rank[0].tolist(),selected=selected[0].tolist(),times=[float(t) for t,_ in raw],states=states))
  value['flowScope']='Conditional generation given the designated teaser reference interaction with Object 0. The reference selection is supplied to the flow head, not predicted by OrderNet. These are unexecuted checkpoint predictions.'
  if a.flow_order:
-  value['flowScope']='Actual flow-head inference conditioned on the supplied illustrative order. This order is not an OrderNet prediction or a recorded execution. Ghost motion previews the generated paths; feasibility is checked separately.'
+  value['flowScope']='Actual flow-head inference conditioned on the supplied illustrative order. This order is not an OrderNet prediction or a execution. Ghost motion previews the generated paths; feasibility is checked separately.'
 annotate(value)
 (a.output or root/'assets/maze-method-trace.js').write_text('window.'+a.global_name+' = '+json.dumps(value,separators=(',',':'))+';\n')
 print('Saved numerical maze trace',flush=True)

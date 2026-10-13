@@ -38,10 +38,10 @@ html = f'''<div id="spot-curriculum">
 <div class="curriculum-timeline" data-curriculum-phases role="group" aria-label="Training phases"></div>
 <p class="loco-status" data-curriculum-explanations aria-live="polite"></p>
 <div class="scratch-curves" data-curriculum-curves></div>
-<details class="curriculum-notes"><summary>About these plots</summary>
-<p class="loco-evidence-note curriculum-baseline-note">Loss logging begins with PPO update 1. Dashed lines mark the first logged value.</p>
+<details class="curriculum-notes"><summary>Training protocol</summary>
+<p class="loco-evidence-note curriculum-baseline-note">Dashed lines indicate the first logged update.</p>
 <p class="loco-evidence-note" data-curriculum-metric-note></p>
-<p class="loco-evidence-note">The ribbon shows the planned schedule. Plots show recorded updates. Index buttons play the corresponding checkpoints.</p>
+<p class="loco-evidence-note">Checkpoints span the training phases.</p>
 </details>
 <p class="loco-status" data-curriculum-readout aria-live="polite"></p>
 </div></div></div>'''

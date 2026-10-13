@@ -1,4 +1,4 @@
-"""Place the joint objective above its component curves and sample explorers."""
+"""Place the joint objective beside its component curves, above sample explorers."""
 from pathlib import Path
 from bs4 import BeautifulSoup
 from training_objective_content import ROLES, CAPTIONS
@@ -15,6 +15,9 @@ def apply(s):
         title = detail.select_one('summary')
         if title and title.get_text(strip=True) in ('Flow matching and causal conditioning', 'Affordance supervision'):
             detail.decompose()
+    for heading in planner.select('h4'):
+        if heading.get_text(strip=True) == 'The full training objective':
+            heading.decompose()
     losses = s.select_one('#training-losses')
     losses.attrs.pop('data-loss-source', None)
     losses.select_one('#loss-loss figcaption p').string = '100,000 training steps'
@@ -49,7 +52,19 @@ def apply(s):
     grid = losses.select_one('.loss-chart-grid')
     grid['aria-label'] = 'Five component training losses'
     grid.attrs.pop('tabindex', None)
-    samples.select_one(':scope > p').string = 'Explore the sample sets for grounding and planning. Select a point to view its recorded outcome and trajectory.'
+    # Keep the formula full width; compare the total and its terms side by side.
+    split = losses.select_one('.training-objective-split')
+    if not split:
+        split = s.new_tag('div', attrs={'class': 'training-objective-split'})
+        losses.select_one('.training-objective-overview').insert_after(split)
+    main = split.select_one('.training-objective-main')
+    if not main:
+        main = s.new_tag('div', attrs={'class': 'training-objective-main'})
+        split.append(main)
+    for node in (losses.select_one('#loss-loss'), losses.select_one('[data-loss-composition]'), scope):
+        main.append(node.extract())
+    split.append(content.extract())
+    samples.select_one(':scope > p').string = 'Training samples for scene grounding and interaction planning.'
     for ident, text in (
         ('grounding-samples', '(a) Grounding · Feasibility samples'),
         ('ordering-samples', '(b–c) Ordering and generation · Reference plans'),

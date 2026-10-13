@@ -28,6 +28,18 @@ body{font-family:var(--clear-font-sans);color:var(--clear-foreground);background
 #main h5{font-size:.9375rem;font-weight:600;line-height:1.5}
 #main .section-heading{border-bottom:1px solid var(--clear-border);padding-bottom:1.125rem;margin-bottom:1.75rem}
 #main .section-heading h2{margin-bottom:0}
+/* Grounding panels share a heading scale and quiet vertical separators. */
+#main .grounding-columns :is(#encoding h2,#embodiment-demo>h4,.affordances h3){font-size:18px;font-weight:600;line-height:28px;margin:0}
+#main .grounding-columns :is(.section-heading,.component-label,#embodiment-demo>h4){border:0;padding:0;margin:0 0 12px;min-height:28px}
+#main .grounding-columns{align-items:stretch}
+#main .grounding-columns>*,#main .grounding-columns .affordances>article{position:relative}
+#main .grounding-columns>*+*::before{content:"";position:absolute;left:-12px;top:0;bottom:0;border-left:1px dashed #d5d8dc;pointer-events:none}
+#main .grounding-columns .structure-branches::before,#main .grounding-columns .structure-branches::after,#main .grounding-columns .structure-branches button::before{content:none}
+@media(max-width:1150px){
+ #main .grounding-columns>.affordances::before{content:none}
+ #main .grounding-columns .affordances>article+article::before{content:"";position:absolute;left:-12px;top:0;bottom:0;border-left:1px dashed #d5d8dc;pointer-events:none}
+}
+@media(max-width:760px){#main .grounding-columns>*+*::before{content:none}}
 #main :is(.section-intro,.method-lead,.overview-intro,.overview-preview-description p,.method-small-copy,.figure-caption,figcaption,.loss-scope,.sample-count,.sample-phase,.sample-factor-note,.sample-embedding-note){color:var(--clear-muted-foreground)}
 #main :is(.method-small-copy,.loss-scope,.figure-caption,figcaption){font-size:.8125rem;line-height:1.65}
 #main .method-lead,#clear-overview .overview-intro{font-size:1rem;line-height:1.75}

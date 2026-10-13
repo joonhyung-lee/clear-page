@@ -2,10 +2,10 @@
   const root = document.querySelector('#clear-overview');
   if (!root) return;
   const stages = {
-    grounding: ['Ground the scene in the robot’s body.', 'Structure, object states, and scene geometry form a planning context that represents the robot’s capabilities and accessible interactions.', 'method-grounding'],
-    ordering: ['Choose what to move, then in which order.', 'OrderNet uses the planning context to select objects and sample interaction priorities. Sorting the selected priorities gives a candidate order.', 'method-order'],
-    generation: ['Generate object references under a fixed interaction order.', 'CausalFlowNet jointly updates object parameters over flow time. Rank causal attention permits each generated row to read its own and earlier ranks, while the planning context remains fixed.', 'method-flow'],
-    execution: ['Observe the consequences and update the plan.', 'Candidate validation accounts for earlier object motions. Policy-guided MPC executes interactions, and updated observations guide replanning.', 'method-execution']
+    grounding: ['Embodiment-aware scene grounding.', 'Structure, object states, and scene geometry form a planning context that represents the robot’s capabilities and accessible interactions.', 'method-grounding'],
+    ordering: ['Object selection and interaction ordering.', 'OrderNet uses the planning context to select objects and sample interaction priorities. Sorting the selected priorities gives a candidate order.', 'method-order'],
+    generation: ['Rank-causal generation of object references.', 'CausalFlowNet jointly updates object parameters over flow time. Rank causal attention permits each generated row to read its own and earlier ranks, while the planning context remains fixed.', 'method-flow'],
+    execution: ['Execution with observation-conditioned replanning.', 'Candidate validation accounts for earlier object motions. Policy-guided MPC executes interactions, and updated observations guide replanning.', 'method-execution']
   };
   const flow = root.querySelector('.overview-flow');
   const svg = root.querySelector('.overview-wires');
@@ -88,7 +88,7 @@
     execution:[['mpc-optimized','Recorded interaction and candidate motions']]
   };
   // Inline inspection keeps the complete pipeline visible above the example.
-  const preview=document.createElement('div');preview.id='overview-preview';preview.className='overview-preview-inline';preview.setAttribute('role','region');preview.setAttribute('aria-label','Component example');flow.after(preview);
+  const preview=document.createElement('div');preview.id='overview-preview';preview.className='overview-preview-inline';preview.setAttribute('role','region');preview.setAttribute('aria-label','Component preview');flow.after(preview);
   const notation=root.querySelector('.overview-notation');if(notation)preview.append(notation);
   const leaders=document.createElementNS(ns,'svg');leaders.classList.add('overview-detail-leaders');leaders.setAttribute('aria-hidden','true');root.append(leaders);
   let previewOwner=null,launchTimer,hoverTimer,pinned=false;

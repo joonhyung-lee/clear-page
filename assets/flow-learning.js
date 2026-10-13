@@ -42,11 +42,10 @@
   const failed=data.referenceFlow[sample].refinement.filter(c=>!c.refined).map(c=>c.object);
   const audit=data.diagnostics?.conditionalDraws[sample];
   if(audit){
-   const lengths=audit.paths.map(p=>`Object ${p.object}: ${p.lengthMeters.toFixed(1)} m`).join(' · ');
    const count=data.diagnostics.endToEndSelectedCounts[sample];
-   root.querySelector('#flow-diagnostic').textContent=`Unsuccessful teaser transfer. OrderNet selected ${count} objects. Final raw path lengths with the supplied order: ${lengths}. Noise draws use the checkpoint’s prior standard deviation of ${data.settings.noiseStd}; they are not distinct valid plans.`;
+   root.querySelector('#flow-diagnostic').textContent='OrderNet selected objects: '+count+'. Generation uses the supplied order.';
   }
-  caption.textContent='Supplied order: '+data.conditionedOrder.map(i=>'Object '+i).join(' → ')+'. '+(phase==='flow'?'Actual joint flow integration. ':'Ordered inspection of the generated paths. ')+(failed.length?'Geometry refinement fails for Object '+failed.join(', ')+'. These paths are not a feasible execution plan.':'Clearance checks passed. Physical execution has not been evaluated.');
+  caption.textContent='Supplied order: '+data.conditionedOrder.map(i=>'Object '+i).join(' → ')+'. '+(failed.length?'Clearance failed for Object '+failed.join(', ')+'.':'Clearance passed; execution pending.');
  }
  function command(value){if(!data)return;const f=viewer.querySelector('iframe.scene-ready');if(f)f.contentWindow.postMessage({type:'clear-playback-command',...value},'*');else{pending={...pending,...value};if(!viewer.querySelector('.viewer-status,.scene-pending'))viewer.querySelector('.launch').click();}}
  function seek(value){time=clamp(value,0,data.timeline.durationSeconds);playing=false;draw();command({time,playing:false});}

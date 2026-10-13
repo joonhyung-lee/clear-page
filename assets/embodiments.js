@@ -1,7 +1,7 @@
 (() => {
  const root=document.querySelector('#embodiment-demo');if(!root)return;
  const descriptions={
-  structure:'Translucent visual meshes reveal the links and joints of each body. Inspect any robot in 3D.',
+  structure:'Link and joint structure across robot embodiments.',
   traversability:'Green highlights the legs or wheels that support locomotion. The translucent ground region illustrates the local support neighborhood, not a predicted terrain feasibility map.',
   manipulation:'Green highlights arms or body contact surfaces. Translucent regions mark contact neighborhoods at the hands, gripper, or front of the body. These geometric illustrations are not learned affordance scores.'
  };

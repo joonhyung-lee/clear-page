@@ -25,13 +25,13 @@
    root.dataset.factor=key||'';let count=0;
    dots.forEach((dot,i)=>{const same=!!key&&signature(samples[i],key)===signature(sample,key);if(same)count++;dot.classList.toggle('factor-match',same);dot.classList.toggle('factor-unmatched',!!key&&!same);});
    root.dataset.factorMatches=String(count);
-   factorNote.textContent=key?count+' points share this '+({body:'body structure',objects:'object configuration',scene:'scene geometry',query:'query'}[key])+'.': 'Hover an input to highlight matching samples.';
+   factorNote.textContent=key?count+' points share this '+({body:'body structure',objects:'object configuration',scene:'scene geometry',query:'query'}[key])+'.': '';
   }
   function inputFactors(sample){
    factors.replaceChildren();
    const point=p=>p?`(${p.slice(0,2).map(v=>v.toFixed(1)).join(', ')})`:'Recorded start';
    const query=sample.query||[sample.scene.start,sample.scene.goal];
-   const items=[['body','Body',`${sample.body==='g1'?'G1':'Spot + arm'} · ${sample.links} links`],['objects','Objects',`${sample.scene.objects.length} objects`],['scene','Scene',`${sample.scene.terrain.length} terrain patches · ${sample.scene.walls.length} walls`],['query',sample.query?'Query':'Start → goal',`${point(query[0])} → ${point(query[1])}`]];
+   const items=[['body','Body',`${sample.body==='g1'?'G1':'Spot + arm'} · ${sample.links} links`],['objects','Objects',`${sample.scene.objects.length} object${sample.scene.objects.length===1?'':'s'}`],['scene','Scene',`${sample.scene.terrain.length} terrain patches · ${sample.scene.walls.length} walls`],['query',sample.query?'Query':'Start → goal',`${point(query[0])} → ${point(query[1])}`]];
    for(const [key,label,value] of items){const button=document.createElement('button');button.type='button';button.dataset.factor=key;const name=document.createElement('span'),detail=document.createElement('strong');name.textContent=label;detail.textContent=value;button.append(name,detail);button.onpointerenter=button.onfocus=()=>highlightFactor(key);button.onpointerleave=()=>{if(document.activeElement!==button)highlightFactor(null);};button.onblur=()=>highlightFactor(null);button.onclick=()=>highlightFactor(key);factors.append(button);}
    highlightFactor(null);
   }
@@ -89,15 +89,15 @@
    const robot=xy([mix(a[1],b[1]),mix(a[2],b[2])]);ctx.save();ctx.translate(...robot);ctx.rotate(-angle(a[3],b[3]));ctx.fillStyle=colors[sample.body];ctx.strokeStyle='#354740';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(9,0);ctx.lineTo(-6,-5);ctx.lineTo(-6,5);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
    ctx.restore();
    if(isProbe){
-    ctx.fillStyle='#f3f5f0';ctx.fillRect(0,282,560,108);ctx.fillStyle='#56635b';ctx.font='12px Arial';ctx.fillText('Recorded base height',16,302);
+    ctx.fillStyle='#f3f5f0';ctx.fillRect(0,282,560,108);ctx.fillStyle='#56635b';ctx.font='12px Arial';ctx.fillText('Base height',16,302);
     const minZ=Math.min(...frames.map(f=>f[5]??0)),maxZ=Math.max(...frames.map(f=>f[5]??0)),zspan=Math.max(.3,maxZ-minZ);
     const hx=f=>42+(f[0]-minT)/(maxT-minT||1)*476,hy=f=>371-((f[5]??0)-minZ)/zspan*54;
     if(sample.evidenceInterval){const [begin,end]=sample.evidenceInterval;ctx.fillStyle='#dce9de';ctx.fillRect(hx([Math.max(begin,minT)]),310,(Math.min(end,maxT)-Math.max(begin,minT))/(maxT-minT||1)*476,70);}
     path(frames.map(f=>[hx(f),hy(f)]),'#aab8ae',1.5);path(frames.slice(0,k+1).map(f=>[hx(f),hy(f)]),colors[sample.body],2.5);dot(hx([time]),hy([time,0,0,0,[],mix(a[5]??0,b[5]??0)]),4,'#fff');
     ctx.fillStyle='#56635b';ctx.fillText(minZ.toFixed(2)+' m',16,386);ctx.fillText(maxZ.toFixed(2)+' m',16,321);
    }
-   const interval=sample.evidenceInterval,phase=interval?(time<interval[0]?'Recorded approach':time<=interval[1]?'Labeled crossing':'Recorded continuation'):'Recorded reference rollout';
-   phaseLabel.textContent=phase+(interval?` · label interval ${interval[0].toFixed(1)}–${interval[1].toFixed(1)} s`:'');
+   const interval=sample.evidenceInterval,phase=interval?(time<interval[0]?'Approach':time<=interval[1]?'Terrain crossing':'Continuation'):'Reference trajectory';
+   phaseLabel.textContent=phase;
    range.value=progress;root.querySelector('.sample-time').textContent=time.toFixed(1)+' s';play.textContent=playing?'Pause rollout':'Play rollout';
   }
   function tick(now){frame=0;if(!visible||!playing||!initialized||document.hidden||samples[index]?.queryOnly)return;const f=samples[index]?.rollout;if(!f)return;const duration=Math.max(3,Math.min(22,f.at(-1)[0]-f[0][0]));if(movie){if(movie.readyState>=2)progress=Math.min(1,movie.currentTime/(f.at(-1)[0]-f[0][0]||1));}else if(last)progress=(progress+(now-last)/(duration*1000))%1;last=now;render();frame=requestAnimationFrame(tick);}
@@ -109,7 +109,7 @@
 
    dots.forEach((dot,j)=>{dot.classList.toggle('selected',j===index);dot.setAttribute('tabindex',j===index?'0':'-1');dot.setAttribute('aria-pressed',String(j===index));});
    root.querySelector('.sample-title').textContent=`Sample ${index+1} · ${sample.body==='g1'?'G1':'Spot + arm'} · ${splitLabel(sample)}`;
-   root.querySelector('.sample-inputs').textContent=`${terrainLabel[terrainGroup(sample)]} · ${sample.links} body links · ${sample.scene.objects.length} objects`+(sample.scope?' · '+sample.scope:'');
+   root.querySelector('.sample-inputs').textContent=`${terrainLabel[terrainGroup(sample)]} · ${sample.links} body links · ${sample.scene.objects.length} object${sample.scene.objects.length===1?'':'s'}`+(sample.scope?' · '+sample.scope:'');
    inputFactors(sample);
    const target=root.querySelector('.sample-target');target.replaceChildren();
    if(root.dataset.kind==='grounding'){
@@ -128,7 +128,7 @@
   let attempted=false;
   async function initialize(retry=false){
    if(initialized||(attempted&&!retry))return;attempted=true;initialized=true;
-   const status=root.querySelector('.learning-loading');status.textContent='Preparing scene samples…';
+   const status=root.querySelector('.learning-loading');status.textContent='Loading training samples…';
    try{
     if(root.dataset.kind==='ordering')await loadScript('assets/ordering-map.js',()=>!!window.clearOrderingMap);
     await loadScript(`assets/learning-samples-${root.dataset.kind}.js`,()=>!!window.CLEAR_LEARNING_SAMPLES?.[root.dataset.kind]);
@@ -140,7 +140,7 @@
     const colorSelect=document.createElement('select');colorSelect.setAttribute('aria-label','Color embedding points by');
     for(const [key,label]of [['terrain','Scene type'],['body','Robot body']]){const option=document.createElement('option');option.value=key;option.textContent=label;colorSelect.append(option);}
     colorLabel.append(colorSelect);const legend=document.createElement('div');legend.className='sample-color-legend';
-    const meaning=document.createElement('p');meaning.className='sample-embedding-note';meaning.textContent='One point per query. Nearby points have similar learned features. Filled: training. Outlined: validation. Dashed: evaluation.'+(root.dataset.kind==='ordering'?' Dotted: unexecuted query.':'');
+    const meaning=document.createElement('p');meaning.className='sample-embedding-note';meaning.textContent='Feature embedding: one point per query. Filled: training; outlined: validation; dashed: evaluation.'+(root.dataset.kind==='ordering'?' Dotted: query without execution.':'');
     colorControls.append(colorLabel,legend);svg.before(colorControls);svg.after(meaning);
     function recolor(){
      const palette=colorBy==='terrain'?terrainColors:colors;
@@ -161,7 +161,7 @@
     const xlabel=element('text',{x:248,y:340,'text-anchor':'middle',class:'sample-axis-label'}),ylabel=element('text',{x:16,y:166,transform:'rotate(-90 16 166)','text-anchor':'middle',class:'sample-axis-label'});
     xlabel.textContent='t-SNE dimension 1';ylabel.textContent='t-SNE dimension 2';axis.append(xlabel,ylabel);svg.append(axis);
     dots=samples.map((sample,i)=>{const dot=element('circle',{cx:52+(sample.xy[0]-lo[0])/(hi[0]-lo[0]||1)*392,cy:300-(sample.xy[1]-lo[1])/(hi[1]-lo[1]||1)*268,r:5.5,fill:sample.split==='train'?colors[sample.body]:'#fff',stroke:colors[sample.body],'stroke-width':2,'stroke-dasharray':sample.queryOnly?'1 3':sample.split==='evaluation'?'2 2':'none',role:'button','aria-label':`Sample ${i+1}, ${sample.body==='g1'?'G1':'Spot plus arm'}, ${splitLabel(sample).toLowerCase()}`});
-     const title=element('title',{});title.textContent=`Sample ${i+1} · ${sample.layout||terrainLabel[terrainGroup(sample)]} · ${sample.body==='g1'?'G1':'Spot + arm'} · ${sample.scene.objects.length} objects · ${splitLabel(sample)}`;dot.append(title);dot.setAttribute('aria-label',title.textContent);dot.addEventListener('focus',()=>select(i));dot.addEventListener('click',()=>select(i));dot.addEventListener('keydown',e=>{if(['ArrowRight','ArrowDown','ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();advance(e.key==='ArrowRight'||e.key==='ArrowDown'?1:-1);dots[index].focus();}if(e.key==='Enter'||e.key===' '){e.preventDefault();select(i);}});svg.append(dot);return dot;});
+     const title=element('title',{});title.textContent=`Sample ${i+1} · ${sample.layout||terrainLabel[terrainGroup(sample)]} · ${sample.body==='g1'?'G1':'Spot + arm'} · ${sample.scene.objects.length} object${sample.scene.objects.length===1?'':'s'} · ${splitLabel(sample)}`;dot.append(title);dot.setAttribute('aria-label',title.textContent);dot.addEventListener('focus',()=>select(i));dot.addEventListener('click',()=>select(i));dot.addEventListener('keydown',e=>{if(['ArrowRight','ArrowDown','ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();advance(e.key==='ArrowRight'||e.key==='ArrowDown'?1:-1);dots[index].focus();}if(e.key==='Enter'||e.key===' '){e.preventDefault();select(i);}});svg.append(dot);return dot;});
     recolor();
     svg.addEventListener('pointermove',event=>{
      const point=new DOMPoint(event.clientX,event.clientY).matrixTransform(svg.getScreenCTM().inverse());

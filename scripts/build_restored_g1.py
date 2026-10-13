@@ -34,7 +34,7 @@ result = dict(schema=2, body='g1', source='archived-controller', complete=True,
               defaultCheckpoint='checkpoint-0',
               intro='G1 adapts a pretrained SUMO walking policy to terrain, then continues with action-rate regularization. Update 0 is pretrained initialization, not a random policy.',
               replayNote='Eight reconstructed checkpoints share a fixed terrain bank: 0, 100, 500, 17,000, 18,000, 20,000, 21,600 and 22,800. Deterministic forward-command evaluations with heading feedback; not footage captured during training.',
-              baselineNote='Original training samples at 25-update intervals, plus phase endpoints. Dashed lines mark the first logged value. Resumed runs can restart the terrain curriculum at low levels; a boundary drop alone does not establish a loss of policy skill. Terrain level is a curriculum index (0–9), not a height in metres or a success rate.')
+              baselineNote='Terrain level denotes curriculum index (0–9). Phase transitions may reset the curriculum.')
 (ROOT / 'assets/g1-restored-data.js').write_text(
     'window.CLEAR_BODY_CURRICULA = window.CLEAR_BODY_CURRICULA || {};\n'
     'window.CLEAR_BODY_CURRICULA["g1"] = '+json.dumps(result, separators=(',', ':'))+';\n')

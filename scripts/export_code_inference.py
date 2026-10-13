@@ -1,4 +1,4 @@
-"""Export model inference and the corresponding scene’s recorded execution.
+"""Export model inference and the corresponding scene’s execution.
 
 Only numerical model outputs and geometric execution data are published. The
 recorded chord decoder and push margin remain explicit, separate from raw flow.

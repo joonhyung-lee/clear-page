@@ -3,10 +3,11 @@
   const root = document.querySelector('#training-losses');
   if (!root) return;
   const charts = [...root.querySelectorAll('[data-loss]')], series = new Map();
-  let data, pendingLoad, pinnedTerm = null, index = null, hovered = null, scheduled = false, activeRole = 'order';
+  let data, pendingLoad, index = null, hovered = null, scheduled = false, selectedRole = null;
+  let pointerPreview = null, focusPreview = null;
   const roleKeys={order:['selection','order','kl'],flow:['flow'],affordance:['affordance'],availability:[]};
   const termColors={selection:'#497f99',order:'#a37a52',kl:'#9780a7',flow:'#598c70',affordance:'#9a9460'};
-  const roleHelp={order:'Selection BCE + pairwise ranking + 0.001 × Gaussian KL. Together they learn which objects participate and the score distributions used to order them.',flow:'Velocity-field regression learns how noise becomes object targets or trajectories under a fixed selection and order. Weight: 1.',affordance:'Binary labels teach interaction availability and terrain-transition feasibility, enriching the planning context. Weight: 1.',availability:'Penalizes unavailable first interactions using selection probabilities and priority scores. Weight: 0; contribution to the objective: 0.'};
+  const roleHelp={order:'Object selection, pairwise ranking, and Gaussian score regularization.',flow:'Flow matching for continuous object references under a fixed interaction order.',affordance:'Binary supervision of interaction availability and terrain-transition feasibility.',availability:'Availability of the first interaction. Objective weight: 0.'};
   const termHelp=document.createElement('div');termHelp.id='loss-term-help';termHelp.className='loss-term-help';termHelp.setAttribute('role','tooltip');termHelp.hidden=true;root.append(termHelp);
   root.querySelectorAll('.objective-term').forEach(term=>term.setAttribute('aria-describedby',termHelp.id));
   const value = n => Number(n.toPrecision(6)).toString();
@@ -100,8 +101,8 @@
         const pointerInspect = e => { const box = canvas.getBoundingClientRect(), plot = chart._plot; if (plot) inspect(chart, (e.clientX - box.left - plot.left) / (plot.right - plot.left) * data.maxStep); };
         canvas.addEventListener('pointermove', pointerInspect); canvas.addEventListener('pointerdown', pointerInspect);
         canvas.addEventListener('pointerleave', () => { if (document.activeElement === canvas) return; index = null; hovered = null; schedule(); });
-        canvas.addEventListener('focus', () => { pinnedTerm = key; highlight(key); inspect(chart, data.samples[index ?? 0].step); });
-        canvas.addEventListener('blur', () => { hovered = null; index = null; pinnedTerm = null; highlight(null); schedule(); });
+        canvas.addEventListener('focus', () => { inspect(chart, data.samples[index ?? 0].step); });
+        canvas.addEventListener('blur', () => { hovered = null; index = null; schedule(); });
         canvas.addEventListener('keydown', e => {
           if (!['ArrowLeft','ArrowRight','Home','End','Escape'].includes(e.key)) return; e.preventDefault();
           if (e.key === 'Escape') { canvas.blur(); return; }
@@ -117,39 +118,93 @@
       const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = 'Retry'; retry.onclick = () => { pendingLoad = null; retry.remove(); initialize(); }; node.append(retry);
     }
   }
-  function highlight(key) { key ??= pinnedTerm; const keys=Array.isArray(key)?key:[key]; charts.forEach(chart => chart.classList.toggle('loss-term-active', keys.includes(chart.dataset.loss))); root.querySelectorAll('[data-loss-term]').forEach(button => button.classList.toggle('loss-term-active', keys.includes(button.dataset.lossTerm))); }
-  const termKeys=term=>(term.dataset.lossKeys||'').split(' ').filter(Boolean);
-  function showRole(key){
-    if(!roleKeys[key])return;activeRole=key;
-    root.querySelectorAll('[data-role-panel]').forEach(panel=>panel.hidden=panel.dataset.rolePanel!==key);
-    root.querySelectorAll('[data-objective-role]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.objectiveRole===key)));
-    highlight(roleKeys[key]);
+  const roleForTerm = term => Object.keys(roleKeys).find(key => term.classList.contains('term-' + key));
+  const roleForLoss = key => Object.keys(roleKeys).find(role => roleKeys[role].includes(key));
+  const previewFor = node => {
+    const role = node.dataset.objectiveRole || roleForTerm(node) || roleForLoss(node.dataset.loss || node.dataset.lossTerm);
+    const loss = node.dataset.loss || node.dataset.lossTerm;
+    return {node, role, keys:loss ? [loss] : roleKeys[role] || []};
+  };
+  function paintInteraction() {
+    const preview = pointerPreview || focusPreview;
+    const selectedKeys = roleKeys[selectedRole] || [];
+    charts.forEach(chart => {
+      chart.classList.toggle('loss-term-active', !!preview?.keys.includes(chart.dataset.loss));
+      chart.classList.toggle('loss-term-selected', selectedKeys.includes(chart.dataset.loss));
+    });
+    root.querySelectorAll('[data-objective-role], .objective-term').forEach(node => {
+      const role = node.dataset.objectiveRole || roleForTerm(node);
+      node.classList.toggle('loss-role-preview', !!preview && preview.role === role);
+      node.setAttribute('aria-pressed', String(role === selectedRole));
+    });
   }
-  function inspectTerm(term){
-    const key=Object.keys(roleKeys).find(key=>term.classList.contains('term-'+key));
-    if(key){
-      showRole(key);termHelp.textContent=roleHelp[key];termHelp.hidden=false;
-      const box=term.getBoundingClientRect();termHelp.style.left=Math.max(12,Math.min(innerWidth-termHelp.offsetWidth-12,box.left))+'px';
-      termHelp.style.top=Math.max(12,Math.min(innerHeight-termHelp.offsetHeight-12,box.bottom+42))+'px';
-    }else highlight(termKeys(term));
+  function showRole(key) {
+    root.querySelectorAll('[data-role-panel]').forEach(panel => panel.hidden = panel.dataset.rolePanel !== key);
   }
-  root.addEventListener('pointerover',e=>{const term=e.target.closest('.objective-term');if(term&&!term.contains(e.relatedTarget))inspectTerm(term);});
-  root.addEventListener('pointerout',e=>{const term=e.target.closest('.objective-term');if(term&&!term.contains(e.relatedTarget)){termHelp.hidden=true;highlight(roleKeys[activeRole]);}});
-  root.addEventListener('focusin',e=>{const term=e.target.closest('.objective-term');if(term)inspectTerm(term);});
-  root.addEventListener('focusout',e=>{if(e.target.closest('.objective-term')){termHelp.hidden=true;highlight(roleKeys[activeRole]);}});
-  root.addEventListener('click',e=>{const term=e.target.closest('.objective-term');if(term)inspectTerm(term);});
-  root.addEventListener('keydown',e=>{const term=e.target.closest('.objective-term');if(term&&['Enter',' '].includes(e.key)){e.preventDefault();inspectTerm(term);}});
-  root.addEventListener('keydown',e=>{if(e.key==='Escape')termHelp.hidden=true;});
-  addEventListener('scroll',()=>{termHelp.hidden=true;},{passive:true});addEventListener('resize',()=>{termHelp.hidden=true;});
-  root.querySelectorAll('[data-objective-role]').forEach(button=>{
-    const activate=()=>showRole(button.dataset.objectiveRole);
-    button.addEventListener('pointerenter',activate);button.addEventListener('focus',activate);button.addEventListener('click',activate);
+  function selectRole(key) {
+    if (!roleKeys[key]) return;
+    selectedRole = selectedRole === key ? null : key;
+    showRole(key);
+    termHelp.hidden = true;
+    paintInteraction();
+  }
+  function showHelp(term) {
+    const key = roleForTerm(term);
+    if (!key) return;
+    termHelp.textContent = roleHelp[key]; termHelp.hidden = false;
+    const box = term.getBoundingClientRect();
+    termHelp.style.left = Math.max(12, Math.min(innerWidth - termHelp.offsetWidth - 12, box.left)) + 'px';
+    termHelp.style.top = Math.max(12, Math.min(innerHeight - termHelp.offsetHeight - 12, box.bottom + 12)) + 'px';
+  }
+  function bindPreview(node, focusNode = node) {
+    node.addEventListener('pointerenter', e => {
+      if (e.pointerType === 'touch') return;
+      pointerPreview = previewFor(node); paintInteraction();
+      if (node.matches('.objective-term')) showHelp(node);
+    });
+    node.addEventListener('pointerleave', () => {
+      if (pointerPreview?.node === node) pointerPreview = null;
+      termHelp.hidden = true; paintInteraction();
+    });
+    focusNode.addEventListener('focus', () => {
+      if (!focusNode.matches(':focus-visible')) return;
+      focusPreview = previewFor(node); paintInteraction();
+      if (node.matches('.objective-term')) showHelp(node);
+    });
+    focusNode.addEventListener('blur', () => {
+      if (focusPreview?.node === node) focusPreview = null;
+      termHelp.hidden = true; paintInteraction();
+    });
+  }
+  root.querySelectorAll('[data-role-panel]').forEach(panel => panel.id = 'loss-role-' + panel.dataset.rolePanel);
+  root.querySelectorAll('[data-objective-role], .objective-term').forEach(node => {
+    const role = node.dataset.objectiveRole || roleForTerm(node);
+    node.setAttribute('aria-controls', ['loss-role-' + role, ...(roleKeys[role] || []).map(key => 'loss-' + key)].join(' '));
+    if (node.matches('.objective-term')) node.removeAttribute('title');
+    bindPreview(node);
+    node.addEventListener('click', () => selectRole(role));
+    if (node.matches('.objective-term')) node.addEventListener('keydown', e => {
+      if (['Enter', ' '].includes(e.key)) {e.preventDefault(); selectRole(role);}
+    });
   });
-  showRole(activeRole);
+  charts.forEach(chart => bindPreview(chart, chart.querySelector('canvas')));
+  root.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    selectedRole = null; pointerPreview = null; focusPreview = null;
+    termHelp.hidden = true; paintInteraction();
+  });
+  addEventListener('scroll', () => {termHelp.hidden = true;}, {passive:true});
+  addEventListener('resize', () => {termHelp.hidden = true;});
+  showRole('order'); paintInteraction();
   root.querySelectorAll('[data-loss-term]').forEach(button => {
-    button.addEventListener('pointerenter', () => highlight(button.dataset.lossTerm)); button.addEventListener('pointerleave', () => highlight(null));
-    button.addEventListener('focus', () => highlight(button.dataset.lossTerm)); button.addEventListener('blur', () => highlight(null));
-    button.onclick = async () => { pinnedTerm = button.dataset.lossTerm; await initialize(); if (!data) return; const chart = charts.find(c => c.dataset.loss === button.dataset.lossTerm); chart.scrollIntoView({behavior:reduced.matches ? 'instant' : 'smooth', block:'center'}); chart.querySelector('canvas').focus({preventScroll:true}); highlight(button.dataset.lossTerm); };
+    bindPreview(button);
+    button.onclick = async () => {
+      await initialize(); if (!data) return;
+      const chart = charts.find(c => c.dataset.loss === button.dataset.lossTerm);
+      if (!chart) return;
+      chart.scrollIntoView({behavior:reduced.matches ? 'instant' : 'smooth', block:'center'});
+      chart.querySelector('canvas').focus({preventScroll:true});
+    };
   });
   new IntersectionObserver(entries => { if (entries.some(e => e.isIntersecting)) initialize(); }, {rootMargin:'250px'}).observe(root);
 })();

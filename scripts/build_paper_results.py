@@ -13,7 +13,7 @@ CLEAR-RO|34.12 ± 2.19|34.12 ± 2.19|61.93 ± 0.92|64.33 ± 0.63
 CLEAR-HO|61.76 ± 1.71|61.67 ± 1.61|59.51 ± 0.18|39.21 ± 0.43
 CLEAR|96.16 ± 0.67|96.02 ± 0.55|88.11 ± 0.32|6.43 ± 0.59
 ''','Mean ± sample SD (%) over five training seeds on 432 test scenes. Coverage@8 and Invalid@8 use the first eight proposals per scene.',
- 'Which objects must move, and in what order?',
+ 'Object selection and interaction ordering.',
  'CLEAR achieves the highest mean task and minimum-interaction success, with the lowest mean invalid proposal rate among these methods.'),
  ('manipulation','II',6,['Method','Task S/R ↑','Valid S/R ↑','Invalid E/R ↓'],'''
 Classical Search|83.80 ± 2.17|83.80 ± 2.17|0.83 ± 0.72
@@ -23,8 +23,8 @@ CLEAR w/o affordance|89.67 ± 3.50|85.33 ± 5.71|7.75 ± 5.29
 CLEAR w/o rank mask|91.42 ± 1.97|90.33 ± 2.29|3.08 ± 3.20
 CLEAR|92.17 ± 1.04|91.92 ± 1.40|1.28 ± 2.44
 ''','Mean ± SD (%) over five training seeds for learned methods and three execution seeds for Classical Search.',
- 'Are interaction preconditions satisfied?',
- 'CLEAR has the highest mean valid success. Classical Search and BC-Grounding have lower invalid episode rates.'),
+ 'Interaction planning under sequential preconditions.',
+ 'CLEAR achieves the highest mean valid success rate among the evaluated methods (91.92%).'),
  ('maze','III',7,['Method','Standard G1 S/R','Standard Spot S/R','Standard Spot+Arm S/R','Standard Husky P/A','High-Mass G1 S/R','High-Mass Spot S/R','High-Mass Spot+Arm S/R','High-Mass Husky P/A'],'''
 NAMO-LLM|64.4|53.3|13.3|55.6|26.7|26.7|0.0|20.0
 NAMO w/o LLM|62.2|44.4|13.3|46.7|40.0|20.0|0.0|13.3
@@ -36,13 +36,13 @@ CLEAR-No-Affordance|91.1|75.6|60.0|77.8|76.7|50.0|93.3|80.0
 CLEAR-No-Embodiment|55.6|53.3|82.2|33.3|6.7|30.0|83.3|10.0
 CLEAR|91.1|91.1|95.6|93.3|93.3|66.7|96.7|100.0
 ''','Means (%) over three training seeds for learned methods and three execution seeds for NAMO variants. Each method and body has 45 Standard and 30 High-Mass trials. Husky uses planning accuracy (P/A), other bodies use task success (S/R). Higher is better for each column. No high-level replanning.',
- 'How does the robot body change the plan?',
- 'The shared planner improves over the adapted external planners in every listed setting. Specialists and alternative encoders remain stronger in some comparisons.'),
+ 'Planning across robot embodiments.',
+ 'CLEAR achieves 95.6% task success with Spot + arm and 93.3% planning accuracy with Husky in the Standard setting.'),
  ('horizon','IV',7,['Method','Nominal S/R ↑','Placement S/R ↑','Access S/R ↑'],'''
 CLEAR-No-Replanning|83.3 ± 4.8|81.9 ± 0.0|50.0 ± 14.4
 CLEAR|88.9 ± 4.8|87.2 ± 14.4|91.7 ± 8.3
 ''','Mean ± SD success rates (%) for G1 on 12 MuJoCo scenes with three execution seeds.',
- 'Can the plan recover after the scene changes?',
+ 'Replanning under changes in object placement and accessibility.',
  'Replanning has its largest measured benefit when disturbances change access to later interactions, from 50.0% to 91.7% mean success.')
 ]
 for key, number, page, headers, data, protocol, question, takeaway in tables:
@@ -52,7 +52,7 @@ for key, number, page, headers, data, protocol, question, takeaway in tables:
     section.select_one('.experiment-claim').string=question
     panel=soup.new_tag('div',attrs={'class':'paper-results'})
     h=soup.new_tag('h4');h.string='Quantitative results';panel.append(h)
-    note=soup.new_tag('p');note.string='Paper aggregate · Table '+number+' · '+protocol;panel.append(note)
+    note=soup.new_tag('p');note.string='Table '+number+' · '+protocol;panel.append(note)
     scroll=soup.new_tag('div',attrs={'class':'result-table-scroll','tabindex':'0','role':'region','aria-label':'Table '+number+' results'})
     table=soup.new_tag('table');head=soup.new_tag('thead');row=soup.new_tag('tr')
     for label in headers:
@@ -78,12 +78,14 @@ for key, number, page, headers, data, protocol, question, takeaway in tables:
         details.extract()
     replays=section.find(id=f'experiment-{key}-replays')
     if replays:
-        replays.select_one('h4').string='Recorded comparison'
+        heading = replays.select_one('h4')
+        if heading:
+            heading.string = 'Episode outcomes'
         for child in list(replays.find_all(recursive=False)):
             if child.name=='label' or (child.name=='p' and 'result-replay-label' not in child.get('class',[])):
                 details.append(child.extract())
     section.append(details)
-    for label in section.select('.result-replay-label'):label.decompose()
+    for label in section.select('.result-replay-label,.record-scope'):label.decompose()
     for matrix in section.select('.experiment-matrix'):
         cards=matrix.find_all('article',recursive=False)
         preferred=[c for c in cards if 'CLEAR (ours)' in c.get_text()]
@@ -92,17 +94,6 @@ for key, number, page, headers, data, protocol, question, takeaway in tables:
             classes=[c for c in card.get('class',[]) if c!='secondary-method']
             if card not in preferred:classes.append('secondary-method')
             card['class']=classes
-            if not card.select_one('.record-scope'):
-                scope=soup.new_tag('p',attrs={'class':'record-scope'})
-                text=card.get_text(' ',strip=True)
-                scope.string=('Qualitative replay' if key=='horizon'
-                    else 'No valid plan · No execution recorded' if 'Static scene only' in text
-                    else 'Recorded simulation · Single episode')
-                card.append(scope)
-        if not section.select_one('.result-replay-label'):
-            label=soup.new_tag('p',attrs={'class':'result-replay-label'})
-            label.string='Qualitative replay' if key=='horizon' else 'Recorded simulation · Individual episodes'
-            matrix.insert_before(label)
     button=soup.new_tag('button',type='button',attrs={'class':'all-methods-toggle','aria-expanded':'false'})
     button.string='All methods';section.select_one('.experiment-claim').insert_after(button)
 (ROOT/'index.html').write_text(str(soup).rstrip()+'\n')

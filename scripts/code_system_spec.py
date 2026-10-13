@@ -14,13 +14,13 @@ NODES = [
     node('representation','Representation',CORE,'SharedEncoder','grounding',
          'Robot structure is encoded together with object and scene features.', 'Planning context H'),
     node('order','Selection and order',CORE,'OrderingHead','ordering',
-         'Illustrative selection and latent priority in the shared maze.', 'Selected objects · order'),
+         'Object selection and latent interaction priorities.', 'Selected objects · order'),
     node('flow','Trajectory generation',FLOW,'RankCausalTargetFlow','generation',
-         'Illustrative rank-conditioned generation for the same selected objects and order.', 'Object references'),
+         'Object trajectory generation conditioned on selection and order.', 'Object references'),
     node('verification','Feasibility checking',PLANNER,'validate_sequence','validation',
-         'Illustrative scene updates reveal how earlier interactions open the route for later ones.', 'Feasible plan'),
+         'Sequential validation accounts for scene changes induced by preceding interactions.', 'Feasible plan'),
     node('control','Execution',MPC,'SumoTaskBackend','execution',
-         'Recorded G1 and Spot + arm controllers track object references using updated observations.', 'Updated observation'),
+         'G1 and Spot + arm track object references using updated state estimates.', 'Updated observation'),
 ]
 
 

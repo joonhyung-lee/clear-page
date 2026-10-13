@@ -7,7 +7,7 @@ if not s.find(id='embodiment-demo'):
  wrapper=s.new_tag('div',id='embodiment-demo');gallery.replace_with(wrapper)
  wrapper.append(BeautifulSoup('''<div class="embodiment-controls" role="group" aria-label="Embodiment inspection mode"><button type="button" data-embodiment-mode="structure" aria-pressed="true">Structure</button><button type="button" data-embodiment-mode="traversability" aria-pressed="false">Traversability</button><button type="button" data-embodiment-mode="manipulation" aria-pressed="false">Manipulation affordance</button></div>''','html.parser'))
  wrapper.append(gallery)
- wrapper.append(BeautifulSoup('<p class="figure-caption embodiment-explanation" aria-live="polite">Translucent visual meshes reveal the links and joints of each body. Inspect any robot in 3D.</p>','html.parser'))
+ wrapper.append(BeautifulSoup('<p class="figure-caption embodiment-explanation" aria-live="polite">Link and joint structure across robot embodiments.</p>','html.parser'))
 for v in gallery.select('.viewer'):
  name=v.get('data-embodiment',v['data-scene'].removeprefix('structure-'));v['data-embodiment']=name
  video=v.find('video')

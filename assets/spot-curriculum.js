@@ -21,12 +21,12 @@
   let chartData, metricMode = 'optimization', inspectedStep = null, hoveredChart, highlightedPhase = null;
   const metricLabels = {value:'Value loss', policy:'Policy surrogate loss', entropy:'Policy entropy', return:'Episode return', terrain:'Mean terrain level', tracking:'Velocity tracking error', arm:'Arm curriculum level'};
   const metricNotes = {
-    value:'Critic squared return error, with PPO value clipping when enabled. This is the unweighted loss.',
-    policy:'Signed PPO clipped surrogate loss. Its sign or decrease alone does not measure task performance.',
-    entropy:'Mean action-distribution entropy in nats, summed over action dimensions. This is exploration entropy, not the weighted entropy loss.',
-    return:'Mean accumulated reward over the latest 100 completed training episodes, or fewer while the buffer fills.',
-    terrain:'Mean terrain curriculum index. Flat-ground training does not log this metric.',
-    tracking:'Planar velocity error accumulated over each episode, divided by the maximum command duration, then averaged at resets. Short episodes can produce small values; this is not per-step RMSE.',
+    value:'Squared return prediction error with PPO value clipping when enabled.',
+    policy:'Signed PPO clipped surrogate objective.',
+    entropy:'Action-distribution entropy, summed over action dimensions (nats).',
+    return:'Mean return over up to 100 recent completed episodes.',
+    terrain:'Mean terrain curriculum index (0–9).',
+    tracking:'Episode-integrated planar velocity error normalized by the maximum command duration, averaged across episodes.',
     arm:'Recorded arm-posture curriculum level.'
   };
   // Preserve signed raw data while resolving normal values beside rare huge excursions.
@@ -106,8 +106,8 @@
     const rows=chartData.curves||[];
     const keys=metricMode==='optimization'?['value','policy','entropy']:['return','terrain',body==='spot_arm'?'arm':'tracking'];
     root.querySelector('[data-curriculum-metric-note]').textContent=metricMode==='optimization'
-      ? 'Entropy measures exploration. PPO losses need not decrease monotonically. Hover a plot title for its definition.'
-      : 'Training returns use recent completed episodes. Accumulated velocity error depends on episode duration and command difficulty. Hover a plot title for its definition.';
+      ? 'PPO value, policy, and entropy objectives.'
+      : 'Training return, terrain curriculum, and motion tracking.';
     const phases=[]; let offset=0;
     chartData.stages.filter(s=>s.id!=='initialization').forEach(stage=>{phases.push({...stage,start:offset});offset+=stage.targetUpdates;});
     root.querySelectorAll('[data-curriculum-chart]').forEach((figure,i)=>{
@@ -240,7 +240,7 @@
     const dialog=document.createElement('dialog');dialog.className='policy-terrain-dialog';
     dialog.setAttribute('aria-label',label+' radial motion illustration');
     const header=document.createElement('header'),title=document.createElement('span'),close=document.createElement('button');
-    title.textContent=label+(stage.replay.headingTracking?' · Velocity tracking':' · Radial illustration');close.type='button';close.textContent='×';close.setAttribute('aria-label','Close terrain view');
+    title.textContent=label+(stage.replay.headingTracking?' · Velocity tracking':' · Rotated trajectory views');close.type='button';close.textContent='×';close.setAttribute('aria-label','Close terrain view');
     header.append(title,close);
     const movie=document.createElement('video');movie.controls=true;movie.muted=true;movie.playsInline=true;movie.loop=true;
     const path=stage.replay.video.replace(/\.mp4$/,'-'+terrain+'.mp4');
@@ -268,7 +268,7 @@
     }
     menu.value=terrainMode;label.append(menu);
     const note=document.createElement('span');note.textContent=stage.replay.headingTracking?'Velocity tracking':'4-way replay';
-    note.title='One recorded motion replayed in four directions from the same initial position; illustrative, not a joint physics simulation.';
+    note.title='Four rotated views of one trajectory.';
     const enlarge=document.createElement('button');enlarge.type='button';enlarge.textContent='↗';enlarge.setAttribute('aria-label','Enlarge terrain view');
     enlarge.onclick=()=>{
       if(terrainMode==='matrix'){movie.requestFullscreen?.();return;}
@@ -290,7 +290,7 @@
     menu.onchange=()=>{terrainMode=menu.value;apply(true);};
     links.append(label,note,enlarge);host.prepend(links);apply();
     if(stage.replay.headingTracking){
-      note.title=(stage.replay.body==='g1'?'Same highest recorded terrain row at every checkpoint, shown from 2.5 s; challenging examples, not aggregate performance. ':'')+'Deterministic forward-command evaluation with physical heading feedback. One measured rollout per terrain is rotated into four replay directions.';
+      note.title=(stage.replay.body==='g1'?'Matched terrain row across checkpoints; playback starts at 2.5 s. ':'')+'Forward-command evaluation with heading feedback. Four rotated views of one trajectory per terrain.';
       const key=document.createElement('div');key.className='policy-tracking-key';
       key.innerHTML='<span><i style="color:#d98727">━</i> Target <i style="color:#14a4b8">━</i> Actual velocity</span>';
       host.append(key);
@@ -302,7 +302,7 @@
       host.querySelector('.viewer')?.dispatchEvent(new Event('reset-viewer'));
       currentScene = null;
       const note = document.createElement('p'); note.className = 'scratch-pending';
-      note.textContent = 'This body’s checkpoint replay is being prepared. It will appear here automatically.';
+      note.textContent = 'Checkpoint replay unavailable.';
       host.replaceChildren(note);
       return;
     }
@@ -368,7 +368,7 @@
     curves(data);
     renderSteps(data);
     status.textContent='';status.hidden=true;
-    root.querySelector('.curriculum-baseline-note').textContent=data.baselineNote || 'Curves show recorded training values.';
+    root.querySelector('.curriculum-baseline-note').textContent=data.baselineNote || 'PPO training trajectories.';
     // New exports do not interrupt a camera interaction or an active replay.
     if (requestedStage) {
       const stage=checkpoints(data).find(stage=>stage.id===requestedStage);
