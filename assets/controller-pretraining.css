@@ -119,3 +119,9 @@
 .policy-tracking-key{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:8px;color:#637079;font-size:11px;line-height:1.6}
 .policy-tracking-key i{font-style:normal;font-weight:650}
 .policy-terrain-dialog:has(.policy-tracking-key) video{max-height:calc(100vh - 150px)}
+
+@media(max-width:600px){
+ #spot-curriculum .curriculum-steps{grid-auto-flow:row;grid-template-columns:repeat(5,minmax(0,1fr))}
+ #spot-curriculum .curriculum-steps[data-count="8"]{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #spot-curriculum .curriculum-steps button{padding-inline:3px;font-size:11px;white-space:nowrap}
+}

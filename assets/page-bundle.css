@@ -423,6 +423,12 @@ html[data-page-hidden] .learning-dataflow span:before,html[data-page-hidden] .sa
 .policy-tracking-key i{font-style:normal;font-weight:650}
 .policy-terrain-dialog:has(.policy-tracking-key) video{max-height:calc(100vh - 150px)}
 
+@media(max-width:600px){
+ #spot-curriculum .curriculum-steps{grid-auto-flow:row;grid-template-columns:repeat(5,minmax(0,1fr))}
+ #spot-curriculum .curriculum-steps[data-count="8"]{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #spot-curriculum .curriculum-steps button{padding-inline:3px;font-size:11px;white-space:nowrap}
+}
+
 /* Paper notation, restrained reading width, and recognizable heading rows. */
 #main .wrap,#main .encoding>.wrap{width:min(1120px,85vw);max-width:85vw}
 #main #method-execution,#main #training-objective{width:100%;max-width:85vw;margin-left:0}

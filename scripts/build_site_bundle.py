@@ -141,7 +141,7 @@ window.CLEAR_MATH_FONTS=true;
             placeholder=soup.new_tag('img',attrs={
                 'data-policy-placeholder':'','src':data_url(policy_poster),
                 'alt':'G1 recorded motion replayed in four directions on stairs',
-                'style':'display:block;width:100%;height:auto;aspect-ratio:928 / 552;margin-top:40px'})
+                'style':'display:block;width:100%;height:auto;aspect-ratio:928 / 752;margin-top:40px'})
             policy_host.append(placeholder)
         for tag in soup.select('img,video'):
             attribute='poster' if tag.name=='video' else 'src'

@@ -161,6 +161,9 @@
       });
       ctx.fillStyle='#65715f';ctx.textAlign='left';ctx.fillText('0',left,h-5);ctx.textAlign='right';ctx.fillText(fmt(maximum)+' recorded updates',right,h-5);
       const replayUpdate=Number(root.dataset.replayUpdates||0);
+      const indexBadges=checkpoints(chartData).map(stage=>x(stage.replay.cumulativeUpdates));
+      for(let i=1;i<indexBadges.length;i++)indexBadges[i]=Math.max(indexBadges[i],indexBadges[i-1]+18);
+      for(let i=indexBadges.length-1;i>=0;i--)indexBadges[i]=Math.min(indexBadges[i],i===indexBadges.length-1?right:indexBadges[i+1]-18);
       checkpoints(chartData).forEach((stage,index)=>{
         const update=stage.replay.cumulativeUpdates;
         if(update<0||update>maximum)return;
@@ -169,10 +172,13 @@
         ctx.strokeStyle=active?'#344b39':'#a6afa3';ctx.lineWidth=active?1.6:1;
         ctx.setLineDash(active?[]:[3,3]);ctx.beginPath();
         ctx.moveTo(position,top);ctx.lineTo(position,bottom+3);ctx.stroke();
-        ctx.setLineDash([]);ctx.beginPath();ctx.arc(position,bottom+12,7.5,0,2*Math.PI);
+        const badge=indexBadges[index];
+        ctx.setLineDash([]);
+        if(badge!==position){ctx.beginPath();ctx.moveTo(position,bottom+3);ctx.lineTo(badge,bottom+7);ctx.stroke();}
+        ctx.beginPath();ctx.arc(badge,bottom+15,7.5,0,2*Math.PI);
         ctx.fillStyle=active?'#344b39':'#edf0e9';ctx.fill();
         ctx.fillStyle=active?'#fff':'#596752';ctx.textAlign='center';
-        ctx.textBaseline='middle';ctx.fillText(String(index+1),position,bottom+12);
+        ctx.textBaseline='middle';ctx.fillText(String(index+1),badge,bottom+15);
         ctx.restore();
       });
       const row=rows.length?rows[nearest(rows,inspectedStep??replayUpdate)]:null;
@@ -216,12 +222,13 @@
   function renderSteps(data) {
     const controls=root.querySelector('[data-curriculum-steps]');
     controls.replaceChildren();
+    controls.dataset.count=checkpoints(data).length;
     checkpoints(data).forEach((stage,index)=>{
       const button=document.createElement('button');button.type='button';
       button.dataset.checkpointStage=stage.id;
-      button.textContent=`Step ${index+1}`;
+      button.textContent=`Index ${index+1}`;
       button.title=`${stage.label} · Update ${fmt(stage.replay.cumulativeUpdates)}`;
-      button.setAttribute('aria-label',`Play step ${index+1}, update ${fmt(stage.replay.cumulativeUpdates)}`);
+      button.setAttribute('aria-label',`Play index ${index+1}, update ${fmt(stage.replay.cumulativeUpdates)}`);
       button.setAttribute('aria-pressed',String(stage.id===selected));
       button.onclick=()=>playCheckpoint(stage);
       controls.append(button);
@@ -233,7 +240,7 @@
     const dialog=document.createElement('dialog');dialog.className='policy-terrain-dialog';
     dialog.setAttribute('aria-label',label+' radial motion illustration');
     const header=document.createElement('header'),title=document.createElement('span'),close=document.createElement('button');
-    title.textContent=label+(stage.replay.headingTracking?' · Heading tracking':' · Radial illustration');close.type='button';close.textContent='×';close.setAttribute('aria-label','Close terrain view');
+    title.textContent=label+(stage.replay.headingTracking?' · Velocity tracking':' · Radial illustration');close.type='button';close.textContent='×';close.setAttribute('aria-label','Close terrain view');
     header.append(title,close);
     const movie=document.createElement('video');movie.controls=true;movie.muted=true;movie.playsInline=true;movie.loop=true;
     const path=stage.replay.video.replace(/\.mp4$/,'-'+terrain+'.mp4');
@@ -260,7 +267,7 @@
       const option=document.createElement('option');option.value=key;option.textContent=name;menu.append(option);
     }
     menu.value=terrainMode;label.append(menu);
-    const note=document.createElement('span');note.textContent=stage.replay.headingTracking?'Heading + velocity':'4-way replay';
+    const note=document.createElement('span');note.textContent=stage.replay.headingTracking?'Velocity tracking':'4-way replay';
     note.title='One recorded motion replayed in four directions from the same initial position; illustrative, not a joint physics simulation.';
     const enlarge=document.createElement('button');enlarge.type='button';enlarge.textContent='↗';enlarge.setAttribute('aria-label','Enlarge terrain view');
     enlarge.onclick=()=>{
@@ -271,7 +278,7 @@
       const playing=!movie.paused,time=keepTime?movie.currentTime:0;
       const path=terrainMode==='matrix'?stage.replay.video:stage.replay.video.replace(/\.mp4$/,'-'+terrainMode+'.mp4');
       movie.poster=clearAssetURL(path.replace(/\.mp4$/,'.webp'));
-      movie.style.aspectRatio=terrainMode==='matrix'?'1':'928 / 552';
+      movie.style.aspectRatio=terrainMode==='matrix'?'16 / 21':'928 / 752';
       const url=clearAssetURL(path);
       if(movie.src!==new URL(url,location.href).href){
         movie.src=url;
@@ -283,9 +290,9 @@
     menu.onchange=()=>{terrainMode=menu.value;apply(true);};
     links.append(label,note,enlarge);host.prepend(links);apply();
     if(stage.replay.headingTracking){
-      note.title='Deterministic forward-command evaluation with physical heading feedback. One measured rollout per terrain is rotated into four replay directions.';
+      note.title=(stage.replay.body==='g1'?'Same highest recorded terrain row at every checkpoint, shown from 2.5 s; challenging examples, not aggregate performance. ':'')+'Deterministic forward-command evaluation with physical heading feedback. One measured rollout per terrain is rotated into four replay directions.';
       const key=document.createElement('div');key.className='policy-tracking-key';
-      key.innerHTML='<span><i style="color:#d7534e">X</i> forward · <i style="color:#429664">Y</i> left · <i style="color:#537ed0">Z</i> up</span><span><i style="color:#d98727">━</i> Target <i style="color:#14a4b8">━</i> Actual velocity</span>';
+      key.innerHTML='<span><i style="color:#d98727">━</i> Target <i style="color:#14a4b8">━</i> Actual velocity</span>';
       host.append(key);
     }
   }

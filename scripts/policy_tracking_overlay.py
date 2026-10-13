@@ -1,4 +1,4 @@
-"""Measured target/actual velocity and heading bases for checkpoint evaluations."""
+"""Measured target/actual velocity and heading vectors for checkpoint evaluations."""
 import copy
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -34,11 +34,6 @@ def tracking_messages(tracking, start, layout, source_origins, pack):
     rotations=Rotation.from_euler('z',angles)
     destinations=np.array([entry['displayCenter'] for entry in layout])
     messages=[]
-    for slot in range(len(layout)):
-        name=f'/heading-basis-{slot}'
-        messages.extend([(0.,dict(type='FrameMessage',name=name,props=dict(show_axes=True,
-            axes_length=.32,axes_radius=.012,origin_radius=.019,origin_color=[240,240,240],scale=1.))),
-            (0.,dict(type='SetSceneNodeVisibilityMessage',name=name,visible=True))])
     def arrow_points(origins,vectors):
         points=[]
         for origin,vector in zip(origins,vectors):
@@ -53,13 +48,10 @@ def tracking_messages(tracking, start, layout, source_origins, pack):
         time=start+frame*tracking.dt;sample=tracking.sample(time)
         roots=rotations.apply(sample['root_position'][selected]-source_origins)+destinations
         anchors=roots+np.array([0.,0.,.92])
-        heading=sample['heading'][selected]+angles
-        for slot,(position,yaw) in enumerate(zip(anchors,heading)):
-            name=f'/heading-basis-{slot}'
-            messages.extend([(time,dict(type='SetPositionMessage',name=name,position=position.tolist())),
-                             (time,dict(type='SetOrientationMessage',name=name,wxyz=Rotation.from_euler('z',yaw).as_quat(scalar_first=True).tolist()))])
-        for kind,key,color,offset in [('target','command_world',[217,135,39],.06),('actual','velocity_world',[20,164,184],-.06)]:
-            name=f'/tracking-{kind}';points=arrow_points(anchors+[0,0,offset],rotations.apply(sample[key][selected]))
+        for kind,vectors,color,offset in [
+            ('target',rotations.apply(sample['command_world'][selected]),[217,135,39],.06),
+            ('actual',rotations.apply(sample['velocity_world'][selected]),[20,164,184],-.06)]:
+            name=f'/tracking-{kind}';points=arrow_points(anchors+[0,0,offset],vectors)
             colors=np.broadcast_to(np.array(color,dtype='u1'),points.shape).copy()
             props=dict(points=pack(points),colors=pack(colors),line_width=4.,scale=1.)
             if frame==0:

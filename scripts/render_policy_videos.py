@@ -54,20 +54,21 @@ def compact_overview(video, size=960):
     with tempfile.TemporaryDirectory(prefix='clear-overview-') as temporary:
         output=Path(temporary)/video.name
         subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(),'-y','-v','error','-i',str(video),
-            '-vf',f'scale={size}:{size}:flags=lanczos','-an','-c:v','libx264','-preset','fast',
+            '-vf',f'scale={size}:-2:flags=lanczos','-an','-c:v','libx264','-preset','fast',
             '-crf','22','-pix_fmt','yuv420p','-movflags','+faststart','-map_metadata','-1',str(output)],check=True)
         staged=video.with_suffix('.mp4.tmp');staged.write_bytes(output.read_bytes());staged.replace(video)
     write_poster(video)
 
 
-def write_details(video, views, size, only=None, tracking=None, start=0):
+def write_details(video, views, size, only=None, tracking=None, start=0, canvas_height=None):
+    canvas_height=canvas_height or size
     rows=(len(views)+1)//2;scale=size/960
     for index,view in enumerate(views):
         if only is not None and index!=only:continue
-        x=round(index%2*(size//2)+8*scale);y=round(index//2*(size//rows)+36*scale)
+        x=round(index%2*(size//2)+8*scale);y=round(index//2*(canvas_height//rows)+36*scale)
         width=size//2-round(16*scale)
         if len(views)%2 and index==len(views)-1:x=(size-width)//2
-        height=size//rows-round(44*scale)
+        height=canvas_height//rows-round(44*scale)
         # Even dimensions retain standard H.264 playback on mobile browsers.
         width-=width%2;height-=height%2
         output=video.with_name(video.stem+'-'+view['key']+'.mp4')
@@ -140,7 +141,7 @@ def outlined_recording(record, buffers, width=0.008):
         return path.read_bytes()
 
 
-def render(browser, scene, checkpoints, args):
+def render(browser, scene, checkpoints, args, camera_stages=None, camera_cache=None):
     source = (args.recordings_dir or ROOT/'assets/recordings')/f'{scene}.hex.js'
     body='g1' if scene=='learning-g1' else ('spot_arm' if scene=='learning-spot_arm' else 'spot')
     tracking_path=args.tracking_dir/body/f'{body}-tracking.npz' if args.tracking_dir else None
@@ -157,11 +158,25 @@ def render(browser, scene, checkpoints, args):
             counts.add(len(np.frombuffer(buffers[ref['__binary_index']],dtype=ref['dtype']))//3)
     assert len(counts)==1, counts
     agents=counts.pop()
-    # A closer oblique view fills the square player with the recorded population.
-    # All stages for one body retain exactly the same camera for comparison.
+    # Use one motion envelope for each body/terrain across every checkpoint.
+    # Keep stage-specific geometry and overlays, but never refit the camera on
+    # index changes (early falls otherwise produce a much tighter zoom).
+    if camera_cache is None:
+        camera_cache = {}
+    if scene not in camera_cache:
+        shared = {}
+        for stage in camera_stages or checkpoints:
+            _, _, stage_views, _ = arrange(record, buffers, stage['replay'].get('startTime', 0), tracking)
+            for view in stage_views:
+                entry = shared.setdefault(view['key'], dict(
+                    eye=view['eye'], target=view['target'], fitPoints=[]))
+                entry['fitPoints'].extend(view['fitPoints'])
+        camera_cache[scene] = shared
     record,buffers,views,layout=arrange(record,buffers,checkpoints[-1]['replay'].get('startTime',0),tracking)
+    for view in views:
+        view.update(copy.deepcopy(camera_cache[scene][view['key']]))
     render_raw=outlined_recording(record,buffers)
-    page=browser.new_page(viewport={'width':args.size,'height':args.size},device_scale_factor=1)
+    page=browser.new_page(viewport={'width':args.size,'height':args.height},device_scale_factor=1)
     def route(request):
         path=urlsplit(request.request.url).path
         if path=='/policy.viser':
@@ -181,7 +196,7 @@ def render(browser, scene, checkpoints, args):
     results=[]
     try:
         for stage in checkpoints:
-            replay=stage['replay'];step=replay['cumulativeUpdates'];start=replay.get('startTime',0)
+            replay=stage['replay'];step=replay['cumulativeUpdates'];start=replay.get('startTime',0)+replay.get('videoStartOffset',0)
             name=f'{scene}-update-{step:05d}.mp4';dest=ROOT/'assets/media'/name
             frames=round(replay.get('duration',8)*args.fps)
             with tempfile.TemporaryDirectory(prefix='clear-policy-') as temporary:
@@ -194,7 +209,8 @@ def render(browser, scene, checkpoints, args):
                     for frame in range(frames):
                         page.evaluate(SEEK,start+frame/args.fps+1e-6)
                         page.evaluate(SETTLE)
-                        picture=annotate(page.screenshot(type='jpeg',quality=95,timeout=30000),views,args.size,tracking.metrics(start+frame/args.fps,layout) if tracking else None)
+                        picture=page.screenshot(type='jpeg',quality=95,timeout=30000)
+                        if body!='spot_arm':picture=annotate(picture,views,args.size,tracking.metrics(start+frame/args.fps,layout) if tracking else None)
                         proc.stdin.write(picture)
                         if frame==min(72,frames-1):
                             (Path('/tmp')/(name+'.jpg')).write_bytes(picture)
@@ -206,11 +222,11 @@ def render(browser, scene, checkpoints, args):
                 # Replace only a completely rendered and encoded output.
                 staged=dest.with_suffix('.mp4.tmp');staged.write_bytes(output.read_bytes());staged.replace(dest)
             write_poster(dest)
-            write_details(dest,views,args.size,tracking={'replay':tracking,'layout':layout} if tracking else None,start=start)
+            write_details(dest,views,args.size,tracking={'replay':tracking,'layout':layout} if tracking and body!='spot_arm' else None,start=start,canvas_height=args.height)
             if args.size>960:compact_overview(dest)
             results.append(dict(file=name,scene=scene,agents=agents,startTime=start,
-                duration=frames/args.fps,fps=args.fps,width=min(args.size,960),height=min(args.size,960),renderWidth=args.size,renderHeight=args.size,
-                renderer='Native Viser',trackingMeasured=tracking is not None,trackingEvidence=f'assets/policy-tracking-{body}.json' if tracking else None,displayMode='radial-heading-evaluation' if tracking else 'radial-replay-illustration',uniqueRecordedAgentsShown=len({item['sourceAgent'] for item in layout}),views=views,displayLayout=layout,displayedAgents=len(layout),outline={'color':'black','widthMeters':0.008,'method':'back-face shell'},sourceSHA256=hashlib.sha256(raw).hexdigest()))
+                duration=frames/args.fps,fps=args.fps,width=min(args.size,960),height=round(args.height*min(args.size,960)/args.size),renderWidth=args.size,renderHeight=args.height,
+                renderer='Native Viser',cameraPolicy='Fixed per body and terrain across all checkpoint motion envelopes',displayGround='Visual flat continuation outside the recorded tile',velocityOverlay=['target','actual'],trackingMeasured=tracking is not None,trackingEvidence=f'assets/policy-tracking-{body}.json' if tracking else None,displayMode='radial-heading-evaluation' if tracking else 'radial-replay-illustration',uniqueRecordedAgentsShown=len({item['sourceAgent'] for item in layout}),views=views,displayLayout=layout,displayedAgents=len(layout),outline={'color':'black','widthMeters':0.008,'method':'back-face shell'},sourceSHA256=hashlib.sha256(raw).hexdigest()))
             print('Rendered',name,agents,'recorded agents',dest.stat().st_size,'bytes',flush=True)
     finally:
         page.close()
@@ -223,9 +239,11 @@ def main():
     parser.add_argument('--recordings-dir',type=Path)
     parser.add_argument('--tracking-dir',type=Path)
     parser.add_argument('--size',type=int,default=1920)
+    parser.add_argument('--height',type=int,help='Canvas height; defaults to 21:16 for larger unclipped terrain views')
     parser.add_argument('--fps',type=int,default=24)
     parser.add_argument('--base-url',default='http://localhost:8772')
     args=parser.parse_args()
+    args.height=args.height or round(args.size*21/16)
     scenes={}
     for name in ['g1-restored-data','spot_arm-restored-data','spot-curriculum-data']:
         body=data(name)
@@ -238,8 +256,9 @@ def main():
         browser=playwright.chromium.launch(args=['--use-angle=vulkan','--enable-features=Vulkan',
             '--disable-vulkan-surface','--enable-gpu','--ignore-gpu-blocklist'])
         try:
+            camera_cache = {}
             for scene,stages in scenes.items():
-                for stage in stages:results.extend(render(browser,scene,[stage],args))
+                for stage in stages:results.extend(render(browser,scene,[stage],args,stages,camera_cache))
         finally:
             browser.close()
     provenance=ROOT/'assets/policy-video-provenance.json'

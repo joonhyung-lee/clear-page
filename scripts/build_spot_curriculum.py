@@ -41,7 +41,7 @@ html = f'''<div id="spot-curriculum">
 <details class="curriculum-notes"><summary>About these plots</summary>
 <p class="loco-evidence-note curriculum-baseline-note">Loss logging begins with PPO update 1. Dashed lines mark the first logged value.</p>
 <p class="loco-evidence-note" data-curriculum-metric-note></p>
-<p class="loco-evidence-note">The ribbon shows the planned schedule. Plots show recorded updates. Step buttons play the corresponding checkpoints.</p>
+<p class="loco-evidence-note">The ribbon shows the planned schedule. Plots show recorded updates. Index buttons play the corresponding checkpoints.</p>
 </details>
 <p class="loco-status" data-curriculum-readout aria-live="polite"></p>
 </div></div></div>'''
