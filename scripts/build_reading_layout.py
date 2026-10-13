@@ -6,16 +6,16 @@ p=ROOT/'index.html';s=BeautifulSoup(p.read_text(),'html.parser')
 def content(node,html):
  node.clear()
  for item in list(BeautifulSoup(html,'html.parser').contents):node.append(item)
-content(s.select_one('#tldr .academic-copy'),'CLEAR jointly <mark>selects objects</mark>, <mark>determines their interaction order</mark>, and <mark>generates motion references</mark> conditioned on robot morphology and scene geometry.')
-content(s.select_one('#motivation .academic-copy'),'A humanoid pushes a box, a quadruped crosses steps, and a wheeled robot follows a slope to reach the same goal. <mark>Robot morphology determines terrain traversability and feasible object interactions.</mark> Planning must account for these constraints and for how each interaction affects subsequent actions.')
+content(s.select_one('#tldr .academic-copy'),'CLEAR jointly <mark data-concept="selection">selects objects</mark>, <mark data-concept="ordering">determines their interaction order</mark>, and <mark data-concept="generation">generates motion references</mark> conditioned on robot morphology and scene geometry.')
+content(s.select_one('#motivation .academic-copy'),'A humanoid pushes a box, a quadruped crosses steps, and a wheeled robot follows a slope to reach the same goal. Robot morphology determines <mark>terrain traversability and feasible object interactions</mark>. Planning must account for these constraints and for how each interaction affects subsequent actions.')
 old=s.select_one('#section-rail')
 if old:old.decompose()
 nav=s.new_tag('nav',id='section-rail',attrs={'aria-label':'Page contents'})
 label=s.new_tag('span',attrs={'class':'rail-label'});label.string='CONTENTS';nav.append(label)
-for target,label in [('tldr','Overview'),('motivation','Motivation'),('method','Method'),('method-grounding','(a) Grounding'),('method-order','(b) Ordering'),('method-flow','(c) Generation'),('method-execution','(d) Execution'),('learning','Training'),('learning-planner','(a) Objective'),('learning-data','(b) Samples'),('controller-pretraining','(c) Policy training'),('experiments','Experiments')]:
+for target,label in [('tldr','Overview'),('motivation','Motivation'),('method','Method'),('method-grounding','(a) Grounding'),('method-order','(b) Ordering'),('method-flow','(c) Generation'),('method-execution','(d) Execution'),('learning','Training'),('learning-planner','(a) Objective'),('learning-data','(b) Samples'),('controller-pretraining','(c) Policy training'),('experiments','Experiments'),('experiment-grid','(a) 2D Grid'),('experiment-manipulation','(b) Ordered Manipulation'),('experiment-maze','(c) Maze Navigation'),('experiment-horizon','(d) Long Horizon Planning')]:
  if not s.find(id=target):continue
  a=s.new_tag('a',href='#'+target);a.string=label
- if target.startswith(('method-','learning-')) or target=='controller-pretraining':a['class']=['rail-subsection']
+ if target.startswith(('method-','learning-','experiment-')) or target=='controller-pretraining':a['class']=['rail-subsection']
  nav.append(a)
 s.body.append(nav)
 # Emphasize one key operation per stage without changing mathematical markup.

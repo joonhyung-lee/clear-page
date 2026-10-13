@@ -4,6 +4,7 @@
       "assets/asset-revisions.js",
       "assets/design-tokens.js",
       "assets/site.js",
+      "assets/inline-loops.js",
       "assets/katex/katex.min.js",
       "assets/method.js",
       "assets/overview.js",
@@ -52,6 +53,7 @@
       "assets/code-download-locations.js",
       "code/code.js",
       "assets/site.js",
+      "assets/inline-loops.js",
       "assets/method-illustration.js",
       "assets/code-shared-examples.js"
     ],

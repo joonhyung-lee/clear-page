@@ -31,17 +31,23 @@ def publish_scenes(directory):
         if scene.startswith(('teaser', 'tldr')):
             raise ValueError('Teaser is excluded')
         source = ROOT / 'assets/recordings' / (scene + '.viser')
-        original = backup / source.name
+        source_scene = entry.get('sourceScene', scene)
+        original = backup / (source_scene + '.viser')
         if not original.exists():
-            shutil.copyfile(source, original)
-        if sha(original) != entry['sourceSHA256']:
+            shutil.copyfile(ROOT / 'assets/recordings' / original.name, original)
+        expected_source=ROOT/'assets/recordings'/f'{source_scene}.viser' if entry.get('currentRecording') else original
+        if sha(expected_source) != entry['sourceSHA256']:
             raise ValueError(f'Source recording changed: {scene}')
-        record, buffers = restyle(*read_recording(original))
-        record, buffers = compact_buffers(record, buffers)
-        with tempfile.TemporaryDirectory() as tmp:
-            staged = Path(tmp) / source.name
-            write_recording(staged, record, buffers)
-            shutil.copyfile(staged, source)
+        rendered_recording = directory / (scene + '.viser')
+        if rendered_recording.exists():
+            shutil.copyfile(rendered_recording, source)
+        else:
+            record, buffers = restyle(*read_recording(original))
+            record, buffers = compact_buffers(record, buffers)
+            with tempfile.TemporaryDirectory() as tmp:
+                staged = Path(tmp) / source.name
+                write_recording(staged, record, buffers)
+                shutil.copyfile(staged, source)
         source.with_suffix('.hex.js').write_text(
             'window.CLEAR_RECORDINGS = window.CLEAR_RECORDINGS || {};\n'
             + f'window.CLEAR_RECORDINGS[{json.dumps(scene)}] = '
@@ -85,10 +91,47 @@ def publish_policy(directory):
     print(f'Published {len(rows)} policy checkpoints and terrain views', flush=True)
 
 
+def publish_cameras(directory):
+    """Publish completed main/Ego camera exports and their material-matched replay."""
+    report = json.loads((directory / 'render.json').read_text())
+    scene = report['scene']
+    backup = ROOT / '.git/visual-refresh/original-recordings' / (scene + '.viser')
+    source = ROOT / 'assets/recordings' / backup.name
+    backup.parent.mkdir(parents=True, exist_ok=True)
+    if not backup.exists():
+        shutil.copyfile(source, backup)
+    if report.get('currentRecording'):
+        if sha(source) != report['sourceSHA256']:
+            raise ValueError(f'Rendered recording changed: {scene}')
+    else:
+        if report.get('sourceSHA256') and sha(backup) != report['sourceSHA256']:
+            raise ValueError(f'Source recording changed: {scene}')
+        record, buffers = restyle(*read_recording(backup))
+        write_recording(source, record, buffers)
+    provenance = ROOT / 'assets/camera-video-provenance.json'
+    entries = json.loads(provenance.read_text()) if provenance.exists() else {}
+    for view in ('contact', 'ego'):
+        video = directory / f'{scene}-{view}.mp4'
+        if not video.exists():
+            continue
+        poster = directory / f'{scene}-{view}-0.png'
+        if not poster.exists():
+            raise ValueError(f'Missing poster: {video.name}')
+        name=scene if scene.startswith('mpc-spot-') and view=='contact' else f'{scene}-{view}'
+        shutil.copyfile(video, ROOT / 'assets/media' / f'{name}.mp4')
+        shutil.copyfile(poster, ROOT / 'assets/media' / f'{name}.png')
+        entries[f'{name}.mp4'] = dict(report, view=view,
+            renderSHA256=sha(video), renderer='Native Viser',
+            robotMaterials='original recorded colors')
+    provenance.write_text(json.dumps(entries, indent=2) + '\n')
+    print(f'Published camera views for {scene}', flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--scenes-dir', type=Path)
     parser.add_argument('--policy-dir', type=Path)
+    parser.add_argument('--cameras-dir', type=Path)
     args = parser.parse_args()
     with (ROOT / '.git/visual-refresh-publish.lock').open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -96,6 +139,8 @@ def main():
             publish_scenes(args.scenes_dir)
         if args.policy_dir:
             publish_policy(args.policy_dir)
+        if args.cameras_dir:
+            publish_cameras(args.cameras_dir)
         for script in ('build_asset_revisions.py', 'build_site_bundle.py'):
             subprocess.run([sys.executable, str(ROOT / 'scripts' / script)], cwd=ROOT, check=True)
 

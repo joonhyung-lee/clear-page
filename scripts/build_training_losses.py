@@ -22,7 +22,7 @@ components = ''.join(plot(*p) for p in [
     ('flow', '(d) Flow', 'Conditional velocity regression'),
     ('affordance', '(e) Affordance', 'Interaction capability BCE')])
 html = f'''<section id="training-losses" aria-label="Interactive training losses">
-<p class="method-small-copy">CLEAR jointly learns object selection, interaction order, motion references, and embodiment-conditioned affordances.</p>
+<p class="method-small-copy">CLEAR jointly learns <mark data-concept="selection">object selection</mark>, <mark data-concept="ordering">interaction order</mark>, <mark data-concept="generation">motion references</mark>, and embodiment-conditioned affordances.</p>
 <div class="paper-equation-row"><div class="equation" data-tex="{formula}" data-objective-annotations="true"></div></div>
 <p class="loss-scope">Objective weights: λflow = 1, λKL = 0.001, λaff = 1, λavail = 0.</p>
 <div class="loss-loading" role="status">Loading training losses…</div>

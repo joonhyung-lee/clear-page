@@ -17,6 +17,7 @@ const manualVisibility = new IntersectionObserver(entries => {
   }
 });
 function prepareManualVideo(video) {
+  if(video.hasAttribute('data-inline-loop'))return;
   if (manualMedia.has(video)) return;
   if(video !== teaser){video.preload = 'none'; video.removeAttribute('autoplay');}
   if (video !== teaser && !video.closest('.media-tile') && !video.closest('.ego-inset')) video.controls = true;
@@ -184,7 +185,8 @@ function releaseOffscreenScenes(current){
 // The same player supports the fixed panels and the enlarged grid previews.
 function wireViewer(viewer, onLaunch = () => {}) {
   const launch = viewer.querySelector('.launch');
-  const video = viewer.querySelector('video, img.preview-image');
+  let video = viewer.querySelector('[data-active-preview], video, img.preview-image');
+  viewer.addEventListener('preview-changed',()=>{video=viewer.querySelector('[data-active-preview]')||video;});
   const launchLabel = launch.textContent;
   let timer, revealTimer, generation = 0, inView = false, localRecoveries = 0;
   const settled = (failed = false) => viewer.dispatchEvent(new CustomEvent('scene-settled', {detail:{failed}}));
@@ -220,6 +222,7 @@ function wireViewer(viewer, onLaunch = () => {}) {
       if (attempt !== generation) return;
       if(viewer.dataset.embodiment)await loadScript('assets/embodiment-bridge.js', () => typeof window.CLEAR_EMBODIMENT_BRIDGE === 'function');
       if(viewer.dataset.ego||viewer.dataset.generation||viewer.dataset.autostart!==undefined)await loadScript('assets/playback-bridge.js', () => typeof window.CLEAR_PLAYBACK_BRIDGE === 'function');
+      if(scene.startsWith('mpc-spot-'))await loadScript('assets/eef-overlay.js',()=>typeof window.CLEAR_EEF_OVERLAY==='function');
       if(viewer.dataset.orderStage)await loadScript('assets/order-bridge.js', () => typeof window.CLEAR_ORDER_BRIDGE === 'function');
       if(viewer.dataset.codeLayers!==undefined)await loadScript('assets/code-layer-bridge.js', () => typeof window.CLEAR_CODE_LAYER_BRIDGE === 'function');
       if(attempt !== generation)return;
@@ -230,7 +233,8 @@ function wireViewer(viewer, onLaunch = () => {}) {
       const bridge=(viewer.dataset.embodiment ? `window.__CLEAR_EMBODIMENT__=${JSON.stringify({robot:viewer.dataset.embodiment,mode:viewer.dataset.displayMode||'structure'})};(${window.CLEAR_EMBODIMENT_BRIDGE.toString()})();` : '')+((viewer.dataset.ego||viewer.dataset.generation||viewer.dataset.autostart!==undefined) ? `(${window.CLEAR_PLAYBACK_BRIDGE.toString()})();` : '')+(viewer.dataset.orderStage ? `window.__CLEAR_ORDER__=${JSON.stringify({stage:viewer.dataset.orderStage,sample:+viewer.dataset.orderSample||0})};(${window.CLEAR_ORDER_BRIDGE.toString()})();` : '')+(viewer.dataset.codeLayers!==undefined ? `(${window.CLEAR_CODE_LAYER_BRIDGE.toString()})();` : '');
       const embedded = `<script>window.__CLEAR_BODY_CHASE__=${viewer.dataset.scene==='mpc-g1-native'};window.__CLEAR_CONTACT_SIDE__=${viewer.dataset.contactSide==='true'};window.__CLEAR_CHECKPOINT_REPLAY__=${!!viewer.dataset.locoViewer};window.__CLEAR_EXTERNAL_TIMELINE__=${viewer.dataset.externalTimeline==='true'};(${sceneLifecycle.toString()})();${bridge}window.__VISER_EMBED_DATA__=${JSON.stringify(recordingBase64(data))};window.__VISER_EMBED_CONFIG__={darkMode:false};<\/script>`;
       const html = new TextDecoder().decode(decodeHex(window.CLEAR_VIEWER_HEX));
-      iframe.srcdoc = html.replace('</head>', embedded + '</head>');
+      const eef=scene.startsWith('mpc-spot-')?`<script>window.CLEAR_EEF_OVERLAY=${window.CLEAR_EEF_OVERLAY.toString()};<\/script>`:'';
+      iframe.srcdoc = html.replace('</head>', eef + embedded + '</head>');
       iframe.allow = 'fullscreen';
       iframe.addEventListener('load', () => { syncVisibility(); if(viewer.dataset.embodiment)iframe.contentWindow.postMessage({type:'clear-embodiment-mode',mode:viewer.dataset.displayMode||'structure'},'*'); }, {once:true});
       clearTimeout(timer);
@@ -278,7 +282,7 @@ function wireViewer(viewer, onLaunch = () => {}) {
   });
   return reset;
 }
-document.querySelectorAll('.viewer:not(.focus-viewer)').forEach(v => wireViewer(v));
+document.querySelectorAll('.viewer[data-scene]:not(.focus-viewer)').forEach(v => wireViewer(v));
 for (const grid of document.querySelectorAll('.media-grid')) {
   const overlay = grid.querySelector('.grid-focus');
   const viewer = overlay.querySelector('.viewer');
@@ -302,7 +306,7 @@ for (const grid of document.querySelectorAll('.media-grid')) {
     video.preload='none';
     const syncPreview=()=>{if(current===tile&&Number.isFinite(preview.currentTime))video.currentTime=preview.currentTime;};
     video.onloadedmetadata=syncPreview;
-    const source=tile.querySelector('source').src;
+    const source=tile.querySelector('source').src||clearAssetURL(preview.dataset.loopSource);
     if(video.src!==source)video.src=source;
     else if(video.readyState>=1)syncPreview();
     overlay.hidden=false; grid.classList.add('has-focus');

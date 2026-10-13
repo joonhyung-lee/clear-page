@@ -9,6 +9,11 @@ OBJECT_FAMILIES = ('blue', 'purple', 'mint', 'red', 'gray', 'green')
 TERRAIN_FAMILIES = {'flat':'gray','stairs_up':'blue','stairs_down':'mint',
                     'slope_up':'green','slope_down':'purple','random_rough':'red'}
 
+def robot_visual(name):
+    return (name.startswith(('/agents/', '/robot/', '/agent-outlines/'))
+            or bool(re.search(r'/(?:g1|spot|spot_arm|husky)/body-[1-9]\d*/', name))
+            or bool(re.search(r'^(?:/tracking)?/body-[1-9]\d*/', name)))
+
 def mapped_color(values, name=''):
     values = tuple(int(v) for v in values)
     if len(values) != 3: return values
@@ -39,6 +44,8 @@ def restyle(record, buffers):
     record = copy.deepcopy(record); buffers = list(buffers); cache = {}
     for _,message in record['messages']:
         name = message.get('name','')
+        if robot_visual(name):
+            continue  # Keep original material values and color buffers byte for byte.
         if message['type'] in ('AmbientLightMessage','DirectionalLightMessage','PointLightMessage'):
             continue
         for field in ('props','updates'):

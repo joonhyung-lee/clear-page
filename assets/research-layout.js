@@ -1,6 +1,22 @@
 /* Three chapters, explicit details and local resource previews. */
 (() => {
  const nav=document.querySelector('#research-nav');if(!nav)return;
+ const highlightHeading=node=>{
+  if(node.querySelector(':scope>.heading-highlight'))return;
+  const ink=document.createElement('span');ink.className='heading-highlight';
+  ink.append(...node.childNodes);node.append(ink);
+ };
+ document.querySelectorAll('#main h2,#main h3,#main h4,#main h5,#main h6,#section-rail a:not(.rail-subsection)').forEach(highlightHeading);
+ new MutationObserver(changes=>{
+  for(const change of changes){
+   if(change.target.matches?.('h2,h3,h4,h5,h6'))highlightHeading(change.target);
+   for(const node of change.addedNodes){
+    if(node.nodeType!==1)continue;
+    if(node.matches('h2,h3,h4,h5,h6'))highlightHeading(node);
+    node.querySelectorAll('h2,h3,h4,h5,h6').forEach(highlightHeading);
+   }
+  }
+ }).observe(document.querySelector('#main'),{childList:true,subtree:true});
  const sizeNav=()=>document.documentElement.style.setProperty('--clear-nav-height',Math.ceil(nav.getBoundingClientRect().height)+'px');
  new ResizeObserver(sizeNav).observe(nav);sizeNav();
  const resources=nav.querySelector('.research-resources');resources.id='research-resources';

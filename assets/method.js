@@ -30,8 +30,8 @@
    let pending=false, previousWidth=0;
    const fit=()=>{
     pending=false;
-    const available=el.clientWidth;
-    if(!available)return;
+    const available=el.getBoundingClientRect().width;
+    if(available<=2)return;
     el.style.setProperty('--objective-font-size','16px');
     let size=16;
     for(let pass=0;pass<3;pass++){

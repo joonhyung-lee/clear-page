@@ -23,6 +23,18 @@ TITLES = {'flat':'Flat','stairs_up':'Stairs up','stairs_down':'Stairs down',
           'slope_up':'Slope up','slope_down':'Slope down','random_rough':'Rough terrain'}
 
 
+# Recorded agents selected for complete late-checkpoint traversals. Keep each
+# terrain row fixed across all indices; do not substitute a later checkpoint.
+TRAVERSAL_AGENTS = {('g1','slope_up'):21, ('spot','stairs_down'):2}
+
+def representative_agent(body, family, ids, origins, use_traversal_selection=True):
+    chosen=TRAVERSAL_AGENTS.get((body,family)) if use_traversal_selection else None
+    if chosen is None:
+        chosen=max(ids,key=lambda i:origins[i,0]) if body=='g1' else min(ids,key=lambda i:(abs(origins[i,0]),origins[i,0]))
+    if chosen not in ids:raise ValueError(f'{body} {family}: agent {chosen} is outside this terrain')
+    return int(chosen)
+
+
 def arrange(record, source_buffers, reference_time, tracking=None):
     buffers=list(source_buffers)
     def array(ref, width):
@@ -52,8 +64,8 @@ def arrange(record, source_buffers, reference_time, tracking=None):
     extent=np.linalg.norm(np.stack(tracks)[:,:,:2]-initial[:,:2],axis=2).max(axis=0)
     for group,(family,y) in enumerate(zip(families,columns)):
         ids=np.flatnonzero(origins[:,1]==y)
-        # Fixed terrain row across checkpoints: hardest recorded G1 row, central row for Spot.
-        ids=[max(ids,key=lambda i:origins[i,0]) if len(families)==6 else min(ids,key=lambda i:(abs(origins[i,0]),origins[i,0]))]*4
+        body=getattr(tracking,'body',None) or ('g1' if len(families)==6 else 'spot_arm')
+        ids=[representative_agent(body,family,ids,origins,use_traversal_selection=tracking is not None)]*4
         motion_radius=float(extent[ids].max())
         margin=4.
         terrain_slots.append(len(selected))
@@ -251,7 +263,7 @@ def annotate(picture, views, size, metrics=None):
     from PIL import Image,ImageDraw,ImageFont
     image=Image.open(io.BytesIO(picture)).convert('RGB')
     draw=ImageDraw.Draw(image);rows=(len(views)+1)//2
-    font=ImageFont.truetype(font_path(),round(size/48))
+    font=ImageFont.truetype(font_path(mono=True),round(size/48))
     small=ImageFont.truetype(font_path(mono=True),round(size/74))
     for index,view in enumerate(views):
         x=index%2*size//2;y=index//2*image.height//rows

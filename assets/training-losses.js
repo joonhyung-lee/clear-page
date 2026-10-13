@@ -7,8 +7,8 @@
   let pointerPreview = null, focusPreview = null;
   const roleKeys={order:['selection','order','kl'],flow:['flow'],affordance:['affordance'],availability:[]};
   const palette=window.CLEAR_DESIGN.colors;
-  const termColors={selection:palette.blue[600],order:palette.purple[600],kl:palette.gray[600],flow:palette.green[600],affordance:palette.mint[600]};
-  const roleHelp={order:'Object selection, pairwise ranking, and Gaussian score regularization.',flow:'Flow matching for continuous object references under a fixed interaction order.',affordance:'Binary supervision of interaction availability and terrain-transition feasibility.',availability:'Availability of the first interaction. Objective weight: 0.'};
+  const termColors={selection:palette.blue[600],order:palette.purple[600],kl:palette.gray[600],flow:palette.green[600],affordance:palette.mint[600],availability:palette.red[600]};
+  const roleHelp={order:'Object selection, pairwise ranking, and Gaussian score regularization.',flow:'Flow matching for continuous object references under a fixed interaction order.',affordance:'Binary supervision of interaction availability and terrain-transition feasibility.',availability:'Weight 0: this term contributes zero to the displayed objective. No loss curve was logged.'};
   const termHelp=document.createElement('div');termHelp.id='loss-term-help';termHelp.className='loss-term-help';termHelp.setAttribute('role','tooltip');termHelp.hidden=true;root.append(termHelp);
   root.querySelectorAll('.objective-term').forEach(term=>term.setAttribute('aria-describedby',termHelp.id));
   const value = n => Number(n.toPrecision(6)).toString();
@@ -68,7 +68,9 @@
   }
   function renderComposition(){
     const holder=root.querySelector('[data-loss-composition]');if(!holder)return;
-    const row=data.samples[index??data.samples.length-1],items=[['selection','Selection',1],['order','Ranking',1],['kl','KL × 0.001',.001],['flow','Flow',1],['affordance','Affordance',1]];
+    const weights=data.weights||{kl:.001,flow:1,affordance:1,availability:0};
+    const row=data.samples[index??data.samples.length-1],items=[['selection','Selection',1],['order','Ranking',1],['kl','KL × '+weights.kl,weights.kl],['flow','Flow',weights.flow],['affordance','Affordance',weights.affordance]];
+    if(weights.availability>0)items.push(['availability','Availability × '+weights.availability,weights.availability]);
     const title=document.createElement('p');title.textContent='Step '+row.step.toLocaleString('en-US')+' · Weighted contributions → total '+value(row.loss);
     const bar=document.createElement('div');bar.className='loss-contribution-bar';bar.setAttribute('aria-hidden','true');
     const legend=document.createElement('div');legend.className='loss-contribution-values';
@@ -76,7 +78,8 @@
       const contribution=row[key]*weight,segment=document.createElement('span');segment.style.flexGrow=String(contribution);segment.style.background=termColors[key];bar.append(segment);
       const item=document.createElement('span');const swatch=document.createElement('i');swatch.style.background=termColors[key];item.append(swatch,document.createTextNode(label+' '+value(contribution)));legend.append(item);
     }
-    const inactive=document.createElement('span');inactive.textContent='Availability × 0 = 0';legend.append(inactive);holder.replaceChildren(title,bar,legend);
+    if(!weights.availability){const inactive=document.createElement('span');inactive.textContent='Availability × 0 = 0';legend.append(inactive);}
+    holder.replaceChildren(title,bar,legend);
   }
   function render() { if (data) {charts.forEach(renderChart);renderComposition();} }
   function schedule() { if (scheduled) return; scheduled = true; requestAnimationFrame(() => { scheduled = false; render(); }); }
@@ -90,6 +93,17 @@
     try {
       await loadScript('assets/training-loss-data.js', () => !!window.CLEAR_TRAINING_LOSSES);
       data = window.CLEAR_TRAINING_LOSSES;
+      const weights=data.weights||{kl:.001,flow:1,affordance:1,availability:0};
+      if(weights.availability>0&&data.samples.every(row=>Number.isFinite(row.availability))){
+        roleKeys.availability=['availability'];
+        roleHelp.availability='Penalizes unavailable first interactions through selection probabilities and priority scores. Weight '+weights.availability+'.';
+        const chart=document.createElement('figure');chart.className='training-loss-chart';chart.id='loss-availability';chart.dataset.loss='availability';
+        chart.innerHTML='<figcaption><h5>(f) Availability</h5><p>Feasible first interactions.</p></figcaption><canvas aria-label="Availability loss. Use left and right arrows to inspect recorded steps." role="img" tabindex="0"></canvas><div class="loss-tooltip" hidden></div>';
+        const grid=root.querySelector('.loss-chart-grid');grid.append(chart);grid.classList.add('has-availability');grid.setAttribute('aria-label','Six component training losses');charts.push(chart);bindPreview(chart,chart.querySelector('canvas'));
+        const state=root.querySelector('.availability-state');if(state)state.textContent='λavail = '+weights.availability;
+        root.querySelector('.loss-scope:not(.loss-band-note)').textContent='Objective weights: λflow = '+weights.flow+', λKL = '+weights.kl+', λaff = '+weights.affordance+', λavail = '+weights.availability+'. Hover a curve to inspect its recorded values.';
+      }
+      root.querySelector('#loss-loss figcaption p').textContent=data.maxStep.toLocaleString('en-US')+' training steps';
       const radius = Math.floor(data.window / 2);
       for (const chart of charts) {
         const key = chart.dataset.loss;
@@ -128,6 +142,7 @@
   };
   function paintInteraction() {
     const preview = pointerPreview || focusPreview;
+    showRole(preview?.role || selectedRole || 'order');
     const selectedKeys = roleKeys[selectedRole] || [];
     charts.forEach(chart => {
       chart.classList.toggle('loss-term-active', !!preview?.keys.includes(chart.dataset.loss));
@@ -177,7 +192,10 @@
       termHelp.hidden = true; paintInteraction();
     });
   }
-  root.querySelectorAll('[data-role-panel]').forEach(panel => panel.id = 'loss-role-' + panel.dataset.rolePanel);
+  const rolePanels=[...root.querySelectorAll('[data-role-panel]')];
+  const panelStack=document.createElement('div');panelStack.className='loss-role-panels';
+  rolePanels[0]?.before(panelStack);
+  rolePanels.forEach(panel => {panel.id = 'loss-role-' + panel.dataset.rolePanel;panelStack.append(panel);});
   root.querySelectorAll('[data-objective-role], .objective-term').forEach(node => {
     const role = node.dataset.objectiveRole || roleForTerm(node);
     node.setAttribute('aria-controls', ['loss-role-' + role, ...(roleKeys[role] || []).map(key => 'loss-' + key)].join(' '));

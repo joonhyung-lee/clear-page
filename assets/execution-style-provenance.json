@@ -1,0 +1,95 @@
+{
+  "style": "Published execution presentation with pastel colors",
+  "reference": "Published execution recordings before the palette refresh",
+  "colors": {
+    "blue": [
+      145,
+      178,
+      211
+    ],
+    "red": [
+      210,
+      153,
+      157
+    ],
+    "green": [
+      113,
+      174,
+      144
+    ],
+    "mint": [
+      155,
+      201,
+      187
+    ],
+    "purple": [
+      184,
+      171,
+      207
+    ],
+    "gray": [
+      209,
+      214,
+      216
+    ]
+  },
+  "anchorsPerPath": 10,
+  "scenes": [
+    {
+      "scene": "mpc-optimized-full",
+      "originalSHA256": "cb891590784257b33360f69c168fa4a7148ee3bd720d514aba567f09a9393be3",
+      "styledSHA256": "dd027bdb0bce2c75cb2b2a442076e95882360f5df5b7a6c87fb4f519e3e87f2d",
+      "camera": "original recording",
+      "bodyPoses": "unchanged",
+      "robotMeshes": "unchanged"
+    },
+    {
+      "scene": "mpc-baseline",
+      "originalSHA256": "28abfe8ac850092dfaed12a88ff2a13314222f623eee90d32af2bf1d6e4be89d",
+      "styledSHA256": "f5f473ee7fc3453de4ff9e751447c0c62fa69169ab5631d9e3abb2de49bdf859",
+      "camera": "original recording",
+      "bodyPoses": "unchanged",
+      "robotMeshes": "unchanged"
+    },
+    {
+      "scene": "mpc-spot-optimized",
+      "originalSHA256": "f3e2a82b77f1b0981489b4a5964b8fcd4e1af897d8811575172d2d2991574a23",
+      "styledSHA256": "be0faf15d83e55380f0721b4357c3274a89d6a714e0bada04b0f45906fe50e85",
+      "camera": "original recording",
+      "bodyPoses": "unchanged",
+      "robotMeshes": "unchanged",
+      "eefOverlay": {
+        "lanes": 1,
+        "anchors": 10,
+        "darkRims": true,
+        "visibleOverObject": true
+      },
+      "objectGhosts": {
+        "count": 2,
+        "source": "Recorded reference anchors: midpoint and target",
+        "outlined": true,
+        "plannedTrajectoryVisible": true
+      }
+    },
+    {
+      "scene": "mpc-spot-native",
+      "originalSHA256": "5759f6cd73b795054f3032a927b521c7575b6b1d7296f860059c187eeb093a56",
+      "styledSHA256": "6158e97ecabed2ddac55ca159ec1733dad94c1ffa2ae08c06f32b7cee6b59d01",
+      "camera": "original recording",
+      "bodyPoses": "unchanged",
+      "robotMeshes": "unchanged",
+      "eefOverlay": {
+        "lanes": 1,
+        "anchors": 10,
+        "darkRims": true,
+        "visibleOverObject": true
+      },
+      "objectGhosts": {
+        "count": 2,
+        "source": "Recorded reference anchors: midpoint and target",
+        "outlined": true,
+        "plannedTrajectoryVisible": true
+      }
+    }
+  ]
+}

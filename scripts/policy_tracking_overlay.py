@@ -8,6 +8,7 @@ class TrackingReplay:
     def __init__(self, path):
         with np.load(path) as data:
             self.data={key:data[key].copy() for key in data.files}
+        self.body=path.parent.name
         self.dt=float(self.data['dt'])
         self.frames=self.data['heading'].shape[1]
         self.duration=self.frames*self.dt

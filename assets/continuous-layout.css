@@ -88,9 +88,9 @@
 #method-execution>.pushing-motion-legend{font-size:12px!important;margin-top:-22px!important}
 .pushing-motion-legend span{display:inline-flex;align-items:center;gap:6px}
 .pushing-motion-legend i{display:inline-block;width:24px;border-top:3px solid}
-.pushing-motion-legend .object-target{border-color:#155dfc;border-top-style:dashed}
-.pushing-motion-legend .object-motion{border-color:#00786f}
-.pushing-motion-legend .eef-motion{border-color:#ff6467}
+.pushing-motion-legend .object-target{border-color:#91b2d3;border-top-style:dashed}
+.pushing-motion-legend .object-motion{border-color:#71ae90}
+.pushing-motion-legend .eef-motion{border-color:#d2999d}
 @media(max-width:900px){#method-execution .pushing-gallery{width:100%;margin-inline:0}}
 /* Each inset is positioned inside its own video tile. */
 .media-tile{position:relative}
@@ -234,9 +234,9 @@
 .spot-loading[hidden]{display:none}
 .spot-path-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:#6a7282}
 .spot-path-legend span{display:inline-flex;align-items:center;gap:6px}
-.spot-path-legend i{display:inline-block;width:22px;border-top:3px solid #ff6467}
-.spot-path-legend .object{border-color:#00786f}
-.spot-path-legend .target{border-color:#155dfc;border-top-style:dashed}
+.spot-path-legend i{display:inline-block;width:22px;border-top:3px solid #d2999d}
+.spot-path-legend .object{border-color:#71ae90}
+.spot-path-legend .target{border-color:#91b2d3;border-top-style:dashed}
 
 /* Each outlined pair contains its title, robot replay and EEF plot. */
 #main [data-replay-body] .execution-process-grid{align-items:stretch}
@@ -258,6 +258,9 @@
 [data-replay-body] .mpc-recording-status:empty{display:none}
 #method-execution .spot-process{margin-top:28px;padding-top:22px;border-top:0}
 .spot-path-legend{font-size:12px;margin-top:6px;justify-content:flex-end}
+/* Reserve the measured controller layout while its data loads, so launching
+   the following Spot replay does not move its iframe out of the viewport. */
+.mpc-process-content[hidden]{display:block!important;visibility:hidden;pointer-events:none}
 .experiment-scenes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 40px;margin:26px 0 64px;max-width:1120px;margin-inline:auto}
 .experiment-scenes figure{margin:0;min-width:0}
 .experiment-scenes a{display:block;color:inherit;text-decoration:none}
@@ -358,3 +361,7 @@
  #clear-overview .overview-preview-inline .overview-preview-grid video{height:150px}
  #clear-overview .overview-preview-inline figure>svg{height:auto}
 }
+
+/* Inline scene loops retain their complete native frame. */
+#input-objects video[data-inline-loop],#embodiment-demo video[data-inline-loop]{object-fit:contain}
+#input-scene .media-tile video[data-inline-loop]{width:100%;height:auto;aspect-ratio:14/11;object-fit:contain}

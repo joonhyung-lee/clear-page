@@ -109,7 +109,8 @@ def style_recording(record, buffers, source, body):
     # Terrain columns follow the recorded environment origins. Partition existing
     # triangles, keeping every coordinate and face, including the border floor.
     columns = s['origins'][:len(terrain_names), 1]
-    half_tile = float(np.diff(columns).min()) / 2
+    spacing = np.diff(columns) if len(columns)>1 else np.diff(np.unique(s['origins'][:,0]))
+    half_tile = float(spacing.min()) / 2
     replacements, removed = [], set()
     for time, message in record['messages']:
         if message['type'] != 'MeshMessage' or not message['name'].startswith('/terrain/'):

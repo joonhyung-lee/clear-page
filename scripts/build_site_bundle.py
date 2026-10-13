@@ -64,6 +64,37 @@ def prepare_main_layout(soup):
                 link.decompose()
         failures.decompose()
 
+def prepare_grounding_previews(soup):
+    """Make the small scene/embodiment panels loop without starting WebGL."""
+    for viewer in soup.select('#embodiment-demo .viewer[data-embodiment]'):
+        body=viewer['data-embodiment']
+        video=viewer.select_one('video[data-inline-loop]')
+        if not video:
+            old=viewer.select_one('img.preview-image')
+            video=soup.new_tag('video',attrs={'class':'preview-video','data-inline-loop':'',
+                'width':'560','height':'440','aria-label':f'{viewer.get("data-title",body)} structure'})
+            old.replace_with(video)
+        viewer['data-display-mode']='structure'
+        video['data-loop-source']=f'assets/media/structure-{body}.mp4'
+        video['data-loop-mode']='structure'
+        video['data-active-preview']=''
+        video['data-preview-src']=f'assets/media/structure-{body}.png'
+        video['poster']=f'assets/media/structure-{body}.png'
+    for button in soup.select('#embodiment-demo [data-embodiment-mode]'):
+        button['aria-pressed']=str(button['data-embodiment-mode']=='structure').lower()
+    explanation=soup.select_one('#embodiment-demo .embodiment-explanation')
+    if explanation:explanation.string='Link and joint structure across robot embodiments.'
+    for video in soup.select('#input-objects video, #input-scene .media-tile video, #embodiment-demo video[data-inline-loop], .affordance-viewer video'):
+        video['data-inline-loop']=''
+        for key in ('muted','loop','playsinline'):video[key]=''
+        video['preload']='none'
+        source=video.select_one('source')
+        if source:
+            video['data-loop-source']=video.get('data-loop-source') or source.get('src') or source.get('data-src')
+            source['data-src']=video['data-loop-source'].split('?')[0]
+            source.attrs.pop('src',None)
+            video['data-loop-source']=source['data-src']
+
 def build(check=False):
     stale = []
     def write(path, text):
@@ -74,9 +105,11 @@ def build(check=False):
             path.write_text(text)
     if not check:
         from build_design_assets import build as build_design_assets
+        from build_loop_assets import build as build_loop_assets
         from build_static_code import build as build_static_code
         from build_fast_data import build as build_fast_data
         build_design_assets()
+        build_loop_assets()
         build_static_code()
         build_fast_data()
     tracked = set(subprocess.check_output(['git','ls-files','-z'], cwd=ROOT).decode().split('\0'))
@@ -91,6 +124,7 @@ def build(check=False):
         soup = BeautifulSoup(page.read_text(), 'html.parser')
         if name == 'index.html':
             prepare_main_layout(soup)
+            prepare_grounding_previews(soup)
         js = ROOT / entry['js_output']
         css = ROOT / entry['css_output']
         page_previews={}

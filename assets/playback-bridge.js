@@ -90,6 +90,14 @@ window.CLEAR_PLAYBACK_BRIDGE=function(){
  window.addEventListener('message',e=>{if(e.source!==parent)return;if(e.data?.type==='clear-playback-command')command=e.data;else if(e.data?.type==='clear-contact-camera'){sideApplied=false;setContactCamera();}});
  const interval=setInterval(()=>{
   setContactCamera();compactCheckpointUpdates();
+  if(window.CLEAR_EEF_OVERLAY){
+   if(!viewer){
+    const root=document.querySelector('#root'),key=root&&Object.keys(root).find(k=>k.startsWith('__reactContainer'));
+    const queue=key?[root[key],root[key]?.stateNode?.current]:[],seen=new Set();
+    while(queue.length){const f=queue.pop();if(!f||seen.has(f))continue;seen.add(f);const v=f.memoizedProps?.value;if(v?.mutable?.current?.nodeRefFromName&&v?.useSceneTree){viewer=v;break;}queue.push(f.child,f.sibling,f.alternate);}
+   }
+   if(viewer)window.CLEAR_EEF_OVERLAY(viewer);
+  }
   const input=document.querySelector('input'),button=document.querySelector('[class*="tabler-icon-player-play"],[class*="tabler-icon-player-pause"]')?.closest('button');if(!input||!button)return;
   let playing=!!button.querySelector('.tabler-icon-player-pause-filled');
   if(command){

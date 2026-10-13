@@ -3,120 +3,334 @@
   "scenes": [
     {
       "scene": "objects",
+      "sourceScene": "objects",
       "sourceSHA256": "93a25d2d93493dbacb991dd731d3184570c85bc37c32e85367fb64e7f84d970b",
       "fps": 60.0,
       "frames": 720,
       "size": [
-        560,
-        440
+        1120,
+        880
       ],
+      "zoom": 1.12,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
       "palette": "design-tokens.json",
       "motion": "archived poses; unchanged",
-      "renderSHA256": "b7791d9dfcd5aeb3b7d7e54e7f9da751565cfcdc68649f097e4814583eca22b7"
+      "renderSHA256": "c10c1ce6ed8ad8171382e5c0462ba4e1497bfda054b7580de952bd958bf6279a"
     },
     {
       "scene": "scene-maze",
+      "sourceScene": "scene-maze",
       "sourceSHA256": "853873ce257a3231ba2024f32601436a3bffe2b6528b719531c84d30c79e1aa4",
       "fps": 60.0,
       "frames": 720,
       "size": [
-        560,
-        440
+        1120,
+        880
       ],
+      "zoom": 1.18,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
       "palette": "design-tokens.json",
       "motion": "archived poses; unchanged",
-      "renderSHA256": "101a611b890d9a0df64fc477cea881a277a6575ed9cd144af07ededa703301e6"
+      "renderSHA256": "8f15292092943f6d3f24be392fa8ca7d0ef98a6dd3c991b9c23760ea0c812727"
     },
     {
       "scene": "scene-slope",
+      "sourceScene": "scene-slope",
       "sourceSHA256": "d968622523ee36c55d2e386f358a421dbdd3b6954a036e8fd297540ba4586a57",
       "fps": 60.0,
       "frames": 720,
       "size": [
-        560,
-        440
+        1120,
+        880
       ],
+      "zoom": 1.18,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
       "palette": "design-tokens.json",
       "motion": "archived poses; unchanged",
-      "renderSHA256": "30f67cbd67034a1b61d9348851808f3536217156267ac6240cc0a75b32b9b7bc"
+      "renderSHA256": "47022f5d73e1e62387a3d59e007b47c99542f850c0f6d5e437a1bd71d247097a"
     },
     {
       "scene": "scene-stairs",
+      "sourceScene": "scene-stairs",
       "sourceSHA256": "6e332df1127aaf2cb041227ad5d482af4e3182fff8815f9b0ee0e9a15392460a",
       "fps": 60.0,
       "frames": 720,
       "size": [
-        560,
-        440
+        1120,
+        880
       ],
+      "zoom": 1.18,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
       "palette": "design-tokens.json",
       "motion": "archived poses; unchanged",
-      "renderSHA256": "2435953a463957ced6759157fc490a5c66e41f4a05eeb4e98fd778c2b33aaf50"
+      "renderSHA256": "7a98fc64d8f2a72c2a72225c9ca44b22e38b0d8916504685a4f46d70c3e8ba0f"
     },
     {
       "scene": "scene-steps",
+      "sourceScene": "scene-steps",
       "sourceSHA256": "7b989842c7960442e33d8a818fdc3318b3ca1598ef9d154fde48767d7582a833",
       "fps": 60.0,
       "frames": 720,
       "size": [
-        560,
-        440
+        1120,
+        880
       ],
+      "zoom": 1.18,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
       "palette": "design-tokens.json",
       "motion": "archived poses; unchanged",
-      "renderSHA256": "81b6b889be39904e4af0d127fd49c625a6c9f5f42c1e285bf6b9fda3a7c034cf"
+      "renderSHA256": "25e7f35a7620d15de8691142db630c17358dcd5999af08b650c405e98a1fbadf"
     },
     {
       "scene": "structure-g1",
+      "sourceScene": "structure-g1",
       "sourceSHA256": "7d810f052d4b62e2ad59fe210386267a131e07052e052a85ddd4cf2519781923",
       "fps": 60.0,
       "frames": 720,
       "size": [
-        560,
-        440
+        1120,
+        880
       ],
+      "zoom": 1,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
       "palette": "design-tokens.json",
       "motion": "archived poses; unchanged",
-      "renderSHA256": "5ff1a3d14808169afecd53258791bda4177030ddeb863823d56531d7face6def"
+      "renderSHA256": "2da8df89f223310a0b0583bd02ada4efef98888d0c5ae79a4c7a1992c4f0691a"
     },
     {
       "scene": "structure-husky",
+      "sourceScene": "structure-husky",
       "sourceSHA256": "53a17a2fb041fe60f439ea041043b7ba0b947d2cb9debb3887f3dd8d0f3635ce",
       "fps": 60.0,
       "frames": 720,
       "size": [
-        560,
-        440
+        1120,
+        880
       ],
+      "zoom": 1,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
       "palette": "design-tokens.json",
       "motion": "archived poses; unchanged",
-      "renderSHA256": "c895312e7a3d3cc323a523e5fa9c7fa2d92556f8d42d51fb203f2d5967ebe3f7"
+      "renderSHA256": "0c08f3eef3fe4c36b285914a26708f85705972aa115b8e2a76347eddc7b287f8"
     },
     {
       "scene": "structure-spot",
+      "sourceScene": "structure-spot",
       "sourceSHA256": "9d684c1ac353bff13c6124e09e1b2c4e1d8c54c8714ef0f952742c17553d8d5e",
       "fps": 60.0,
       "frames": 720,
       "size": [
-        560,
-        440
+        1120,
+        880
       ],
+      "zoom": 1,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
       "palette": "design-tokens.json",
       "motion": "archived poses; unchanged",
-      "renderSHA256": "7fa106e45aab9b699d5f8029a1a97d3ce68c0c2f56a4a126188751dfe76720c3"
+      "renderSHA256": "465623728a839985782ed9378b2afc198ed92523ccf5c2be89308992baa9a5cc"
     },
     {
       "scene": "structure-spot_arm",
+      "sourceScene": "structure-spot_arm",
       "sourceSHA256": "dc8fdce9cdd409b8a0667c71ba7ebe334b4689ba25decda6705620242ebbd6ac",
       "fps": 60.0,
       "frames": 720,
       "size": [
-        560,
-        440
+        1120,
+        880
       ],
+      "zoom": 1,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
       "palette": "design-tokens.json",
       "motion": "archived poses; unchanged",
-      "renderSHA256": "1b69394142f0f777f26297808f13b8861a999f3f429523449c6e7e46ecd681a1"
+      "renderSHA256": "6ef222e0749333b8a58a32b979290b2e1a47208418cc93b117efc0526eab695c"
+    },
+    {
+      "scene": "affordance-manipulation-g1",
+      "sourceScene": "structure-g1",
+      "sourceSHA256": "1303f56355cfde60311f87406e5a1af8f000a6fb2645bb8f4684d9dcf63cd7eb",
+      "currentRecording": true,
+      "fps": 30,
+      "frames": 360,
+      "size": [
+        640,
+        502
+      ],
+      "zoom": 1,
+      "mode": "manipulation",
+      "robotMaterials": "original recorded colors",
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "dda70b98ac5714d070a8d64e108457608376ad1efa4a5b8b3a403ee0209d9eec"
+    },
+    {
+      "scene": "affordance-traversability-g1",
+      "sourceScene": "structure-g1",
+      "sourceSHA256": "3b6f5deb9f738eab1af7eafd6b15d243ab7386b619561aec1243989748609ab6",
+      "currentRecording": true,
+      "fps": 30,
+      "frames": 360,
+      "size": [
+        640,
+        502
+      ],
+      "zoom": 1,
+      "mode": "traversability",
+      "robotMaterials": "original recorded colors",
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "571e1e00d9a3f634980ad14ef4a96fd4a5991d2dc163aa5423b03589c90519f1"
+    },
+    {
+      "scene": "affordance-manipulation-spot",
+      "sourceScene": "structure-spot",
+      "sourceSHA256": "bc1d5a7e124c802cc203ac9612fc569e20ed3ae4c0c0e87ec08fb7ada193dc4c",
+      "currentRecording": true,
+      "fps": 30,
+      "frames": 360,
+      "size": [
+        640,
+        502
+      ],
+      "zoom": 1,
+      "mode": "manipulation",
+      "robotMaterials": "original recorded colors",
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "7a39a9bbb3346702cad7a0e8322b131e341b134b1dee297c7b0fa29368daba80"
+    },
+    {
+      "scene": "affordance-traversability-spot",
+      "sourceScene": "structure-spot",
+      "sourceSHA256": "81c224b8cb92bd2ad5c9b4ecfbf96856c57807e7e64c597e18ae0558c213e2f8",
+      "currentRecording": true,
+      "fps": 30,
+      "frames": 360,
+      "size": [
+        640,
+        502
+      ],
+      "zoom": 1,
+      "mode": "traversability",
+      "robotMaterials": "original recorded colors",
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "97be84b92ea52ddffb56c0a98c44c8b898ed6b5fb71531481367b570eae805c5"
+    },
+    {
+      "scene": "affordance-manipulation-spot_arm",
+      "sourceScene": "structure-spot_arm",
+      "sourceSHA256": "e0c75f243d341de4894d09f1e97b7cd3da803372c2d8f251484cad432d1a8e3e",
+      "currentRecording": true,
+      "fps": 30,
+      "frames": 360,
+      "size": [
+        640,
+        502
+      ],
+      "zoom": 1,
+      "mode": "manipulation",
+      "robotMaterials": "original recorded colors",
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "20f460fcd3ab745e89bd83773f1f03f27cccc075001b176fb459f8c91c8b6b95"
+    },
+    {
+      "scene": "affordance-traversability-spot_arm",
+      "sourceScene": "structure-spot_arm",
+      "sourceSHA256": "98b4200e253cc56b44b196bb7cb479fd1ace0a587fc8ca7277cab94c22fc6552",
+      "currentRecording": true,
+      "fps": 30,
+      "frames": 360,
+      "size": [
+        640,
+        502
+      ],
+      "zoom": 1,
+      "mode": "traversability",
+      "robotMaterials": "original recorded colors",
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "7193eeeb3d4ba69e89691577f5c4b2896921e9e4c8f6e97b6c461c717b1ac155"
+    },
+    {
+      "scene": "affordance-manipulation-husky",
+      "sourceScene": "structure-husky",
+      "sourceSHA256": "1fa5b9efe0a27a7b30d83cc6edab38ab4cceacad0214a7482a634b3f839b31c5",
+      "currentRecording": true,
+      "fps": 30,
+      "frames": 360,
+      "size": [
+        640,
+        502
+      ],
+      "zoom": 1,
+      "mode": "manipulation",
+      "robotMaterials": "original recorded colors",
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "d36d631bfb63f46a027f7722019a3749f92458242cd242d27f9ea791a5fafbb0"
+    },
+    {
+      "scene": "affordance-traversability-husky",
+      "sourceScene": "structure-husky",
+      "sourceSHA256": "890ca03e7ee3015626b5cf8587dc1e81df04903dd0ffe45fd6138d158f0e063c",
+      "currentRecording": true,
+      "fps": 30,
+      "frames": 360,
+      "size": [
+        640,
+        502
+      ],
+      "zoom": 1,
+      "mode": "traversability",
+      "robotMaterials": "original recorded colors",
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "301f83e7e801164c5e11e075875c8ecb957dc01b29b4dacc4f818d1b6916462b"
+    },
+    {
+      "scene": "mpc-spot-native",
+      "sourceScene": "mpc-spot-native",
+      "sourceSHA256": "5759f6cd73b795054f3032a927b521c7575b6b1d7296f860059c187eeb093a56",
+      "fps": 25.0,
+      "frames": 263,
+      "size": [
+        1120,
+        840
+      ],
+      "zoom": 1,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "a5c11f712683d209249374f1ea9b25dd47f8f94cabc7bd7348ae27a23b3fb3fb"
+    },
+    {
+      "scene": "mpc-spot-optimized",
+      "sourceScene": "mpc-spot-optimized",
+      "sourceSHA256": "f3e2a82b77f1b0981489b4a5964b8fcd4e1af897d8811575172d2d2991574a23",
+      "fps": 25.0,
+      "frames": 545,
+      "size": [
+        1120,
+        840
+      ],
+      "zoom": 1,
+      "mode": "structure",
+      "robotMaterials": "original recorded colors",
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "a02e2263303fabf2ebd715a4282f17a083cbd3972249691af284920cf6d65d38"
     }
   ]
 }

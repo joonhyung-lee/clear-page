@@ -2,7 +2,7 @@
 import argparse,hashlib,json
 from pathlib import Path
 import numpy as np
-from policy_matrix_scene import DISPLAY_TERRAIN
+from policy_matrix_scene import DISPLAY_TERRAIN, representative_agent
 
 ROOT=Path(__file__).resolve().parents[1]
 def build(source,body):
@@ -14,11 +14,11 @@ def build(source,body):
     telemetry=np.load(source/f'{body}-tracking.npz')
     origins=states['origins'];dt=float(telemetry['dt'])
     agents=[]
-    for y in sorted(set(origins[:,1])):
+    for terrain,y in zip(audit['terrains'],sorted(set(origins[:,1]))):
         ids=np.flatnonzero(origins[:,1]==y)
-        agents.append(int(max(ids,key=lambda i:origins[i,0]) if body=='g1' else min(ids,key=lambda i:(abs(origins[i,0]),origins[i,0]))))
+        agents.append(representative_agent(body,terrain,ids,origins))
     result=dict(schema=1,body=body,source='Deterministic checkpoint evaluation with forward velocity and heading feedback',
-        selection=('Fixed highest available terrain row for every G1 checkpoint; challenging examples, not aggregate performance' if body=='g1' else 'Fixed terrain row closest to world X=0; independent of reward or tracking error'),
+        selection=('Fixed terrain row across checkpoints; G1 slope-down agent 21 and Spot stairs-up agent 2 selected for completed late-checkpoint traversals; remaining rows retain the original selection'),
         terrainLabels='Traversal direction from the tile center outward; sourceTerrain retains the original pyramid-shape name',
         display='Four rotated copies of each selected recorded rollout, not four independent measurements',
         displayGround='Flat exterior ground continues the recorded tile visually; it does not change the simulated terrain or recorded poses',
@@ -58,7 +58,7 @@ def build(source,body):
     data['checkpoints']=checkpoints
     if data.get('defaultCheckpoint') not in {stage['id'] for stage in checkpoints}:
         data['defaultCheckpoint']=checkpoints[0]['id']
-    data['replayNote']=('G1 shows the same highest terrain row at every checkpoint, starting 2.5 seconds into each evaluation. ' if body=='g1' else '')+'Videos are deterministic forward-command checkpoint evaluations with heading feedback. Target and actual velocity arrows share one scale. Four directions are rotated copies of one selected rollout per terrain.'
+    data['replayNote']=('G1 shows the same selected terrain row at every checkpoint, starting 2.5 seconds into each evaluation. ' if body=='g1' else '')+'Videos are deterministic forward-command checkpoint evaluations with heading feedback. Target and actual velocity arrows share one scale. Four directions are rotated copies of one selected rollout per terrain.'
     datafile.write_text(prefix+' = '+json.dumps(data,separators=(',',':'))+';\n')
     print(body,'published',len(result['checkpoints']),'checkpoints;',len(agents),'measured terrain rollouts each')
 

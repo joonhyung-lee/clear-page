@@ -19,6 +19,7 @@ p.add_argument('--deterministic', action='store_true', help='Evaluate the policy
 p.add_argument('--arm-motion', action='store_true', help='Evaluate commanded arm posture changes during locomotion')
 p.add_argument('--bare-spot', action='store_true', help='Use the distinct arm-free physical model and policy')
 p.add_argument('--heading-tracking', action='store_true', help='Evaluate a 0.5 m/s world-forward command with heading feedback and record telemetry')
+p.add_argument('--rough-only',action='store_true',help='Evaluate the saved checkpoints on the random rough terrain bank')
 p.add_argument('--no-auto-reset',action='store_true',help='Continue physics after failure so falls remain visible')
 p.add_argument('--device', default='cuda:0')
 p.add_argument('--consistent-commands', action='store_true', help='Use the corrected per-episode Spot torso commands')
@@ -55,6 +56,12 @@ if a.no_auto_reset:
     cfg.terminations = {}
 terrain = cfg.scene.terrain
 generator = terrain.terrain_generator
+if a.rough_only:
+    import copy
+    from mjlab.tasks.velocity.config.g1.blind_stairs_env_cfg import blind_stairs_terrain_cfg
+    rough=copy.deepcopy(blind_stairs_terrain_cfg(curriculum=True).sub_terrains['random_rough'])
+    rough.proportion=1.
+    generator.sub_terrains={'random_rough':rough}
 generator.seed = 42
 columns = len(generator.sub_terrains)
 generator.num_rows = (32 + columns - 1) // columns

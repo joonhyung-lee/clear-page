@@ -65,7 +65,6 @@ body{font-family:var(--clear-font-sans);color:var(--clear-foreground);background
 #main :is(.method-small-copy,.loss-scope,.figure-caption,figcaption){font-size:.8125rem;line-height:1.65}
 #main .method-lead,#clear-overview .overview-intro{font-size:1rem;line-height:1.75}
 #main .academic-copy{color:var(--clear-foreground)}
-#main mark{background:linear-gradient(transparent 30%,#e5e7eb 30%,#e5e7eb 92%,transparent 92%)}
 #main :is(table,output,.loss-contribution-values){font-variant-numeric:tabular-nums}
 #main code{font-family:var(--clear-font-mono)}
 
@@ -157,7 +156,6 @@ footer{color:var(--clear-muted-foreground);border-color:var(--clear-border)}
 #main :is(h4,h5),#main .grounding-columns :is(h2,h3,h4){font-weight:400}
 #main :is(code,pre,output,.loss-contribution-values,.sample-axis-tick,.loco-readout){font-family:var(--clear-font-mono)}
 #main svg text{font-family:var(--clear-font-sans)}
-#main mark{background:linear-gradient(transparent 30%,var(--clear-green-100) 30%,var(--clear-green-100) 92%,transparent 92%)}
 ::selection{background:var(--clear-green-200);color:var(--clear-green-900)}
 
 /* Compact navigation shares the same surface and state vocabulary as the rail. */
@@ -174,7 +172,7 @@ footer{color:var(--clear-muted-foreground);border-color:var(--clear-border)}
 #research-nav :is(.research-resources>button,.research-code):hover{background:var(--clear-muted);color:var(--clear-primary)}
 #research-nav #resource-menu-toggle{display:none!important}
 #main [id],#top{scroll-margin-top:calc(var(--clear-nav-height,80px) + 20px)!important}
-#section-rail{top:calc(var(--clear-nav-height,80px) + 20px);padding:12px 8px;background:var(--clear-surface);border:1px solid var(--clear-border);border-radius:8px;gap:3px}
+#section-rail{top:12px;padding:10px 8px;background:var(--clear-surface);border:1px solid var(--clear-border);border-radius:8px;gap:3px}
 #section-rail .rail-label{padding:0 8px 9px;letter-spacing:.08em;font-family:var(--clear-font-mono);font-size:11px}
 #section-rail a{padding:7px 9px;border:0;border-radius:5px;font-weight:400}
 #section-rail a.rail-subsection{padding-left:18px}
@@ -199,3 +197,12 @@ footer{color:var(--clear-muted-foreground);border-color:var(--clear-border)}
  #research-nav .research-resources>button,#research-nav .research-code{flex-direction:column;gap:2px;padding:5px;min-width:34px;font-size:10px}
  #research-nav .research-resources span{font-size:10px}
 }
+
+/* Header bands are distinct from the semantic highlights in the prose. */
+#main :is(h2,h3,h4,h5,h6):has(>.heading-highlight){background:#eeedf3;padding:.16em .35em;box-decoration-break:clone}
+#main .heading-highlight,#section-rail .heading-highlight{background:none;padding:0}
+#section-rail a:not(.rail-subsection){background:#eeedf3}
+#main mark{background:#e1f2e6;color:inherit;padding:0 .08em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#main mark[data-concept="selection"]{background:#fbe2e3}
+#main mark[data-concept="ordering"]{background:#dfecfc}
+#main mark[data-concept="generation"]{background:#fff1c2}

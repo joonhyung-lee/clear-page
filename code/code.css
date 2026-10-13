@@ -148,10 +148,11 @@ main{width:min(1600px,94%)}
 .snippet-footer{border-top:1px solid #e5e7eb;color:#6a7282;font-size:9px}
 /* Show the visualization and its source together for every implementation stage. */
 .pipeline-mobile-label,#pipeline-select{display:none}
-.implementation-workspace .component-content{grid-template-columns:minmax(0,4fr) minmax(0,6fr);gap:28px}
-.implementation-workspace .component-content>.result{width:100%;max-width:none;margin:0}
+.implementation-workspace .component-content{grid-template-columns:minmax(0,4fr) minmax(0,6fr);gap:0;border-block:1px solid var(--line)}
+.implementation-workspace .component-content>.result{width:100%;max-width:none;margin:0;padding:16px 20px 20px 0}
+.implementation-workspace .component-content>.snippet{padding:16px 0 20px 20px;border:0;border-left:1px dashed var(--line);border-radius:0;background:transparent}
 .workspace-column-label{margin:0 0 12px;font-size:12px;font-weight:400;color:var(--muted);line-height:1.5}
-.snippet>.workspace-column-label{padding:10px 12px;margin:0;border-bottom:1px solid var(--line)}
+.implementation-workspace .workspace-column-label{padding:0;margin:0 0 12px;border:0}
 @media(min-width:1001px){.component-content>.result{top:85px}}
 @media(max-width:1000px){.snippet-heading>span{flex-basis:auto}}
 @media(max-width:760px){
@@ -165,7 +166,9 @@ main{width:min(1600px,94%)}
  .example-heading,.snippet-heading{padding:9px 10px}
  .snippet-heading{top:65px;flex-wrap:wrap}
  .snippet-heading>span{flex-basis:100%}
- .implementation-workspace .component-content{grid-template-columns:1fr;gap:24px}
+ .implementation-workspace .component-content{grid-template-columns:1fr;gap:0}
+ .implementation-workspace .component-content>.result{padding:16px 0 20px}
+ .implementation-workspace .component-content>.snippet{padding:20px 0;border-left:0;border-top:1px dashed var(--line)}
 }
 .snippet-heading{top:85px}
 @media(max-width:620px){.snippet-heading{top:77px}}

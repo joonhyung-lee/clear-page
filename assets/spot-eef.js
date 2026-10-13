@@ -3,7 +3,7 @@
  const root=document.querySelector('#spot-process');if(!root)return;
  const panels=[...root.querySelectorAll('[data-spot-process]')],play=root.querySelector('[data-spot-play]'),slider=root.querySelector('input'),counter=root.querySelector('[data-spot-time]'),status=root.querySelector('.spot-loading');
  let data=null,loading=false,visible=false,playing=false,elapsed=0,end=0,last=0,frame=0,mode='3d',bounds=null;
- const camera={yaw:Math.PI/6,pitch:.6,zoom:1,pan:[0,0]},W=560,colors={eef:'#ff6467',object:'#00786f',reference:'#155dfc'};
+ const camera={yaw:Math.PI/6,pitch:.6,zoom:1,pan:[0,0]},W=560,colors={eef:'#d2999d',object:'#71ae90',reference:'#91b2d3'};
  function at(rows,t){let lo=0,hi=rows.length-1;while(lo<hi){const m=Math.ceil((lo+hi)/2);if(rows[m][0]<=t)lo=m;else hi=m-1;}const a=rows[lo],b=rows[Math.min(lo+1,rows.length-1)],u=b[0]>a[0]?Math.max(0,Math.min(1,(t-a[0])/(b[0]-a[0]))):0;return a.map((v,i)=>i?v+(b[i]-v)*u:t);}
  function local(p,r){return [p[0]-r.reference[0][0],p[1]-r.reference[0][1],p[2]];}
  function rotate(p){return [Math.cos(camera.yaw)*p[0]+Math.sin(camera.yaw)*p[1],Math.sin(camera.pitch)*(Math.sin(camera.yaw)*p[0]-Math.cos(camera.yaw)*p[1])-Math.cos(camera.pitch)*p[2]];}

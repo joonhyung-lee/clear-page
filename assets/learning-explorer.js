@@ -48,7 +48,14 @@
   const arrow=element('marker',{id:'sample-arrow-'+root.dataset.kind,viewBox:'0 0 8 8',refX:7,refY:4,markerWidth:6,markerHeight:6,orient:'auto'});arrow.append(element('path',{d:'M 1 1 L 7 4 L 1 7',fill:'none',stroke:'#6a7282','stroke-width':1.2}));
   mask.append(reveal);defs.append(mask,arrow);connector.append(defs,leader,outline);leader.setAttribute('mask','url(#sample-reveal-'+root.dataset.kind+')');leader.setAttribute('marker-end','url(#sample-arrow-'+root.dataset.kind+')');grid.append(connector);
   const phaseLabel=document.createElement('p');phaseLabel.className='sample-phase';canvas.after(phaseLabel);
-  if(movie)root.querySelector('.sample-map-details').before(root.querySelector('.sample-target'));
+  if(movie){
+   const inspector=root.querySelector('.sample-inspector');
+   const row=document.createElement('div');row.className='sample-media-row';
+   const rollout=document.createElement('div');rollout.className='sample-rollout';
+   inspector.querySelector('.sample-title').after(row);
+   row.append(rollout,root.querySelector('.sample-map-details'));
+   rollout.append(movie,root.querySelector('.sample-controls'),root.querySelector('.sample-target'));
+  }
   function connect(animate=false){
    if(!dots[index]||!visible)return;
    const bounds=grid.getBoundingClientRect(),a=dots[index].getBoundingClientRect(),b=(movie||canvas).getBoundingClientRect();

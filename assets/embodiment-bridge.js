@@ -19,17 +19,18 @@ window.CLEAR_EMBODIMENT_BRIDGE = function () {
     const nodes=viewer.useSceneTree.getAll();
     for(const [name,node] of Object.entries(nodes)){
       if(!node?.message)continue;
-      if(name.includes('/field/support-')||name.endsWith('/contact-field')){
-        const visible=name.includes('/field/support-')?mode==='traversability':mode==='manipulation';
+      if(name.startsWith('/field/support-')||name.includes('/locomotion-shell-')||name.includes('/interaction-shell-')){
+        const visible=name.includes('/interaction-shell-')?mode==='manipulation':mode==='traversability';
+        if(node.visibility!==visible)viewer.sceneTreeActions.updateNodeAttributes(name,{visibility:visible});continue;
+      }
+      if(name.endsWith('/kinematics')||name.endsWith('/joints')){
+        const visible=mode==='structure';
         if(node.visibility!==visible)viewer.sceneTreeActions.updateNodeAttributes(name,{visibility:visible});continue;
       }
       const match=name.match(/\/body-(\d+)\/mesh-\d+$/);if(!match)continue;
       const props=node.message.props;if(!originals.has(name))originals.set(name,{color:props.color,opacity:props.opacity});
-      const body=+match[1],robot=config.robot;
-      const mobility=robot==='g1'?body>=2&&body<=13:robot==='husky'?body>=2&&body<=5:body>=2&&body<=13;
-      const manipulation=robot==='g1'?body>=17:robot==='spot_arm'?body>=14:body===1;
-      const selected=mode==='traversability'?mobility:manipulation;
-      const desired=mode==='structure'?originals.get(name):{color:selected?[159,198,151]:[163,170,168],opacity:selected?.8:.16};
+      // Thin copies of the selected meshes carry the mode color.
+      const desired=originals.get(name);
       if(props.opacity!==desired.opacity||String(props.color)!==String(desired.color))viewer.sceneTreeActions.updateSceneNodeProps(name,desired);
     }
   }

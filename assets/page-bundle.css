@@ -768,9 +768,9 @@ html[data-page-hidden] .learning-dataflow span:before,html[data-page-hidden] .sa
 #method-execution>.pushing-motion-legend{font-size:12px!important;margin-top:-22px!important}
 .pushing-motion-legend span{display:inline-flex;align-items:center;gap:6px}
 .pushing-motion-legend i{display:inline-block;width:24px;border-top:3px solid}
-.pushing-motion-legend .object-target{border-color:#155dfc;border-top-style:dashed}
-.pushing-motion-legend .object-motion{border-color:#00786f}
-.pushing-motion-legend .eef-motion{border-color:#ff6467}
+.pushing-motion-legend .object-target{border-color:#91b2d3;border-top-style:dashed}
+.pushing-motion-legend .object-motion{border-color:#71ae90}
+.pushing-motion-legend .eef-motion{border-color:#d2999d}
 @media(max-width:900px){#method-execution .pushing-gallery{width:100%;margin-inline:0}}
 /* Each inset is positioned inside its own video tile. */
 .media-tile{position:relative}
@@ -914,9 +914,9 @@ html[data-page-hidden] .learning-dataflow span:before,html[data-page-hidden] .sa
 .spot-loading[hidden]{display:none}
 .spot-path-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:#6a7282}
 .spot-path-legend span{display:inline-flex;align-items:center;gap:6px}
-.spot-path-legend i{display:inline-block;width:22px;border-top:3px solid #ff6467}
-.spot-path-legend .object{border-color:#00786f}
-.spot-path-legend .target{border-color:#155dfc;border-top-style:dashed}
+.spot-path-legend i{display:inline-block;width:22px;border-top:3px solid #d2999d}
+.spot-path-legend .object{border-color:#71ae90}
+.spot-path-legend .target{border-color:#91b2d3;border-top-style:dashed}
 
 /* Each outlined pair contains its title, robot replay and EEF plot. */
 #main [data-replay-body] .execution-process-grid{align-items:stretch}
@@ -938,6 +938,9 @@ html[data-page-hidden] .learning-dataflow span:before,html[data-page-hidden] .sa
 [data-replay-body] .mpc-recording-status:empty{display:none}
 #method-execution .spot-process{margin-top:28px;padding-top:22px;border-top:0}
 .spot-path-legend{font-size:12px;margin-top:6px;justify-content:flex-end}
+/* Reserve the measured controller layout while its data loads, so launching
+   the following Spot replay does not move its iframe out of the viewport. */
+.mpc-process-content[hidden]{display:block!important;visibility:hidden;pointer-events:none}
 .experiment-scenes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 40px;margin:26px 0 64px;max-width:1120px;margin-inline:auto}
 .experiment-scenes figure{margin:0;min-width:0}
 .experiment-scenes a{display:block;color:inherit;text-decoration:none}
@@ -1038,6 +1041,10 @@ html[data-page-hidden] .learning-dataflow span:before,html[data-page-hidden] .sa
  #clear-overview .overview-preview-inline .overview-preview-grid video{height:150px}
  #clear-overview .overview-preview-inline figure>svg{height:auto}
 }
+
+/* Inline scene loops retain their complete native frame. */
+#input-objects video[data-inline-loop],#embodiment-demo video[data-inline-loop]{object-fit:contain}
+#input-scene .media-tile video[data-inline-loop]{width:100%;height:auto;aspect-ratio:14/11;object-fit:contain}
 
 /* Shared prose uses the full section measure, with natural wrapping. */
 #main :is(#tldr,#motivation).wrap{width:min(1120px,calc(100% - 48px));max-width:none}
@@ -1176,6 +1183,9 @@ html[data-page-hidden] .learning-dataflow span:before,html[data-page-hidden] .sa
 .loss-role-tabs button[aria-pressed=true]{background:#f3f4f6;border-color:#00c950;color:#364153}
 .loss-role-panel{border-left:3px solid #05df72;padding:12px 18px;background:#f9fafb}
 .loss-role-panel[hidden]{display:none!important}
+.loss-role-panels{display:grid;min-width:0}
+.loss-role-panels>.loss-role-panel{grid-area:1/1;min-width:0}
+.loss-role-panels>.loss-role-panel[hidden]{display:block!important;visibility:hidden;pointer-events:none}
 .loss-role-panel h5{font-size:17px;margin:0 0 8px;font-weight:500}
 .loss-role-panel p{font-size:15px;line-height:1.65;margin:8px 0}
 .loss-role-panel a{font-size:14px}
@@ -1265,6 +1275,42 @@ html[data-page-hidden] .learning-dataflow span:before,html[data-page-hidden] .sa
 #learning .training-objective-main .training-objective-copy .paper-equation-row{margin:12px 0 0;padding:0;min-width:0}
 #learning #training-losses .training-objective-main [data-objective-annotations]{padding:0;white-space:nowrap;max-width:100%;font-size:var(--objective-font-size,12px)}
 #learning #training-losses .training-objective-main [data-objective-annotations] .katex-display{display:block;width:max-content;min-width:0;margin:8px auto;white-space:nowrap}
+#learning #training-losses .training-objective-main [data-objective-annotations] .katex-html{display:block;white-space:nowrap}
+
+/* Compact sample overview, with rollout and trajectory side by side. */
+#learning .learning-explorer{min-height:0}
+#learning .sample-explorer-grid{grid-template-columns:minmax(0,.36fr) minmax(0,.64fr);gap:24px}
+#learning .sample-scatter{display:block;width:100%;max-width:340px;margin:0 auto}
+#learning .research-representations figure{margin:0}
+#learning .sample-embedding-note,#learning .sample-count{font-size:11px;line-height:1.4;margin:4px 0}
+#learning .sample-factor-note:empty,#learning .sample-inputs{display:none}
+#learning .sample-factors{gap:4px}
+#learning .sample-factors button{padding:5px 6px;font-size:11px}
+#learning .sample-filters{margin:6px 0;gap:4px}
+#learning .sample-filters button{padding:4px 7px;font-size:11px}
+#learning .sample-color-controls{font-size:11px;gap:6px;margin:6px 0}
+#learning .sample-media-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start}
+#learning .sample-rollout,#learning .sample-map-details{min-width:0;margin:0}
+#learning .sample-map-details h5{font-size:12px;margin:0 0 5px}
+#learning .sample-video,#learning .sample-scene{display:block;width:100%;height:auto;max-height:230px;object-fit:contain;margin:0}
+#learning .sample-title{font-size:14px;margin:0 0 10px}
+#learning .sample-controls{gap:6px;margin:6px 0;flex-wrap:nowrap;font-size:11px}
+#learning .sample-controls button{font-size:11px;white-space:nowrap;padding:5px 7px}
+#learning .sample-progress{min-width:30px;width:0;flex:1}
+#learning .sample-target{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0;font-size:11px;line-height:1.4}
+#learning .sample-target p,#learning .sample-phase{margin:0;font-size:11px;line-height:1.4}
+#learning .sample-pagination{margin-top:10px;gap:8px}
+#learning .sample-pagination button{font-size:11px;padding:5px 8px}
+@media(max-width:900px){#learning .sample-explorer-grid{grid-template-columns:1fr}#learning .research-representations{max-width:520px;margin:auto}}
+@media(max-width:480px){#learning .sample-media-row{gap:8px;grid-template-columns:1fr 1fr}#learning .sample-controls{flex-wrap:wrap}#learning .sample-controls input{min-width:60px}}
+
+/* Availability occupies the third cell when that objective was actually logged. */
+#learning .training-objective-split .loss-chart-grid.has-availability>#loss-flow{grid-column:1/3;grid-row:2}
+#learning .training-objective-split .loss-chart-grid.has-availability>#loss-affordance{grid-column:3/5;grid-row:2}
+#learning .training-objective-split .loss-chart-grid.has-availability>#loss-availability{grid-column:5/7;grid-row:2}
+@media(max-width:500px){
+ #learning .training-objective-split .loss-chart-grid.has-availability>:is(#loss-flow,#loss-affordance,#loss-availability){grid-column:1;grid-row:auto}
+}
 
 /* Shared visual tokens; all assets and interactions remain local to the page. */
 :root{
@@ -1333,7 +1379,6 @@ body{font-family:var(--clear-font-sans);color:var(--clear-foreground);background
 #main :is(.method-small-copy,.loss-scope,.figure-caption,figcaption){font-size:.8125rem;line-height:1.65}
 #main .method-lead,#clear-overview .overview-intro{font-size:1rem;line-height:1.75}
 #main .academic-copy{color:var(--clear-foreground)}
-#main mark{background:linear-gradient(transparent 30%,#e5e7eb 30%,#e5e7eb 92%,transparent 92%)}
 #main :is(table,output,.loss-contribution-values){font-variant-numeric:tabular-nums}
 #main code{font-family:var(--clear-font-mono)}
 
@@ -1425,7 +1470,6 @@ footer{color:var(--clear-muted-foreground);border-color:var(--clear-border)}
 #main :is(h4,h5),#main .grounding-columns :is(h2,h3,h4){font-weight:400}
 #main :is(code,pre,output,.loss-contribution-values,.sample-axis-tick,.loco-readout){font-family:var(--clear-font-mono)}
 #main svg text{font-family:var(--clear-font-sans)}
-#main mark{background:linear-gradient(transparent 30%,var(--clear-green-100) 30%,var(--clear-green-100) 92%,transparent 92%)}
 ::selection{background:var(--clear-green-200);color:var(--clear-green-900)}
 
 /* Compact navigation shares the same surface and state vocabulary as the rail. */
@@ -1442,7 +1486,7 @@ footer{color:var(--clear-muted-foreground);border-color:var(--clear-border)}
 #research-nav :is(.research-resources>button,.research-code):hover{background:var(--clear-muted);color:var(--clear-primary)}
 #research-nav #resource-menu-toggle{display:none!important}
 #main [id],#top{scroll-margin-top:calc(var(--clear-nav-height,80px) + 20px)!important}
-#section-rail{top:calc(var(--clear-nav-height,80px) + 20px);padding:12px 8px;background:var(--clear-surface);border:1px solid var(--clear-border);border-radius:8px;gap:3px}
+#section-rail{top:12px;padding:10px 8px;background:var(--clear-surface);border:1px solid var(--clear-border);border-radius:8px;gap:3px}
 #section-rail .rail-label{padding:0 8px 9px;letter-spacing:.08em;font-family:var(--clear-font-mono);font-size:11px}
 #section-rail a{padding:7px 9px;border:0;border-radius:5px;font-weight:400}
 #section-rail a.rail-subsection{padding-left:18px}
@@ -1467,6 +1511,15 @@ footer{color:var(--clear-muted-foreground);border-color:var(--clear-border)}
  #research-nav .research-resources>button,#research-nav .research-code{flex-direction:column;gap:2px;padding:5px;min-width:34px;font-size:10px}
  #research-nav .research-resources span{font-size:10px}
 }
+
+/* Header bands are distinct from the semantic highlights in the prose. */
+#main :is(h2,h3,h4,h5,h6):has(>.heading-highlight){background:#eeedf3;padding:.16em .35em;box-decoration-break:clone}
+#main .heading-highlight,#section-rail .heading-highlight{background:none;padding:0}
+#section-rail a:not(.rail-subsection){background:#eeedf3}
+#main mark{background:#e1f2e6;color:inherit;padding:0 .08em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#main mark[data-concept="selection"]{background:#fbe2e3}
+#main mark[data-concept="ordering"]{background:#dfecfc}
+#main mark[data-concept="generation"]{background:#fff1c2}
 
 /* Graphik for prose and figure labels; B612 Mono for literal values and code. */
 :root{--clear-font-sans:Graphik,Arial,sans-serif;--clear-font-mono:'B612 Mono',monospace}

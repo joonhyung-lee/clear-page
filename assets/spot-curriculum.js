@@ -240,7 +240,7 @@
     const dialog=document.createElement('dialog');dialog.className='policy-terrain-dialog';
     dialog.setAttribute('aria-label',label+' radial motion illustration');
     const header=document.createElement('header'),title=document.createElement('span'),close=document.createElement('button');
-    title.textContent=label+(stage.replay.headingTracking?' · Velocity tracking':' · Rotated trajectory views');close.type='button';close.textContent='×';close.setAttribute('aria-label','Close terrain view');
+    title.textContent=label;close.type='button';close.textContent='×';close.setAttribute('aria-label','Close terrain view');
     header.append(title,close);
     const movie=document.createElement('video');movie.controls=true;movie.muted=true;movie.playsInline=true;movie.loop=true;
     const path=stage.replay.video.replace(/\.mp4$/,'-'+terrain+'.mp4');
@@ -258,7 +258,7 @@
     host.querySelector('.policy-terrain-links')?.remove();
     host.querySelector('.policy-tracking-key')?.remove();
     const terrains=[['stairs_up','Stairs up'],['stairs_down','Stairs down'],['slope_up','Slope up'],['slope_down','Slope down'],['flat','Flat']];
-    if(stage.replay.scene==='learning-g1')terrains.push(['random_rough','Rough terrain']);
+    if(stage.replay.scene==='learning-g1'||stage.replay.roughTerrain)terrains.push(['random_rough','Rough terrain']);
     if(!terrains.some(([key])=>key===terrainMode)&&terrainMode!=='matrix')terrainMode='stairs_up';
     const links=document.createElement('div');links.className='policy-terrain-links';
     const label=document.createElement('label');label.textContent='Terrain ';
@@ -267,8 +267,6 @@
       const option=document.createElement('option');option.value=key;option.textContent=name;menu.append(option);
     }
     menu.value=terrainMode;label.append(menu);
-    const note=document.createElement('span');note.textContent=stage.replay.headingTracking?'Velocity tracking':'4-way replay';
-    note.title='Four rotated views of one trajectory.';
     const enlarge=document.createElement('button');enlarge.type='button';enlarge.textContent='↗';enlarge.setAttribute('aria-label','Enlarge terrain view');
     enlarge.onclick=()=>{
       if(terrainMode==='matrix'){movie.requestFullscreen?.();return;}
@@ -288,9 +286,8 @@
       }
     };
     menu.onchange=()=>{terrainMode=menu.value;apply(true);};
-    links.append(label,note,enlarge);host.prepend(links);apply();
+    links.append(label,enlarge);host.prepend(links);apply();
     if(stage.replay.headingTracking){
-      note.title=(stage.replay.body==='g1'?'Matched terrain row across checkpoints; playback starts at 2.5 s. ':'')+'Forward-command evaluation with heading feedback. Four rotated views of one trajectory per terrain.';
       const key=document.createElement('div');key.className='policy-tracking-key';
       const refreshed=stage.replay.visualStyle==='editorial-v1';
       const targetColor=refreshed?window.CLEAR_DESIGN.colors.blue[600]:'#d98727';

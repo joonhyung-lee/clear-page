@@ -146,8 +146,7 @@ def outlined_recording(record, buffers, width=0.008):
 def render(browser, scene, checkpoints, args, camera_stages=None, camera_cache=None):
     source = (args.recordings_dir or ROOT/'assets/recordings')/f'{scene}.hex.js'
     body='g1' if scene=='learning-g1' else ('spot_arm' if scene=='learning-spot_arm' else 'spot')
-    if body!='spot_arm':
-        font_path()  # Captioned videos require the requested rendering font.
+    font_path(mono=True)
     tracking_path=args.tracking_dir/body/f'{body}-tracking.npz' if args.tracking_dir else None
     tracking=TrackingReplay(tracking_path) if tracking_path and tracking_path.exists() else None
     if any(stage['replay'].get('headingTracking') for stage in checkpoints) and (tracking is None or args.recordings_dir is None):
@@ -215,7 +214,7 @@ def render(browser, scene, checkpoints, args, camera_stages=None, camera_cache=N
                         page.evaluate(SEEK,start+frame/args.fps+1e-6)
                         page.evaluate(SETTLE)
                         picture=page.screenshot(type='jpeg',quality=95,timeout=30000)
-                        if body!='spot_arm':picture=annotate(picture,views,args.size,tracking.metrics(start+frame/args.fps,layout) if tracking else None)
+                        picture=annotate(picture,views,args.size,tracking.metrics(start+frame/args.fps,layout) if tracking else None)
                         proc.stdin.write(picture)
                         if frame==min(72,frames-1):
                             (Path('/tmp')/(name+'.jpg')).write_bytes(picture)
@@ -227,11 +226,11 @@ def render(browser, scene, checkpoints, args, camera_stages=None, camera_cache=N
                 # Replace only a completely rendered and encoded output.
                 staged=dest.with_suffix('.mp4.tmp');staged.write_bytes(output.read_bytes());staged.replace(dest)
             write_poster(dest)
-            write_details(dest,views,args.size,tracking={'replay':tracking,'layout':layout} if tracking and body!='spot_arm' else None,start=start,canvas_height=args.height)
+            write_details(dest,views,args.size,tracking={'replay':tracking,'layout':layout} if tracking else None,start=start,canvas_height=args.height)
             if args.size>960:compact_overview(dest)
             results.append(dict(file=name,scene=scene,agents=agents,startTime=start,
                 duration=frames/args.fps,fps=args.fps,width=min(args.size,960),height=round(args.height*min(args.size,960)/args.size),renderWidth=args.size,renderHeight=args.height,
-                renderer='Native Viser',cameraPolicy='Fixed per body and terrain across all checkpoint motion envelopes',displayGround='Visual flat continuation outside the recorded tile',velocityOverlay=['target','actual'],trackingMeasured=tracking is not None,trackingEvidence=f'assets/policy-tracking-{body}.json' if tracking else None,displayMode='radial-heading-evaluation' if tracking else 'radial-replay-illustration',uniqueRecordedAgentsShown=len({item['sourceAgent'] for item in layout}),views=views,displayLayout=layout,displayedAgents=len(layout),outline={'color':'black','widthMeters':0.008,'method':'back-face shell'},sourceSHA256=hashlib.sha256(raw).hexdigest()))
+                renderer='Native Viser',robotMaterials='original recorded colors',captionFont='B612 Mono',cameraPolicy='Fixed per body and terrain across all checkpoint motion envelopes',displayGround='Visual flat continuation outside the recorded tile',velocityOverlay=['target','actual'],trackingMeasured=tracking is not None,trackingEvidence=f'assets/policy-tracking-{body}.json' if tracking else None,displayMode='radial-heading-evaluation' if tracking else 'radial-replay-illustration',uniqueRecordedAgentsShown=len({item['sourceAgent'] for item in layout}),views=views,displayLayout=layout,displayedAgents=len(layout),outline={'color':'black','widthMeters':0.008,'method':'back-face shell'},sourceSHA256=hashlib.sha256(raw).hexdigest()))
             print('Rendered',name,agents,'recorded agents',dest.stat().st_size,'bytes',flush=True)
     finally:
         page.close()

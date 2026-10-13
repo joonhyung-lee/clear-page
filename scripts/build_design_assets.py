@@ -2,6 +2,7 @@
 import json
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
+from fontTools.pens.boundsPen import BoundsPen
 from design_tokens import ROOT, TOKENS, color
 
 def build():
@@ -29,13 +30,14 @@ def build():
     if not path.exists(): path = ROOT / 'assets/fonts/Graphik-Regular.ttf'
     if not path.exists(): path = ROOT / 'assets/fonts/B612Mono-Regular.ttf'
     font = TTFont(path); glyphs = font.getGlyphSet(); cmap = font.getBestCmap()
-    x = 0; paths = []
-    for letter in 'CLEAR':
-        name = cmap[ord(letter)]; pen = SVGPathPen(glyphs); glyphs[name].draw(pen)
-        paths.append(f'<path transform="translate({x} 0)" d="{pen.getCommands()}"/>')
-        x += font['hmtx'][name][0]
-    scale = 86/x
-    svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><title>CLEAR</title><rect width="100" height="100" rx="14" fill="{color("green",700)}"/><g fill="white" transform="translate(7 61) scale({scale} {-scale})">'+''.join(paths)+'</g></svg>\n'
+    name = cmap[ord('C')]
+    pen = SVGPathPen(glyphs); glyphs[name].draw(pen)
+    bounds = BoundsPen(glyphs); glyphs[name].draw(bounds)
+    left, bottom, right, top = bounds.bounds
+    scale = 58 / (top - bottom)
+    x = 50 - (left + right) * scale / 2
+    y = 50 + (bottom + top) * scale / 2
+    svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><title>CLEAR</title><rect width="100" height="100" rx="18" fill="{color("green",200)}" fill-opacity=".55"/><path fill="#111111" transform="translate({x} {y}) scale({scale} {-scale})" d="{pen.getCommands()}"/></svg>\n'
     (ROOT / 'assets/favicon.svg').write_text(svg)
 
 if __name__ == '__main__': build()

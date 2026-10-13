@@ -85,7 +85,7 @@
     grounding:[['structure-g1','G1'],['structure-spot','Spot'],['structure-spot_arm','Spot + arm'],['structure-husky','Husky']],
     ordering:[['illustration-order','Object selection and ordering']],
     generation:[['illustration-flow','Motion references']],
-    execution:[['mpc-optimized','Recorded interaction and candidate motions']]
+    execution:[['mpc-optimized-full','Recorded interaction and candidate motions']]
   };
   // Inline inspection keeps the complete pipeline visible above the example.
   const preview=document.createElement('div');preview.id='overview-preview';preview.className='overview-preview-inline';preview.setAttribute('role','region');preview.setAttribute('aria-label','Component preview');flow.after(preview);
@@ -132,13 +132,13 @@
           const diagram=window.CLEAR_METHOD_SCHEMATIC?.createPreview(kind);
           if(diagram){diagram.style.width='100%';diagram.style.maxHeight='360px';figure.append(diagram);}
           figure.append(label);gallery.append(figure);
-        }else if(file.startsWith('method-')||file==='mpc-optimized'){
-          const v=document.createElement('div');v.className='viewer overview-live-viewer';v.dataset.scene=file;v.dataset.title=caption;v.dataset.generation='true';if(file==='mpc-optimized')v.dataset.ego='true';
+        }else if(file.startsWith('method-')||file==='mpc-optimized-full'){
+          const v=document.createElement('div');v.className='viewer overview-live-viewer';v.dataset.scene=file;v.dataset.title=caption;v.dataset.generation='true';if(file==='mpc-optimized-full')v.dataset.ego='true';
           if(file==='method-order-maze'){v.dataset.orderStage='supervision';label.textContent='Designated teaser reference interaction';}
-          const poster=document.createElement(file==='mpc-optimized'?'video':'img');poster.className='preview-image';
-          if(poster.tagName==='VIDEO'){poster.muted=true;poster.loop=true;poster.playsInline=true;prepareManualVideo(poster);const media=file==='mpc-optimized'?'mpc-optimized-contact':file;poster.poster=clearAssetURL('assets/media/'+media+'.png');poster.src=clearAssetURL('assets/media/'+media+'.mp4');v.dataset.contactSide='true';}
+          const poster=document.createElement(file==='mpc-optimized-full'?'video':'img');poster.className='preview-image';
+          if(poster.tagName==='VIDEO'){poster.muted=true;poster.loop=true;poster.playsInline=true;prepareManualVideo(poster);const media=file==='mpc-optimized-full'?'mpc-optimized-full-contact':file;poster.poster=clearAssetURL('assets/media/'+media+'.png');poster.src=clearAssetURL('assets/media/'+media+'.mp4');v.dataset.contactSide='false';}
           else{poster.src=clearAssetURL('assets/media/'+file+'.png');poster.alt=caption;}
-          const button=document.createElement('button');button.className='launch';button.textContent='Play example';button.type='button';v.append(poster,button);if(file==='mpc-optimized')attachEgoVideo(v,file);figure.append(v,label);gallery.append(figure);wireViewer(v);
+          const button=document.createElement('button');button.className='launch';button.textContent='Play example';button.type='button';v.append(poster,button);if(file==='mpc-optimized-full')attachEgoVideo(v,file);figure.append(v,label);gallery.append(figure);wireViewer(v);
         }else{
           const movie=document.createElement('video');movie.muted=true;movie.loop=true;movie.playsInline=true;prepareManualVideo(movie);movie.poster=clearAssetURL('assets/media/'+file+'.png');movie.src=clearAssetURL('assets/media/'+file+'.mp4');figure.append(movie,label);gallery.append(figure);
         }
