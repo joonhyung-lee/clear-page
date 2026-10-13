@@ -23,7 +23,8 @@
       "assets/continuous-layout.js",
       "assets/failure-map.js",
       "assets/spot-eef.js",
-      "assets/training-losses.js"
+      "assets/training-losses.js",
+      "assets/reading-layout.js"
     ],
     "styles": [
       "assets/site.css",
@@ -32,7 +33,8 @@
       "assets/controller-pretraining.css",
       "assets/paper-layout.css",
       "assets/research-layout.css",
-      "assets/continuous-layout.css"
+      "assets/continuous-layout.css",
+      "assets/reading-layout.css"
     ],
     "js_output": "assets/page-bundle.js",
     "css_output": "assets/page-bundle.css"

@@ -18,8 +18,11 @@
   katex.render(tex,el,{displayMode:el.classList.contains('equation'),throwOnError:true,
    strict:code=>code==='htmlExtension'?'ignore':'error',trust:context=>context.command==='\\htmlClass'});
   el.querySelectorAll('.objective-term').forEach(term=>{
+   const keys=term.classList.contains('term-order')?['selection','order','kl']:term.classList.contains('term-flow')?['flow']:term.classList.contains('term-affordance')?['affordance']:[];
+   term.dataset.lossKeys=keys.join(' ');
    term.tabIndex=0;term.setAttribute('role','button');
-   term.setAttribute('aria-label',term.classList.contains('term-order')?'Highlight selection, ranking and regularization losses':term.classList.contains('term-flow')?'Highlight flow loss':term.classList.contains('term-affordance')?'Highlight affordance loss':'Availability has zero weight in this recorded run. Highlight the full objective loss.');
+   if(keys.length)term.setAttribute('aria-controls',keys.map(key=>'loss-'+key).join(' '));
+   term.setAttribute('aria-label',term.classList.contains('term-order')?'Explain selection, ranking and regularization losses':term.classList.contains('term-flow')?'Explain generation loss':term.classList.contains('term-affordance')?'Explain feasibility loss':'Explain the availability penalty and its zero weight');
    term.title=term.getAttribute('aria-label');
   });
  });

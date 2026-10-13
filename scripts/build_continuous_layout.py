@@ -241,7 +241,8 @@ def replace_content(node,html):
  node.clear()
  for child in list(frag(html).contents):node.append(child.extract())
 
-replace_content(s.select_one('#clear-overview .overview-intro'),r'''Given a scene <span data-tex="S"></span> and robot embodiment <span data-tex="B"></span>, CLEAR proposes plans <span data-tex="\pi=((i_1,\xi_1),\ldots,(i_K,\xi_K))"></span>. The scene includes the observed geometry, <span data-tex="N"></span> movable objects, the robot state and a task goal. Each plan entry specifies an object and its target configuration or trajectory. Among candidates accepted by the task's feasibility checks, the planner selects one with the fewest object interactions.''')
+from update_method_intro import apply as update_method_intro
+update_method_intro(s)
 s.select_one('#overview-grounding').parent.select_one('.overview-model-name').string='Affordance-Guided Encoding'
 s.select_one('#overview-generation>span').string='Yₜ'
 s.select_one('#overview-generation>small').string='Decode object references ξₖ'
@@ -272,4 +273,6 @@ replace_content(s.select_one('#method-execution>.method-lead'),r'''Decoded refer
 
 from cleanup_reading_layout import apply
 apply(s)
+from update_training_layout import apply as apply_training_layout
+apply_training_layout(s)
 p.write_text(str(s).rstrip()+'\n')

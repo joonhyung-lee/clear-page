@@ -44,4 +44,6 @@ for selector, key, label in [
         node.insert_after(BeautifulSoup(f'<p class="training-loss-jump"><a href="#loss-{key}">{label} <span aria-hidden="true">↗</span></a></p>', 'html.parser'))
 if not any((x.get('src') or '').split('?')[0] == 'assets/training-losses.js' for x in s.find_all('script')):
     s.body.append(s.new_tag('script', src='assets/training-losses.js'))
+from update_training_layout import apply as apply_training_layout
+apply_training_layout(s)
 page.write_text(str(s).rstrip() + '\n')

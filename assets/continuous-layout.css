@@ -291,3 +291,70 @@
 .grid-focus .focus-viewer>video{position:absolute;top:40px;left:0;width:100%;height:calc(100% - 92px);padding:0;object-fit:contain;transform:none}
 .grid-focus .focus-viewer:has(>video[controls])>.launch{top:auto;bottom:8px;left:50%;right:auto;transform:translateX(-50%)}
 .grid-focus .focus-title{max-width:calc(100% - 64px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Explain the task first, then introduce symbols after the pipeline. */
+#clear-overview .overview-intro{max-width:960px;font-size:18px;line-height:1.7;color:#444;margin:16px auto 24px}
+#clear-overview .overview-node{font-size:17px;line-height:1.45;min-height:132px;padding:16px 10px}
+#clear-overview .overview-node span{font-size:25px;margin:6px 0}
+#clear-overview .overview-inputs>div>div{font-size:16px;padding:12px 8px}
+#clear-overview .overview-flow small{font-size:14px;line-height:1.45;color:#626b60}
+#clear-overview .overview-category{font-size:14px}
+#clear-overview .overview-notation{max-width:960px;margin:8px auto 24px;padding:22px 0 0;border-top:1px solid #dce2d6;text-align:left}
+#clear-overview .overview-notation h4{font-size:18px;line-height:1.4;margin:0 0 10px;font-weight:500}
+#clear-overview .overview-notation p{font-size:16px;line-height:1.7;margin:10px 0;color:#555}
+#clear-overview .overview-plan-equation{font-size:20px;line-height:1.6;margin:14px 0;text-align:center}
+@media(min-width:701px) and (max-width:1100px){
+ #clear-overview .overview-flow{gap:18px}
+ #clear-overview .overview-node{font-size:16px;padding:12px 6px}
+ #clear-overview .overview-flow small{font-size:13px}
+}
+@media(max-width:700px){
+ #clear-overview .overview-intro{font-size:17px;text-align:left;line-height:1.65}
+ #clear-overview .overview-node{min-height:112px;font-size:18px}
+ #clear-overview .overview-inputs>div{grid-template-columns:1fr}
+ #clear-overview .overview-inputs>div>div{font-size:16px;padding:10px}
+ #clear-overview .overview-notation{padding-top:18px}
+ #clear-overview .overview-plan-equation{font-size:18px}
+}
+
+/* Give media the available space; keep supporting text compact. */
+#main #tldr.wrap{width:min(1120px,calc(100% - 64px));padding-block:20px}
+#tldr .section-heading{margin-bottom:14px}
+#tldr>.summary-sentence{max-width:1000px;margin:10px auto 0;font-size:17px;line-height:1.5;text-wrap:balance}
+#tldr .tldr-video{width:min(100%,calc(64svh * 16 / 9));max-width:1120px;margin-inline:auto}
+#tldr video{display:block;width:100%;height:auto;max-height:none;object-fit:contain;background:#fafbf8}
+#clear-overview{max-width:1120px;margin:16px auto 24px}
+#clear-overview>h3{font-size:22px}
+#clear-overview .overview-intro{font-size:17px;line-height:1.5;margin:8px auto 10px}
+#clear-overview .overview-flow{padding-top:32px;padding-bottom:28px;gap:22px}
+#clear-overview .overview-node{min-height:108px;padding:8px}
+#clear-overview .overview-inputs>div>div{padding:6px 8px}
+#clear-overview .overview-model-name{margin-bottom:6px}
+#clear-overview .overview-preview-inline{display:grid;grid-template-columns:minmax(190px,240px) minmax(0,1fr);gap:18px;align-items:center;width:100%;min-height:0;margin:12px auto;padding:10px 14px}
+#clear-overview .overview-preview-inline>[hidden]{display:none!important}
+#clear-overview .overview-preview-description strong{display:block;font-size:16px;font-weight:500;line-height:1.35}
+#clear-overview .overview-preview-description p{font-size:14px;line-height:1.45;color:#626b60;margin:6px 0 0}
+#clear-overview .overview-preview-inline figure>svg{height:210px;width:100%}
+#clear-overview .overview-preview-inline :is(video,img){height:200px;object-fit:contain}
+#clear-overview .overview-preview-inline .overview-preview-grid video{height:180px}
+#clear-overview .overview-preview-inline .overview-live-viewer{height:230px}
+#clear-overview .overview-preview-inline .overview-live-viewer>video{height:100%}
+#clear-overview .overview-preview-inline .ego-inset video{height:auto}
+#clear-overview .overview-preview-inline figcaption{font-size:12px;line-height:1.4;margin-top:4px}
+#clear-overview .overview-notation{margin:8px auto 12px;padding-top:8px}
+#clear-overview .overview-notation p{font-size:15px;line-height:1.5;margin:6px 0}
+#clear-overview .overview-plan-equation{margin:6px 0;font-size:18px}
+#clear-overview .overview-notation>summary{cursor:pointer;font-size:16px;font-weight:500;color:#455b40;padding:4px 0}
+#clear-overview .paper-figure-link{margin-top:8px}
+#clear-overview .paper-figure-link img{width:54px;height:auto}
+@media(max-width:700px){
+ #main #tldr.wrap{width:calc(100% - 32px);padding-block:18px}
+ #tldr .tldr-video{width:100%}
+ #tldr>.summary-sentence{font-size:17px;text-align:left;text-wrap:pretty}
+ #clear-overview .overview-flow{gap:42px;padding:30px 18px}
+ #clear-overview .overview-preview-inline{grid-template-columns:1fr;gap:10px;padding:12px}
+ #clear-overview .overview-preview-inline .overview-preview-description{order:2}
+ #clear-overview .overview-preview-inline :is(video,img){height:auto;max-height:240px}
+ #clear-overview .overview-preview-inline .overview-preview-grid video{height:150px}
+ #clear-overview .overview-preview-inline figure>svg{height:auto}
+}

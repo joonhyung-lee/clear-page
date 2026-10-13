@@ -1,0 +1,166 @@
+/* Shared prose uses the full section measure, with natural wrapping. */
+#main :is(#tldr,#motivation).wrap{width:min(1120px,calc(100% - 48px));max-width:none}
+#main :is(#tldr,#motivation) .academic-copy{width:100%;max-width:none;margin:16px 0 0;text-align:left;text-wrap:wrap;font-size:18px;line-height:1.65}
+#motivation .motivation-layout{display:block}
+#motivation .prose{width:100%;max-width:none}
+#motivation .motivation-sentence{display:inline;margin:0}
+#main mark{color:inherit;background:linear-gradient(transparent 28%,#e5efb6 28%,#e5efb6 90%,transparent 90%);padding:0 .08em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#section-rail{display:none}
+@media(min-width:1200px){
+ body:has(#section-rail){padding-left:188px}
+ #section-rail{display:flex;position:fixed;left:12px;top:110px;bottom:24px;width:168px;flex-direction:column;gap:6px;overflow-y:auto;z-index:44;border-right:1px solid #e2e6db;padding:10px 10px 10px 0;background:#fff}
+ #section-rail .rail-label{font-size:12px;letter-spacing:.12em;color:#89917f;padding:0 8px 12px}
+ #section-rail a{font-size:15px;line-height:1.5;padding:8px;text-decoration:none;color:#74806a;border-left:2px solid transparent}
+ #section-rail a.rail-subsection{font-size:14px;padding-left:16px}
+ #section-rail a:is(:hover,[aria-current]){color:#344b2c;background:#f0f4df;border-left-color:#829565}
+ #research-nav .research-links{visibility:hidden}
+}
+/* Reserve explicit rows for titles and model names; wires live in gutters. */
+#clear-overview .overview-flow{grid-template-columns:1.05fr repeat(4,minmax(0,1fr));gap:30px;align-items:stretch;padding:46px 0 48px}
+#clear-overview .overview-column{display:grid;grid-template-rows:46px 46px 180px;align-items:stretch}
+#clear-overview .overview-column>[data-overview-stage]{grid-row:1;font-size:15px!important;line-height:1.4;margin:0;padding:0;align-self:start;min-height:0}
+#clear-overview .overview-model-name{grid-row:2;margin:0;font-size:13px!important;line-height:1.4;align-self:start}
+#clear-overview .overview-node{grid-row:3;min-height:0;height:100%;font-size:16px;padding:10px 8px}
+#clear-overview .overview-inputs>.overview-category{grid-row:2;position:static;align-self:start;padding:0;font-size:14px}
+#overview-inputs{grid-row:3;display:grid;grid-template-rows:repeat(3,1fr);gap:6px}
+#clear-overview #overview-inputs>div{margin:0;padding:4px 6px;display:flex;flex-direction:column;justify-content:center;font-size:15px}
+#clear-overview .overview-flow small{font-size:13px;line-height:1.4}
+#clear-overview .overview-detail-leaders{display:none}
+/* The media receives the full width; explanations sit above it. */
+#clear-overview .overview-preview-inline{display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:16px;margin:8px auto 16px}
+#clear-overview .overview-preview-description{order:0;display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,2fr);gap:24px;align-items:start}
+#clear-overview .overview-preview-description p{margin:0;font-size:15px;line-height:1.5}
+#clear-overview .overview-preview-description strong{font-size:17px;line-height:1.45}
+#clear-overview .overview-preview-inline>div:not(.overview-preview-description){width:100%}
+#clear-overview .overview-preview-inline figure>svg{height:320px;max-height:none!important;width:100%}
+#clear-overview .overview-preview-inline .overview-preview-grid{gap:12px}
+#clear-overview .overview-preview-inline .overview-preview-grid :is(video,img){width:100%;height:230px;object-fit:contain}
+/* Match the recorded 4:3 view so its picture and the ego inset share one frame. */
+#clear-overview .overview-preview-inline .overview-live-viewer{width:100%;height:auto;aspect-ratio:4/3;max-height:none}
+#clear-overview .overview-preview-inline .overview-live-viewer>video{height:100%;width:100%;max-height:none;object-fit:contain}
+#clear-overview .overview-preview-inline>div:not(.overview-preview-grid) figure>video{width:100%;height:auto;max-height:460px;object-fit:contain}
+#clear-overview .overview-preview-inline .ego-inset video{height:auto;max-height:none}
+@media(max-width:1000px){
+ #clear-overview .overview-flow{display:grid;grid-template-columns:1fr;gap:34px;max-width:520px;padding:24px 30px 44px;margin:auto}
+ #clear-overview .overview-column{grid-template-rows:auto auto minmax(110px,auto);gap:8px}
+ #clear-overview .overview-inputs{grid-template-rows:auto auto auto}
+ #clear-overview .overview-inputs>.overview-category{grid-row:1}
+ #clear-overview #overview-inputs{grid-row:3;grid-template-columns:1fr;grid-template-rows:repeat(3,56px)}
+ #clear-overview .overview-node{font-size:18px;min-height:110px}
+ #clear-overview .overview-preview-description{display:block}
+ #clear-overview .overview-preview-description p{margin-top:6px}
+}
+@media(max-width:700px){
+ #main :is(#tldr,#motivation).wrap{width:calc(100% - 32px)}
+ #main :is(#tldr,#motivation) .academic-copy{font-size:17px}
+ #clear-overview .overview-preview-inline{padding:10px}
+ #clear-overview .overview-preview-inline .overview-preview-grid :is(video,img){height:170px}
+ #clear-overview .overview-preview-inline figure>svg{height:auto}
+}
+/* Fixed-size arrowheads and rounded routes stay separate from node borders. */
+#clear-overview .overview-wires .overview-edges>path{stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+/* The context bypass runs below the forward chain, above the feedback lane. */
+@media(min-width:1001px){#clear-overview .overview-flow{padding-top:12px;padding-bottom:92px}}
+#clear-overview .overview-preview-inline .overview-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+#clear-overview .overview-preview-inline .overview-preview-grid :is(video,img){height:auto;aspect-ratio:16/10;max-height:340px;object-fit:contain}
+#clear-overview .overview-preview-grid figure[data-example="illustration-scene"]{grid-column:1/-1}
+#clear-overview .overview-preview-grid figure[data-example="illustration-scene"] svg{height:230px}
+#clear-overview .overview-pin{align-self:flex-end;order:-1;font-size:13px;padding:5px 12px;border:1px solid #c7d2bf;background:#fff;color:#45603d}
+#clear-overview .overview-pin[aria-pressed=true]{background:#edf3df;border-color:#83986f}
+#clear-overview .overview-preview-inline[data-pinned=true]{border-color:#83986f}
+@media(max-width:600px){#clear-overview .overview-preview-inline .overview-preview-grid{gap:10px}#clear-overview .overview-preview-inline .overview-preview-grid :is(video,img){max-height:none;aspect-ratio:1}}
+/* Clear reading order and compact stage headers. */
+#clear-overview>h3{text-align:left}
+#clear-overview .overview-intro{text-align:left;width:100%;max-width:none;margin-inline:0}
+#clear-overview .overview-preview-description{display:block;order:0}
+#clear-overview .overview-preview-description p{margin:6px 0 0}
+#clear-overview .overview-notation{max-width:none;width:100%;text-align:left}
+#clear-overview .notation-role strong{font-weight:500}
+@media(min-width:1001px){
+ #clear-overview .overview-column{grid-template-rows:32px 34px 180px}
+ #clear-overview .overview-preview-inline .overview-preview-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+ #clear-overview .overview-preview-inline .overview-preview-grid :is(video,img){height:auto;aspect-ratio:4/3}
+}
+/* The inset and its video must use their own dimensions, not gallery sizing. */
+#clear-overview .overview-live-viewer{position:relative}
+#clear-overview .overview-live-viewer>.ego-inset{position:absolute;top:10px;right:10px;width:27%;height:auto;aspect-ratio:4/3;z-index:6;overflow:hidden;background:#fff}
+#clear-overview .overview-live-viewer>.ego-inset>video{display:block;position:static;width:100%;height:100%;max-height:none;aspect-ratio:4/3;object-fit:contain;padding:0}
+#clear-overview .overview-live-viewer>.ego-inset>span{position:absolute;left:4px;top:3px;z-index:1;font-size:11px;background:#ffffffe6;padding:1px 4px}
+#clear-overview .overview-live-viewer>.launch{top:auto;bottom:48px;right:10px;left:auto;transform:none;z-index:7}
+@media(min-width:1001px){
+ #clear-overview .overview-column{grid-template-rows:44px 34px 180px}
+ #clear-overview .overview-column>[data-overview-stage]{align-self:end;padding-bottom:4px}
+ #clear-overview .overview-model-name{padding-top:4px}
+}
+
+#clear-overview .overview-preview-inline>.overview-notation{order:2;border:0;margin:0;padding:8px 0 0;width:100%;max-width:none}
+/* Exactly one manuscript-aligned explanation is visible for the selected node. */
+#overview-preview [data-overview-detail][hidden]{display:none!important}
+#clear-overview .overview-notation [data-overview-detail]>p{margin:10px 0;font-size:15px;line-height:1.65}
+#clear-overview .overview-notation .equation{margin:12px 0;padding:6px 0;font-size:16px;overflow-x:auto;max-width:100%}
+#clear-overview .overview-notation .katex-display{margin:0}
+@media(max-width:700px){#clear-overview .overview-notation .equation{font-size:14px}}
+/* Training: joint objective, component curves, then the corresponding samples. */
+#learning .learning-pair{display:flex;flex-direction:column;gap:40px}
+#learning .training-objective-overview{display:flex;flex-direction:column;align-items:center;gap:16px}
+#learning .training-objective-copy{min-width:0}
+#learning .training-objective-copy .paper-equation-row{display:block;margin:20px 0}
+#learning #training-losses .equation{font-size:16px;max-width:100%;overflow-x:auto}
+#learning #training-losses .equation .katex-display{width:max-content;min-width:100%;margin:12px 0;white-space:nowrap}
+#learning #training-losses .objective-term.term-availability{cursor:help}
+/* KaTeX's invisible vertical-layout spans must not intercept adjacent labels. */
+#training-losses [data-objective-annotations] .katex-html,#training-losses [data-objective-annotations] .katex-html *{pointer-events:none}
+#training-losses [data-objective-annotations] .objective-term,#training-losses [data-objective-annotations] .objective-term .text,#training-losses [data-objective-annotations] .objective-term .text *,#training-losses [data-objective-annotations] .objective-term .stretchy{pointer-events:auto}
+#learning .training-objective-overview #loss-loss{border-top:0;padding-top:0}
+#learning .training-objective-overview figcaption{margin-top:0}
+#learning .training-objective-copy{width:100%;text-align:center}
+#learning .training-objective-copy>.method-small-copy{max-width:none}
+#learning .training-objective-overview #loss-loss{width:min(100%,1000px);text-align:center}
+#learning #loss-loss .loss-tooltip{text-align:left}
+#learning .loss-content>.loss-scope:first-child{text-align:center;max-width:960px;margin:20px auto}
+.loss-composition{width:min(100%,1000px);font-size:13px;color:#5d6a56}
+.loss-composition>p{margin:0 0 8px;text-align:center}
+.loss-contribution-bar{display:flex;height:12px;gap:2px}
+.loss-contribution-bar>span{flex-basis:0;min-width:1px}
+.loss-contribution-values{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 18px;margin-top:10px;font-size:12px;font-variant-numeric:tabular-nums}
+.loss-contribution-values i{display:inline-block;width:8px;height:8px;margin-right:5px}
+.loss-role-guide{margin:26px 0}
+.loss-role-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.loss-role-tabs button{border:1px solid #d9e1d0;background:#fff;padding:10px;color:#52654b;font:inherit;font-size:14px}
+.loss-role-tabs button[aria-pressed=true]{background:#edf3df;border-color:#83986f;color:#344b2c}
+.loss-role-panel{border-left:3px solid #9dae84;padding:12px 18px;background:#f7f9f2}
+.loss-role-panel[hidden]{display:none!important}
+.loss-role-panel h5{font-size:17px;margin:0 0 8px;font-weight:500}
+.loss-role-panel p{font-size:15px;line-height:1.65;margin:8px 0}
+.loss-role-panel a{font-size:14px}
+.availability-state{color:#5d704e}
+.loss-term-help{position:fixed;z-index:90;width:min(370px,calc(100vw - 24px));padding:12px 15px;border:1px solid #b5c5a5;background:#f6faed;color:#394c30;font-size:14px;line-height:1.6;pointer-events:none}
+.loss-term-help[hidden]{display:none!important}
+#learning .training-loss-chart figcaption p{font-size:13px;min-height:40px;line-height:1.5}
+#learning #loss-loss figcaption p{min-height:0}
+@media(max-width:800px){.loss-role-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#learning .loss-chart-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-flow:row;grid-auto-columns:auto;gap:20px 24px;overflow:visible;padding:16px 0 0;scroll-snap-type:none}
+#learning .loss-chart-grid>figure{grid-column:span 2}
+#learning .loss-chart-grid>figure:nth-last-child(-n+2){grid-column:span 3}
+#learning .loss-band-note{margin:14px 0 0;max-width:none}
+#learning #learning-data{border-top:1px solid #e2e6db;padding-top:28px}
+#learning .training-sample-heading{font-size:16px;font-weight:500;margin:0 0 20px}
+#learning .sample-explorer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;max-width:none;margin:0;align-items:start}
+#learning .sample-inspector,#learning .research-representations{max-width:none;width:100%;margin:0}
+#learning .sample-video,#learning .sample-scene{width:100%;max-width:none;max-height:none;height:auto;object-fit:contain}
+#learning .sample-factors{gap:8px}
+#learning .sample-factors button{padding:8px;text-align:left}
+#learning .sample-filters{gap:6px;margin:12px 0}
+#learning .sample-filters button,#learning .sample-pagination button,#learning .sample-controls button{padding:6px 9px}
+#learning .sample-factor-note,#learning .sample-embedding-note,#learning .sample-count,#learning .sample-phase{font-size:12px;line-height:1.55}
+#learning .sample-title,#learning .research-representations>h5{font-size:16px;margin:0 0 14px}
+@media(max-width:800px){
+ #learning .training-objective-overview,#learning .sample-explorer-grid{grid-template-columns:1fr;gap:24px}
+ #learning .loss-chart-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+ #learning .loss-chart-grid>figure,#learning .loss-chart-grid>figure:nth-last-child(-n+2){grid-column:auto}
+ #learning .loss-chart-grid>figure:last-child{grid-column:1/-1}
+}
+@media(max-width:500px){
+ #learning .loss-chart-grid{grid-template-columns:1fr}
+ #learning #training-losses .equation{font-size:14px}
+}
