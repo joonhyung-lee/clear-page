@@ -1,0 +1,122 @@
+{
+  "palette": "design-tokens.json",
+  "scenes": [
+    {
+      "scene": "objects",
+      "sourceSHA256": "93a25d2d93493dbacb991dd731d3184570c85bc37c32e85367fb64e7f84d970b",
+      "fps": 60.0,
+      "frames": 720,
+      "size": [
+        560,
+        440
+      ],
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "b7791d9dfcd5aeb3b7d7e54e7f9da751565cfcdc68649f097e4814583eca22b7"
+    },
+    {
+      "scene": "scene-maze",
+      "sourceSHA256": "853873ce257a3231ba2024f32601436a3bffe2b6528b719531c84d30c79e1aa4",
+      "fps": 60.0,
+      "frames": 720,
+      "size": [
+        560,
+        440
+      ],
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "101a611b890d9a0df64fc477cea881a277a6575ed9cd144af07ededa703301e6"
+    },
+    {
+      "scene": "scene-slope",
+      "sourceSHA256": "d968622523ee36c55d2e386f358a421dbdd3b6954a036e8fd297540ba4586a57",
+      "fps": 60.0,
+      "frames": 720,
+      "size": [
+        560,
+        440
+      ],
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "30f67cbd67034a1b61d9348851808f3536217156267ac6240cc0a75b32b9b7bc"
+    },
+    {
+      "scene": "scene-stairs",
+      "sourceSHA256": "6e332df1127aaf2cb041227ad5d482af4e3182fff8815f9b0ee0e9a15392460a",
+      "fps": 60.0,
+      "frames": 720,
+      "size": [
+        560,
+        440
+      ],
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "2435953a463957ced6759157fc490a5c66e41f4a05eeb4e98fd778c2b33aaf50"
+    },
+    {
+      "scene": "scene-steps",
+      "sourceSHA256": "7b989842c7960442e33d8a818fdc3318b3ca1598ef9d154fde48767d7582a833",
+      "fps": 60.0,
+      "frames": 720,
+      "size": [
+        560,
+        440
+      ],
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "81b6b889be39904e4af0d127fd49c625a6c9f5f42c1e285bf6b9fda3a7c034cf"
+    },
+    {
+      "scene": "structure-g1",
+      "sourceSHA256": "7d810f052d4b62e2ad59fe210386267a131e07052e052a85ddd4cf2519781923",
+      "fps": 60.0,
+      "frames": 720,
+      "size": [
+        560,
+        440
+      ],
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "5ff1a3d14808169afecd53258791bda4177030ddeb863823d56531d7face6def"
+    },
+    {
+      "scene": "structure-husky",
+      "sourceSHA256": "53a17a2fb041fe60f439ea041043b7ba0b947d2cb9debb3887f3dd8d0f3635ce",
+      "fps": 60.0,
+      "frames": 720,
+      "size": [
+        560,
+        440
+      ],
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "c895312e7a3d3cc323a523e5fa9c7fa2d92556f8d42d51fb203f2d5967ebe3f7"
+    },
+    {
+      "scene": "structure-spot",
+      "sourceSHA256": "9d684c1ac353bff13c6124e09e1b2c4e1d8c54c8714ef0f952742c17553d8d5e",
+      "fps": 60.0,
+      "frames": 720,
+      "size": [
+        560,
+        440
+      ],
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "7fa106e45aab9b699d5f8029a1a97d3ce68c0c2f56a4a126188751dfe76720c3"
+    },
+    {
+      "scene": "structure-spot_arm",
+      "sourceSHA256": "dc8fdce9cdd409b8a0667c71ba7ebe334b4689ba25decda6705620242ebbd6ac",
+      "fps": 60.0,
+      "frames": 720,
+      "size": [
+        560,
+        440
+      ],
+      "palette": "design-tokens.json",
+      "motion": "archived poses; unchanged",
+      "renderSHA256": "1b69394142f0f777f26297808f13b8861a999f3f429523449c6e7e46ecd681a1"
+    }
+  ]
+}

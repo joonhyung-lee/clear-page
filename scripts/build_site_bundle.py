@@ -35,6 +35,35 @@ def versioned(path, parent):
     import os
     return os.path.relpath(path, parent) + '?v=' + hashlib.sha256(path.read_bytes()).hexdigest()[:12]
 
+def prepare_main_layout(soup):
+    brand = soup.select_one('#research-nav .research-logo')
+    title = soup.select_one('h1')
+    if brand and title:
+        full_name = title.get_text(' ', strip=True)
+        brand.clear()
+        short = soup.new_tag('strong'); short.string = 'CLEAR:'
+        long = soup.new_tag('span', attrs={'class': 'research-full-name'})
+        long.string = full_name.removeprefix('CLEAR:').strip()
+        brand.append(short); brand.append(' '); brand.append(long)
+        brand['aria-label'] = full_name + ' - overview'
+    method = soup.select_one('#method')
+    if method and not method.select_one(':scope > .method-chapter-header'):
+        heading = method.select_one(':scope > .section-heading')
+        navigation = method.select_one(':scope > .chapter-links')
+        if heading and navigation:
+            header = soup.new_tag('header', attrs={'class': 'method-chapter-header'})
+            heading.insert_before(header)
+            header.append(heading.extract())
+            header.append(navigation.extract())
+    failures = soup.select_one('#failure-cases')
+    if failures:
+        removed_ids = {node['id'] for node in failures.select('[id]')}
+        removed_ids.add('failure-cases')
+        for link in soup.select('a[href^="#"]'):
+            if link['href'][1:] in removed_ids:
+                link.decompose()
+        failures.decompose()
+
 def build(check=False):
     stale = []
     def write(path, text):
@@ -44,8 +73,10 @@ def build(check=False):
         else:
             path.write_text(text)
     if not check:
+        from build_design_assets import build as build_design_assets
         from build_static_code import build as build_static_code
         from build_fast_data import build as build_fast_data
+        build_design_assets()
         build_static_code()
         build_fast_data()
     tracked = set(subprocess.check_output(['git','ls-files','-z'], cwd=ROOT).decode().split('\0'))
@@ -58,6 +89,8 @@ def build(check=False):
     for name, entry in manifest.items():
         page = ROOT / name
         soup = BeautifulSoup(page.read_text(), 'html.parser')
+        if name == 'index.html':
+            prepare_main_layout(soup)
         js = ROOT / entry['js_output']
         css = ROOT / entry['css_output']
         page_previews={}

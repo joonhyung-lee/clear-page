@@ -2,6 +2,7 @@
   "index.html": {
     "scripts": [
       "assets/asset-revisions.js",
+      "assets/design-tokens.js",
       "assets/site.js",
       "assets/katex/katex.min.js",
       "assets/method.js",
@@ -27,6 +28,7 @@
       "assets/reading-layout.js"
     ],
     "styles": [
+      "assets/design-tokens.css",
       "assets/site.css",
       "assets/katex/katex.min.css",
       "assets/page-structure.css",
@@ -35,7 +37,8 @@
       "assets/research-layout.css",
       "assets/continuous-layout.css",
       "assets/reading-layout.css",
-      "assets/stylized.css"
+      "assets/stylized.css",
+      "assets/editorial-type.css"
     ],
     "js_output": "assets/page-bundle.js",
     "css_output": "assets/page-bundle.css"
@@ -43,6 +46,7 @@
   "code/index.html": {
     "scripts": [
       "assets/asset-revisions.js",
+      "assets/design-tokens.js",
       "assets/code-archives.js",
       "code/catalog.js",
       "assets/code-download-locations.js",
@@ -52,7 +56,9 @@
       "assets/code-shared-examples.js"
     ],
     "styles": [
-      "code/code.css"
+      "assets/design-tokens.css",
+      "code/code.css",
+      "assets/editorial-type.css"
     ],
     "js_output": "code/page-bundle.js",
     "css_output": "code/page-bundle.css"

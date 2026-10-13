@@ -1,18 +1,18 @@
 /* A quiet reading rail keeps the chapter hierarchy visible without covering figures. */
-#page-contents{position:fixed;z-index:20;right:max(32px,3vw);top:42px;width:178px;max-height:calc(100dvh - 84px);overflow-y:auto;overscroll-behavior:contain;padding:4px 0 12px 14px;border-left:1px solid #e6e9e2;background:#fff;font-size:12px;line-height:1.45;scrollbar-width:thin}
-.contents-heading{font-size:11px;color:#777f70;margin:0 0 14px;padding-left:8px}
+#page-contents{position:fixed;z-index:20;right:max(32px,3vw);top:42px;width:178px;max-height:calc(100dvh - 84px);overflow-y:auto;overscroll-behavior:contain;padding:4px 0 12px 14px;border-left:1px solid #e5e7eb;background:#fff;font-size:12px;line-height:1.45;scrollbar-width:thin}
+.contents-heading{font-size:11px;color:#6a7282;margin:0 0 14px;padding-left:8px}
 #page-contents ol{list-style:none;padding:0;margin:0}#page-contents ol ol{padding-left:10px}#page-contents>ol>li{margin-bottom:12px}
-#page-contents a{display:block;text-decoration:none;color:#818679;padding:5px 8px;border-left:2px solid transparent}
+#page-contents a{display:block;text-decoration:none;color:#6a7282;padding:5px 8px;border-left:2px solid transparent}
 #page-contents li[data-depth="3"] a{font-size:11px;padding-block:4px}
-#page-contents a:hover{color:#334a30;background:#f7f8f4}
-#page-contents li[data-current-branch]>a{color:#4a6040}
-#page-contents a[aria-current="location"]{color:#2f4828;border-left-color:#7e956b;background:#f1f5eb}
+#page-contents a:hover{color:#364153;background:#f7f8f4}
+#page-contents li[data-current-branch]>a{color:#4a5565}
+#page-contents a[aria-current="location"]{color:#364153;border-left-color:#00c950;background:#f3f4f6}
 #page-contents .contents-top{font-size:11px;margin-top:12px}
 #contents-toggle{display:none}
-.reading-detail{margin:24px 0;border-top:1px solid #e1e6da;border-bottom:1px solid #e1e6da;padding:0 0 0}
-.reading-detail>summary{display:flex;align-items:center;justify-content:space-between;gap:20px;list-style:none;padding:17px 0;cursor:pointer;font-size:13px;color:#526249}
+.reading-detail{margin:24px 0;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:0 0 0}
+.reading-detail>summary{display:flex;align-items:center;justify-content:space-between;gap:20px;list-style:none;padding:17px 0;cursor:pointer;font-size:13px;color:#4a5565}
 .reading-detail>summary::-webkit-details-marker{display:none}
-.reading-detail>summary:after{content:'+';font-size:18px;font-weight:400;color:#798670}
+.reading-detail>summary:after{content:'+';font-size:18px;font-weight:400;color:#6a7282}
 .reading-detail[open]>summary:after{content:'−'}
 .reading-detail[open]{padding-bottom:20px}.reading-detail[open]>summary{margin-bottom:8px}
 .reading-detail .learning-explorer,.reading-detail .mpc-process{margin-top:8px}
@@ -29,8 +29,8 @@
  body:not(.reading-started) #page-contents{opacity:0;pointer-events:none;visibility:hidden}
 }
 @media(max-width:1679px){
- #contents-toggle{display:block;position:fixed;z-index:31;right:16px;top:14px;padding:8px 13px;background:#fffffff5;border:1px solid #d9e0d1;font-size:12px}
- #page-contents{display:none;z-index:30;right:16px;top:54px;width:245px;max-height:calc(100dvh - 78px);border:1px solid #d9e0d1;padding:16px;background:#fff;box-shadow:0 6px 20px #0000000a}
+ #contents-toggle{display:block;position:fixed;z-index:31;right:16px;top:14px;padding:8px 13px;background:#fffffff5;border:1px solid #d1d5dc;font-size:12px}
+ #page-contents{display:none;z-index:30;right:16px;top:54px;width:245px;max-height:calc(100dvh - 78px);border:1px solid #d1d5dc;padding:16px;background:#fff;box-shadow:0 6px 20px #0000000a}
  #page-contents[data-open]{display:block}
  #main [id]{scroll-margin-top:64px}
 }
@@ -38,22 +38,22 @@
 
 /* Visible subsections, with one heading level and no disclosure affordance. */
 section.reading-detail{padding:22px 0 12px;border-bottom:0;margin:28px 0}
-section.reading-detail>h4{font-size:18px;font-weight:500;color:#424f3d;margin:0 0 20px}
-.method-details>h5,.sample-explanation-details>h5,.ordering-spatial>h5{font-size:12px;font-weight:500;margin:14px 0 8px;color:#596650}
+section.reading-detail>h4{font-size:18px;font-weight:500;color:#4a5565;margin:0 0 20px}
+.method-details>h5,.sample-explanation-details>h5,.ordering-spatial>h5{font-size:12px;font-weight:500;margin:14px 0 8px;color:#4a5565}
 .learning-explorer>h5,.context-heading>h5,.ordering-main>h5{font-size:14px;font-weight:500;margin:0 0 12px}
 #grounding-samples .method-with-notation{margin-top:24px}
 #grounding-samples .method-loss{margin-top:16px}
 #ordering-context .context-formation{border-top:0;margin-top:0;padding-top:0}
 
 .sample-factors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0}
-.sample-factors button{padding:8px 10px;border:1px solid #e1e6da;background:#fafbf8;text-align:left;min-width:0}
-.sample-factors button:hover,.sample-factors button:focus-visible{border-color:#91a281;background:#f0f5ea}
-.sample-factors span{display:block;font-size:10px;color:#758069;margin-bottom:3px}
+.sample-factors button{padding:8px 10px;border:1px solid #e5e7eb;background:#fafbf8;text-align:left;min-width:0}
+.sample-factors button:hover,.sample-factors button:focus-visible{border-color:#99a1af;background:#f3f4f6}
+.sample-factors span{display:block;font-size:10px;color:#6a7282;margin-bottom:3px}
 .sample-factors strong{display:block;font-size:11px;font-weight:400;overflow-wrap:anywhere}
-.sample-factor-note{font-size:10px;line-height:1.6;color:#7c8574;min-height:48px;margin:8px 0}
-.sample-scatter .factor-match{stroke:#40583b;stroke-width:3.5}
+.sample-factor-note{font-size:10px;line-height:1.6;color:#6a7282;min-height:48px;margin:8px 0}
+.sample-scatter .factor-match{stroke:#4a5565;stroke-width:3.5}
 .sample-scatter .factor-unmatched{opacity:.13}
-.sample-map-details>h5{font-size:11px;font-weight:400;color:#727d69;margin:12px 0 6px}
+.sample-map-details>h5{font-size:11px;font-weight:400;color:#6a7282;margin:12px 0 6px}
 
 .learning-dataflow span:before{animation-play-state:paused}
 .learning-explorer.is-visible .learning-dataflow span:before{animation-play-state:running}

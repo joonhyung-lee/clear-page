@@ -16,6 +16,7 @@ import numpy as np
 from OpenGL import GL
 from OpenGL.GL.shaders import compileProgram, compileShader
 from PIL import Image, ImageDraw, ImageFont, ImageChops
+from design_tokens import font_path as design_font_path
 from scipy.spatial.transform import Rotation
 import imageio_ffmpeg
 from attention_probability import distribution
@@ -57,7 +58,7 @@ void main(){float shade=.72+.28*abs(dot(normalize(n),normalize(vec3(.25,-.35,1.)
 ''',GL.GL_FRAGMENT_SHADER))
 uniforms={key:GL.glGetUniformLocation(program,key) for key in ['mvp','model','color']}
 GL.glEnable(GL.GL_DEPTH_TEST);GL.glDisable(GL.GL_CULL_FACE);GL.glUseProgram(program)
-font_path='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+font_path=design_font_path()
 fonts={size:ImageFont.truetype(font_path,size) for size in [13,15,17,20,24]}
 green=np.array([0,76,38],float)/255
 # Fixed full-range scale across all views and recordings. This is attention,

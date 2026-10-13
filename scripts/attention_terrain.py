@@ -2,7 +2,8 @@
 import numpy as np
 from PIL import Image,ImageDraw
 
-PALETTE={'ramp':(235,204,165),'stair_tread':(164,198,220),'flat':(206,195,219)}
+from design_tokens import rgb
+PALETTE={'ramp':rgb('mint',200),'stair_tread':rgb('blue',200),'flat':rgb('gray',100)}
 LABELS={'ramp':'Ramp','stair_tread':'Step','flat':'Platform'}
 
 def terrain_color(tile):

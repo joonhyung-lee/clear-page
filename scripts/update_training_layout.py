@@ -21,16 +21,14 @@ def apply(s):
     losses = s.select_one('#training-losses')
     losses.attrs.pop('data-loss-source', None)
     losses.select_one('#loss-loss figcaption p').string = '100,000 training steps'
-    if not losses.select_one('.training-objective-overview'):
-        overview = s.new_tag('div', attrs={'class': 'training-objective-overview'})
+    copy = losses.select_one('.training-objective-copy')
+    if not copy:
         copy = s.new_tag('div', attrs={'class': 'training-objective-copy'})
         for selector in (':scope > .method-small-copy', ':scope > .paper-equation-row', ':scope > .loss-scope'):
             node = losses.select_one(selector)
             if node:
                 copy.append(node.extract())
-        overview.append(copy)
-        overview.append(losses.select_one('#loss-loss').extract())
-        losses.insert(0, overview)
+        losses.insert(0, copy)
     equation = losses.select_one('[data-objective-annotations]')
     equation['data-tex'] = r'\mathcal{L}(\theta)=\mathcal{L}_{\mathrm{order}}+\lambda_{\mathrm{flow}}\mathcal{L}_{\mathrm{flow}}+\lambda_{\mathrm{aff}}\mathcal{L}_{\mathrm{aff}}+\lambda_{\mathrm{avail}}\mathcal{L}_{\mathrm{avail}}'
     content = losses.select_one('.loss-content')
@@ -52,17 +50,19 @@ def apply(s):
     grid = losses.select_one('.loss-chart-grid')
     grid['aria-label'] = 'Five component training losses'
     grid.attrs.pop('tabindex', None)
-    # Keep the formula full width; compare the total and its terms side by side.
+    # Pair the total and its formula with the component curves.
     split = losses.select_one('.training-objective-split')
     if not split:
         split = s.new_tag('div', attrs={'class': 'training-objective-split'})
-        losses.select_one('.training-objective-overview').insert_after(split)
+        losses.insert(0, split)
     main = split.select_one('.training-objective-main')
     if not main:
         main = s.new_tag('div', attrs={'class': 'training-objective-main'})
         split.append(main)
-    for node in (losses.select_one('#loss-loss'), losses.select_one('[data-loss-composition]'), scope):
+    for node in (losses.select_one('#loss-loss'), copy, losses.select_one('[data-loss-composition]'), scope):
         main.append(node.extract())
+    for overview in losses.select('.training-objective-overview'):
+        overview.decompose()
     split.append(content.extract())
     samples.select_one(':scope > p').string = 'Training samples for scene grounding and interaction planning.'
     for ident, text in (

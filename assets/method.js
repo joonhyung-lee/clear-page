@@ -25,5 +25,30 @@
    term.setAttribute('aria-label',term.classList.contains('term-order')?'Explain selection, ranking and regularization losses':term.classList.contains('term-flow')?'Explain generation loss':term.classList.contains('term-affordance')?'Explain feasibility loss':'Explain the availability penalty and its zero weight');
    term.title=term.getAttribute('aria-label');
   });
+  if(el.dataset.objectiveAnnotations){
+   // Fit the actual typeset width, including labels, without scaling hit targets.
+   let pending=false, previousWidth=0;
+   const fit=()=>{
+    pending=false;
+    const available=el.clientWidth;
+    if(!available)return;
+    el.style.setProperty('--objective-font-size','16px');
+    let size=16;
+    for(let pass=0;pass<3;pass++){
+     const width=el.querySelector('.katex-display').getBoundingClientRect().width;
+     if(width<=available-2)break;
+     size=Math.floor(size*(available-2)/width*100)/100;
+     el.style.setProperty('--objective-font-size',`${size}px`);
+    }
+   };
+   const schedule=()=>{if(!pending){pending=true;requestAnimationFrame(fit);}};
+   new ResizeObserver(entries=>{
+    const width=entries[0].contentRect.width;
+    if(width!==previousWidth){previousWidth=width;schedule();}
+   }).observe(el);
+   document.fonts.ready.then(schedule);
+   document.fonts.addEventListener('loadingdone',schedule);
+   schedule();
+  }
  });
 })();

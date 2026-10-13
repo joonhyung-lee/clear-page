@@ -7,6 +7,7 @@ from pathlib import Path
 import imageio_ffmpeg
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+from design_tokens import font_path as design_font_path
 from scipy.spatial.transform import Rotation
 from attention_lanes import box_vertices, draw_query_marker
 from replanning_mesh_renderer import MeshRenderer, camera_matrix
@@ -30,7 +31,7 @@ logs = {int(f.stem.split('-')[-1]): json.loads(f.read_text()) for f in a.telemet
 capture = json.loads((a.telemetry/'capture.json').read_text())
 W, H = 1280, 720
 renderer = MeshRenderer(g, d['meshes'])
-fonts = {n: ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', n) for n in [12, 13, 14, 16, 18, 22]}
+fonts = {n: ImageFont.truetype(design_font_path(), n) for n in [12, 13, 14, 16, 18, 22]}
 sizes = {o['object_id']: o['size'] for o in d['scene']['objects']}
 objects = {int(k): v for k, v in d['object_bodies'].items()}
 body_to_object = {b: oid for oid, b in objects.items()}

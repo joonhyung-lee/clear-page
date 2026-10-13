@@ -16,25 +16,25 @@
    const [low,high]=bounds,scale=Math.min((w-32)/(high[0]-low[0]),(h-42)/(high[1]-low[1]));
    const xy=p=>[w/2+(p[0]-(high[0]+low[0])/2)*scale,h/2+10-(p[1]-(high[1]+low[1])/2)*scale];
    const rect=(b,color)=>{const p=xy([b[0],b[3]]);ctx.fillStyle=color;ctx.fillRect(p[0],p[1],(b[2]-b[0])*scale,(b[3]-b[1])*scale);};
-   for(const t of scene.terrain||[])rect(t.bounds,t.kind==='ramp'?'#deeee3':t.kind==='stair_tread'?'#f1e1d5':'#edf2e9');
-   for(const b of scene.walls)rect(b,'#c0c9bd');
+   for(const t of scene.terrain||[])rect(t.bounds,t.kind==='ramp'?'#e5e7eb':t.kind==='stair_tread'?'#e5e7eb':'#f3f4f6');
+   for(const b of scene.walls)rect(b,'#d1d5dc');
    const polygon=(points,fill,stroke,width=1.5)=>{ctx.beginPath();points.map(xy).forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();};
    const violations=[];
    paths.forEach((path,index)=>{
-    const obj=scene.objects[path.object],color=['#568f9a','#ad805a','#7c83a6'][index%3];
+    const obj=scene.objects[path.object],color=['#00bba7','#ff6467','#2b7fff'][index%3];
     path.poses.slice(1).forEach((b,j)=>{
      const a=path.poses[j],bad=g.blocked(a,b,obj.size,scene.walls);
      if(bad)violations.push({object:path.object,segment:j});
-     ctx.beginPath();ctx.moveTo(...xy(a));ctx.lineTo(...xy(b));ctx.strokeStyle=bad?'#b94732':color;ctx.lineWidth=bad?3:2;ctx.stroke();
+     ctx.beginPath();ctx.moveTo(...xy(a));ctx.lineTo(...xy(b));ctx.strokeStyle=bad?'#fb2c36':color;ctx.lineWidth=bad?3:2;ctx.stroke();
      ctx.beginPath();ctx.arc(...xy(b),3.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.stroke();
     });
     for(const j of [Math.floor(path.poses.length/2),path.poses.length-1]){
      const pose=path.poses[j],bad=scene.walls.some(b=>g.overlap(pose,obj.size,b));
-     polygon(g.footprint(pose,obj.size),bad?'#b9473240':color+'30',bad?'#b94732':color,2);
+     polygon(g.footprint(pose,obj.size),bad?'#b9473240':color+'30',bad?'#fb2c36':color,2);
     }
    });
-   scene.objects.forEach((o,i)=>{polygon(g.footprint(o.pose,o.size),'#d7b49a','#8c7059');const q=xy(o.pose);ctx.font='12px Arial';ctx.fillStyle='#374333';ctx.textAlign='center';ctx.fillText(String(i),q[0],q[1]+4);});
-   for(const [p,label]of [[scene.start,'Start'],[scene.goal,'Goal']]){const q=xy(p);ctx.fillStyle='#486a48';ctx.beginPath();ctx.arc(...q,4.5,0,Math.PI*2);ctx.fill();ctx.font='13px Arial';ctx.textAlign='center';ctx.fillText(label,q[0],q[1]-10);}
+   scene.objects.forEach((o,i)=>{polygon(g.footprint(o.pose,o.size),'#ffa2a2','#ff6467');const q=xy(o.pose);ctx.font='12px B612 Mono';ctx.fillStyle='#364153';ctx.textAlign='center';ctx.fillText(String(i),q[0],q[1]+4);});
+   for(const [p,label]of [[scene.start,'Start'],[scene.goal,'Goal']]){const q=xy(p);ctx.fillStyle='#4a5565';ctx.beginPath();ctx.arc(...q,4.5,0,Math.PI*2);ctx.fill();ctx.font='13px B612 Mono';ctx.textAlign='center';ctx.fillText(label,q[0],q[1]-10);}
    canvas.dataset.flowTime=time.toFixed(3);canvas.dataset.overlapSegments=JSON.stringify(violations);
    canvas.dataset.source=flow?'recorded-teaser-flow-draw-0':'archived-planning-decisions';
    slider.value=time;output.textContent=flow?'t = '+time.toFixed(2):(candidate.id+1)+' / '+data.candidates.length;

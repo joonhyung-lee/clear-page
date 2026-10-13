@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import mujoco,imageio_ffmpeg
 from PIL import Image,ImageDraw,ImageFont
+from design_tokens import font_path as design_font_path
 from attention_terrain import PALETTE
 from attention_lanes import draw_query_marker
 
@@ -11,7 +12,7 @@ p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--source',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
 p.add_argument('--preview',action='store_true');p.add_argument('--bodies',nargs='+',default=['spot','husky'])
 a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
-font='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';fonts={n:ImageFont.truetype(font,n) for n in [13,17,20]}
+font=design_font_path();fonts={n:ImageFont.truetype(font,n) for n in [13,17,20]}
 for body in a.bodies:
     folder=a.source/('spot__stair_once' if body=='spot' else 'husky__ramp')
     model=mujoco.MjModel.from_binary_path(str(folder/(body+'.mjb')));state=mujoco.MjData(model)

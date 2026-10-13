@@ -21,28 +21,28 @@
   if(mode==='3d'){
    // World coordinates stay fixed. Reproject them without rebuilding point arrays on every drag.
    const cy=Math.cos(camera.yaw),sy=Math.sin(camera.yaw),sp=Math.sin(camera.pitch),cp=Math.cos(camera.pitch),scale=baseScale*camera.zoom,center=bounds.map(([lo,hi])=>(lo+hi)/2);
-   ctx.strokeStyle='#87918a';ctx.lineWidth=.65;
+   ctx.strokeStyle='#99a1af';ctx.lineWidth=.65;
    for(let n=0;n<r.ghostPaths.length;n++){
     if(n%48===0)ctx.beginPath();
     const points=r.ghostPaths[n];for(let j=0;j<points.length;j+=3){const x=points[j]-center[0],y=points[j+1]-center[1],z=points[j+2]-center[2],px=280+(cy*x+sy*y)*scale+camera.pan[0],py=235+(sp*(sy*x-cy*y)-cp*z)*scale+camera.pan[1];if(j)ctx.lineTo(px,py);else ctx.moveTo(px,py);}
     if(n%48===47||n===r.ghostPaths.length-1)ctx.stroke();count++;
    }
-  }else for(const update of r.updates){const times=r.futureTimes.map(t=>update.time-r.updates[0].time+t);for(let n=0;n<r.population;n++)for(let hand=0;hand<2;hand++){path(ctx,update.paths[n].map(p=>p[hand]),times,r,'#87918a',.65);count++;}}
+  }else for(const update of r.updates){const times=r.futureTimes.map(t=>update.time-r.updates[0].time+t);for(let n=0;n<r.population;n++)for(let hand=0;hand<2;hand++){path(ctx,update.paths[n].map(p=>p[hand]),times,r,'#99a1af',.65);count++;}}
   const entry={layer,count};cache.set(key,entry);return entry;
  }
- function drawGrid(ctx){ctx.font=Math.max(13,10*W/(ctx.canvas.clientWidth||W))+'px Arial';ctx.fillStyle='#707c6a';
+ function drawGrid(ctx){ctx.font=Math.max(13,10*W/(ctx.canvas.clientWidth||W))+'px Arial';ctx.fillStyle='#6a7282';
   if(mode==='2d'){
    for(let a=0;a<3;a++){const[lo,hi]=bounds[a],bottom=177+a*151;ctx.fillText(['X · Forward (m)','Y · Lateral (m)','Z · Height (m)'][a],15,bottom-130);
-    for(const v of [lo,(lo+hi)/2,hi]){stroke(ctx,[[60,ty(v,a)],[530,ty(v,a)]],'#e4e9df');ctx.fillText(format(v),12,ty(v,a)+4);}
-    for(const t of [0,10,20,30,40,axisEnd]){stroke(ctx,[[tx(t),bottom-111],[tx(t),bottom]],'#edf0e9');if(a===2)ctx.fillText(t+' s',tx(t)-10,bottom+21);}
+    for(const v of [lo,(lo+hi)/2,hi]){stroke(ctx,[[60,ty(v,a)],[530,ty(v,a)]],'#e5e7eb');ctx.fillText(format(v),12,ty(v,a)+4);}
+    for(const t of [0,10,20,30,40,axisEnd]){stroke(ctx,[[tx(t),bottom-111],[tx(t),bottom]],'#f3f4f6');if(a===2)ctx.fillText(t+' s',tx(t)-10,bottom+21);}
    }ctx.fillText('Full execution time · fixed scales',16,542);return;
   }
   const[xlo,xhi]=bounds[0],[ylo,yhi]=bounds[1];
-  for(let x=Math.ceil(xlo);x<=xhi;x++)stroke(ctx,[project([x,ylo,0]),project([x,yhi,0])],'#e5eae1');
-  for(let y=Math.ceil(ylo);y<=yhi;y++)stroke(ctx,[project([xlo,y,0]),project([xhi,y,0])],'#e5eae1');
+  for(let x=Math.ceil(xlo);x<=xhi;x++)stroke(ctx,[project([x,ylo,0]),project([x,yhi,0])],'#e5e7eb');
+  for(let y=Math.ceil(ylo);y<=yhi;y++)stroke(ctx,[project([xlo,y,0]),project([xhi,y,0])],'#e5e7eb');
   const origin=[xlo,ylo,0],directions=[[xhi,ylo,0],[xlo,yhi,0],[xlo,ylo,bounds[2][1]]];
-  directions.forEach((end,a)=>{stroke(ctx,[project(origin),project(end)],'#8a9880',1.3);const p=project(end);ctx.fillStyle='#53654a';ctx.fillText(['X · Forward','Y · Lateral','Z · Height'][a],Math.max(10,Math.min(470,p[0]+6)),p[1]-6);});
-  ctx.fillStyle='#7a8572';ctx.fillText('Drag to rotate · wheel to zoom · double-click to reset',16,402);
+  directions.forEach((end,a)=>{stroke(ctx,[project(origin),project(end)],'#99a1af',1.3);const p=project(end);ctx.fillStyle='#4a5565';ctx.fillText(['X · Forward','Y · Lateral','Z · Height'][a],Math.max(10,Math.min(470,p[0]+6)),p[1]-6);});
+  ctx.fillStyle='#6a7282';ctx.fillText('Drag to rotate · wheel to zoom · double-click to reset',16,402);
  }
  function detail(ctx,r,u,actual,time,colors,c,forecastValid){
   if(mode!=='3d')return;
@@ -52,22 +52,22 @@
   ctx.strokeStyle=colors[0];ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.strokeRect(...box);ctx.setLineDash([]);stroke(ctx,[[box[0]+box[2],box[1]],[334,168]],colors[0],.8,[3,4]);
   const local=world.map(rotate),extent=[0,1].map(a=>[Math.min(...local.map(p=>p[a])),Math.max(...local.map(p=>p[a]))]),scale=Math.min(180/Math.max(.08,extent[0][1]-extent[0][0]),96/Math.max(.08,extent[1][1]-extent[1][0]));
   const mini=p=>{const q=rotate(coords(p,r));return [438+(q[0]-(extent[0][0]+extent[0][1])/2)*scale,100+(q[1]-(extent[1][0]+extent[1][1])/2)*scale];};
-  ctx.save();ctx.fillStyle='#eef3e9';ctx.fillRect(334,18,210,150);ctx.fillStyle='#e1e9d9';ctx.fillRect(334,18,210,25);ctx.strokeStyle='#8da080';ctx.strokeRect(334,18,210,150);ctx.beginPath();ctx.rect(335,40,208,126);ctx.clip();
+  ctx.save();ctx.fillStyle='#f3f4f6';ctx.fillRect(334,18,210,150);ctx.fillStyle='#e5e7eb';ctx.fillRect(334,18,210,25);ctx.strokeStyle='#99a1af';ctx.strokeRect(334,18,210,150);ctx.beginPath();ctx.rect(335,40,208,126);ctx.clip();
   // A metric plane and coordinate triad give the magnified paths a spatial reference.
   const center=world.reduce((s,p)=>p.map((v,a)=>s[a]+v/world.length),[0,0,0]);
   const miniWorld=p=>{const q=rotate(p);return [438+(q[0]-(extent[0][0]+extent[0][1])/2)*scale,100+(q[1]-(extent[1][0]+extent[1][1])/2)*scale];};
-  for(let i=-10;i<=10;i++){const d=i*.1;stroke(ctx,[miniWorld([center[0]+d,center[1]-1,center[2]]),miniWorld([center[0]+d,center[1]+1,center[2]])],'#d2ddc8',.6);stroke(ctx,[miniWorld([center[0]-1,center[1]+d,center[2]]),miniWorld([center[0]+1,center[1]+d,center[2]])],'#d2ddc8',.6);}
+  for(let i=-10;i<=10;i++){const d=i*.1;stroke(ctx,[miniWorld([center[0]+d,center[1]-1,center[2]]),miniWorld([center[0]+d,center[1]+1,center[2]])],'#d1d5dc',.6);stroke(ctx,[miniWorld([center[0]-1,center[1]+d,center[2]]),miniWorld([center[0]+1,center[1]+d,center[2]])],'#d1d5dc',.6);}
   for(let h=0;h<2;h++){
-   for(let n=0;forecastValid&&n<r.population;n++)stroke(ctx,u.paths[n].map(pair=>mini(pair[h])),u.elites.includes(n)?colors[h]:'#c9d1c2',u.elites.includes(n)?1.2:.65);
+   for(let n=0;forecastValid&&n<r.population;n++)stroke(ctx,u.paths[n].map(pair=>mini(pair[h])),u.elites.includes(n)?colors[h]:'#d1d5dc',u.elites.includes(n)?1.2:.65);
    if(forecastValid)stroke(ctx,u.paths[u.applied].map(pair=>mini(pair[h])),colors[h],2);
-   const history=past.map(row=>mini(row.slice(1+h*3,4+h*3)));history.push(mini(actual.slice(1+h*3,4+h*3)));stroke(ctx,history,'#29302a',2.1);const point=history.at(-1);dot(ctx,point,colors[h]);ctx.fillStyle=colors[h];ctx.fillText(h?'R':'L',point[0]+6,point[1]+(h?12:-6));
-  }ctx.restore();ctx.fillStyle='#53654a';ctx.font=Math.max(13,10*W/(ctx.canvas.clientWidth||W))+'px Arial';ctx.fillText('Palm detail · '+(time-r.updates[0].time).toFixed(1)+' s',344,35);
-  ctx.font='10px Arial';const triad=[350,150];for(let a=0;a<3;a++){const v=[0,0,0];v[a]=15;const q=rotate(v);stroke(ctx,[triad,[triad[0]+q[0],triad[1]+q[1]]],'#65795a',1);ctx.fillText(['X','Y','Z'][a],triad[0]+q[0]+2,triad[1]+q[1]-2);}const metric=scale*.1<70?.1:.05,bar=Math.min(75,metric*scale);stroke(ctx,[[450,153],[450+bar,153]],'#65795a',1.5);ctx.fillText(metric+' m',452,146);
+   const history=past.map(row=>mini(row.slice(1+h*3,4+h*3)));history.push(mini(actual.slice(1+h*3,4+h*3)));stroke(ctx,history,'#1e2939',2.1);const point=history.at(-1);dot(ctx,point,colors[h]);ctx.fillStyle=colors[h];ctx.fillText(h?'R':'L',point[0]+6,point[1]+(h?12:-6));
+  }ctx.restore();ctx.fillStyle='#4a5565';ctx.font=Math.max(13,10*W/(ctx.canvas.clientWidth||W))+'px Arial';ctx.fillText('Palm detail · '+(time-r.updates[0].time).toFixed(1)+' s',344,35);
+  ctx.font='10px B612 Mono';const triad=[350,150];for(let a=0;a<3;a++){const v=[0,0,0];v[a]=15;const q=rotate(v);stroke(ctx,[triad,[triad[0]+q[0],triad[1]+q[1]]],'#6a7282',1);ctx.fillText(['X','Y','Z'][a],triad[0]+q[0]+2,triad[1]+q[1]-2);}const metric=scale*.1<70?.1:.05,bar=Math.min(75,metric*scale);stroke(ctx,[[450,153],[450+bar,153]],'#6a7282',1.5);ctx.fillText(metric+' m',452,146);
   c.dataset.detailTime=String(time-r.updates[0].time);c.dataset.detailBox=JSON.stringify(box);c.dataset.detailScale=String(scale);c.dataset.detailApplied=String(u.applied);
  }
  function render(){if(!data)return;play.textContent=playing?'Pause':'Play';slider.value=elapsed/playEnd;root.setAttribute('data-play-limit',String(playEnd));root.querySelector(".mpc-time-pin").style.left=(14/playEnd*100)+"%";root.dataset.elapsed=elapsed.toFixed(3);root.dataset.view=mode;root.querySelector('#mpc-process-counter').textContent=elapsed.toFixed(1)+' / '+playEnd.toFixed(1)+' s';
   for(const panel of panels){const name=panel.dataset.process,r=data[name],start=r.updates[0].time,end=r.observed.at(-1)[0],interactionEnd=r.interactionEnd??end,time=Math.min(start+elapsed,end),done=elapsed>=interactionEnd-start;let index=0;while(index+1<r.updates.length&&r.updates[index+1].time<=time)index++;
-   const u=r.updates[index],forecastValid=time<=interactionEnd+1e-6,actual=at(r.observed,time),c=panel.querySelector('canvas'),ctx=c.getContext('2d'),ghost=ghosts(name,r),colors=name==='optimized'?['#537d59','#739b97']:['#b97773','#bd9891'];
+   const u=r.updates[index],forecastValid=time<=interactionEnd+1e-6,actual=at(r.observed,time),c=panel.querySelector('canvas'),ctx=c.getContext('2d'),ghost=ghosts(name,r),colors=name==='optimized'?['#00a63e','#00bba7']:['#ff6467','#ffa2a2'];
    panel.dataset.update=String(u.sourceIndex);panel.dataset.time=String(time);panel.dataset.complete=String(done);panel.dataset.retained=u.elites.join(',');panel.dataset.candidateCount=String(r.population);
    panel.querySelector('.mpc-recording-status').textContent=name==='baseline'&&elapsed>14.14?'Contact lost':name==='optimized'&&done?'Interaction complete':'';
    c.width=W;c.height=mode==='3d'?420:H;c.dataset.view=mode;c.dataset.hands='2';c.dataset.ghostTrajectories=String(ghost.count);c.dataset.coordinateBounds=JSON.stringify(bounds);c.dataset.axisEnd=String(axisEnd);c.dataset.observedUntil=String(time-start);c.dataset.recordedEnd=String(end-start);c.dataset.applied=String(u.applied);c.dataset.camera=JSON.stringify(camera);c.dataset.forecastValid=String(forecastValid);c.dataset.postContact=String(name==='baseline'&&elapsed>14.14);
@@ -75,14 +75,14 @@
    const currentTimes=r.futureTimes.map(t=>u.time-start+t);
    for(let hand=0;hand<2;hand++){
     const all=r.observed.map(row=>row.slice(1+hand*3,4+hand*3)),allTimes=r.observed.map(row=>row[0]-start);path(ctx,all,allTimes,r,'rgba(130,136,134,.4)',1.8);
-    for(let n=0;forecastValid&&n<r.population;n++)path(ctx,u.paths[n].map(p=>p[hand]),currentTimes,r,u.elites.includes(n)?colors[hand]:'#b4bdb0',u.elites.includes(n)?1.3:.7);
+    for(let n=0;forecastValid&&n<r.population;n++)path(ctx,u.paths[n].map(p=>p[hand]),currentTimes,r,u.elites.includes(n)?colors[hand]:'#99a1af',u.elites.includes(n)?1.3:.7);
     if(forecastValid)path(ctx,u.paths[u.applied].map(p=>p[hand]),currentTimes,r,colors[hand],2.2);
-    const history=r.observed.filter(row=>row[0]<=time),positions=history.map(row=>row.slice(1+hand*3,4+hand*3)),times=history.map(row=>row[0]-start),now=actual.slice(1+hand*3,4+hand*3);positions.push(now);times.push(time-start);path(ctx,positions,times,r,'#29302a',2.3);
+    const history=r.observed.filter(row=>row[0]<=time),positions=history.map(row=>row.slice(1+hand*3,4+hand*3)),times=history.map(row=>row[0]-start),now=actual.slice(1+hand*3,4+hand*3);positions.push(now);times.push(time-start);path(ctx,positions,times,r,'#1e2939',2.3);
     const point=coords(now,r),locations=mode==='3d'?[project(point)]:point.map((v,a)=>[tx(time-start),ty(v,a)]);
     locations.forEach(p=>{dot(ctx,p,colors[hand],done?5.5:4);ctx.fillStyle=colors[hand];ctx.font=Math.max(13,10*W/(ctx.canvas.clientWidth||W))+'px Arial';ctx.fillText(hand?'R':'L',p[0]+7,p[1]+(hand?13:-7));});
    }
    detail(ctx,r,u,actual,time,colors,c,forecastValid);
-   if(mode==='2d')for(let a=0;a<3;a++)stroke(ctx,[[tx(interactionEnd-start),66+a*151],[tx(interactionEnd-start),177+a*151]],'#94a28a',1,[3,4]);
+   if(mode==='2d')for(let a=0;a<3;a++)stroke(ctx,[[tx(interactionEnd-start),66+a*151],[tx(interactionEnd-start),177+a*151]],'#99a1af',1,[3,4]);
   }syncContext();
   root.dispatchEvent(new CustomEvent('clear-mpc-clock',{bubbles:true,detail:{time:elapsed,playing:playing&&visible&&!document.hidden,speed:2}}));
  }

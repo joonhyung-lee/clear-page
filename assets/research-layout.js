@@ -1,6 +1,8 @@
 /* Three chapters, explicit details and local resource previews. */
 (() => {
  const nav=document.querySelector('#research-nav');if(!nav)return;
+ const sizeNav=()=>document.documentElement.style.setProperty('--clear-nav-height',Math.ceil(nav.getBoundingClientRect().height)+'px');
+ new ResizeObserver(sizeNav).observe(nav);sizeNav();
  const resources=nav.querySelector('.research-resources');resources.id='research-resources';
  const resourceToggle=document.createElement('button');resourceToggle.type='button';resourceToggle.id='resource-menu-toggle';resourceToggle.setAttribute('aria-label','Resources');resourceToggle.setAttribute('aria-controls',resources.id);resourceToggle.setAttribute('aria-expanded','false');
  resourceToggle.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5zM9 9h6M9 12h6M9 15h4"/></svg>';resources.before(resourceToggle);

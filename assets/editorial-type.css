@@ -1,0 +1,10 @@
+/* Graphik for prose and figure labels; B612 Mono for literal values and code. */
+:root{--clear-font-sans:Graphik,Arial,sans-serif;--clear-font-mono:'B612 Mono',monospace}
+body,button,input,select,textarea{font-family:var(--clear-font-sans)}
+body{font-weight:400;font-synthesis:none}
+code,pre,kbd,samp,output,.snippet-heading>span,.flow-node-sub{font-family:var(--clear-font-mono)}
+svg text{font-family:var(--clear-font-sans)}
+.system-root,.system-group-label{font-family:var(--clear-font-sans)!important}
+h1,h2,h3{font-weight:300}
+h4,h5,h6,strong,b{font-weight:400}
+output,td,.loss-contribution-values{font-variant-numeric:tabular-nums}

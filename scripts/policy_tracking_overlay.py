@@ -2,6 +2,7 @@
 import copy
 import numpy as np
 from scipy.spatial.transform import Rotation
+from design_tokens import rgb
 
 class TrackingReplay:
     def __init__(self, path):
@@ -49,8 +50,8 @@ def tracking_messages(tracking, start, layout, source_origins, pack):
         roots=rotations.apply(sample['root_position'][selected]-source_origins)+destinations
         anchors=roots+np.array([0.,0.,.92])
         for kind,vectors,color,offset in [
-            ('target',rotations.apply(sample['command_world'][selected]),[217,135,39],.06),
-            ('actual',rotations.apply(sample['velocity_world'][selected]),[20,164,184],-.06)]:
+            ('target',rotations.apply(sample['command_world'][selected]),rgb('blue',600),.06),
+            ('actual',rotations.apply(sample['velocity_world'][selected]),rgb('green',600),-.06)]:
             name=f'/tracking-{kind}';points=arrow_points(anchors+[0,0,offset],vectors)
             colors=np.broadcast_to(np.array(color,dtype='u1'),points.shape).copy()
             props=dict(points=pack(points),colors=pack(colors),line_width=4.,scale=1.)

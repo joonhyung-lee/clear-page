@@ -9,11 +9,12 @@ import numpy as np
 import trimesh
 from scipy.spatial.transform import Rotation
 from scipy.spatial import ConvexHull
+from design_tokens import rgb, font_path
 
 PALETTE = {
-    'flat': (229,239,245), 'stairs_up': (246,231,217),
-    'stairs_down': (244,239,215), 'slope_up': (224,239,226),
-    'slope_down': (233,228,243), 'random_rough': (243,227,237),
+    'flat': rgb('gray',100), 'stairs_up': rgb('blue',100),
+    'stairs_down': rgb('mint',100), 'slope_up': rgb('green',100),
+    'slope_down': rgb('purple',100), 'random_rough': rgb('red',100),
 }
 # The archived generator names pyramid shape; outward replays traverse the opposite grade.
 DISPLAY_TERRAIN={'stairs_up':'stairs_down','stairs_down':'stairs_up','slope_up':'slope_down','slope_down':'slope_up'}
@@ -96,6 +97,8 @@ def arrange(record, source_buffers, reference_time, tracking=None):
                 color=tuple(min(255,c+7) for c in PALETTE[family]),flat_shading=True,receive_shadow=False)
             if family.startswith('slope_'):
                 view=views[slot//4]
+                tone='green' if family=='slope_up' else 'purple'
+                view['gradientColors']=[rgb(tone,50),rgb(tone,300)]
                 view.setdefault('gradientNodes',[]).append(node['name'])
                 top=clipped.vertices[np.unique(clipped.faces[clipped.face_normals[:,2]>.3])]
                 if len(top):view.setdefault('gradientHeights',[]).extend([float(top[:,2].min()),float(top[:,2].max())])
@@ -189,7 +192,7 @@ MATRIX = r'''views=>{
  for(const view of views){
   if(!view.gradientNodes?.length)continue;
   const lo=Math.min(...view.gradientHeights),hi=Math.max(...view.gradientHeights);
-  const palette=view.key==='slope_up'?[[236,245,238],[151,185,162]]:[[243,238,249],[174,153,202]];
+  const palette=view.gradientColors;
   for(const name of view.gradientNodes){
    m.nodeRefFromName[name]?.traverse(object=>{
     if(!object.isMesh||!object.geometry?.attributes.position)return;
@@ -248,8 +251,8 @@ def annotate(picture, views, size, metrics=None):
     from PIL import Image,ImageDraw,ImageFont
     image=Image.open(io.BytesIO(picture)).convert('RGB')
     draw=ImageDraw.Draw(image);rows=(len(views)+1)//2
-    font=ImageFont.truetype('DejaVuSans.ttf',round(size/48))
-    small=ImageFont.truetype('DejaVuSans.ttf',round(size/74))
+    font=ImageFont.truetype(font_path(),round(size/48))
+    small=ImageFont.truetype(font_path(mono=True),round(size/74))
     for index,view in enumerate(views):
         x=index%2*size//2;y=index//2*image.height//rows
         width=size if len(views)%2 and index==len(views)-1 else size//2

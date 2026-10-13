@@ -70,9 +70,17 @@ def build():
         card.select_one('.snippet-heading>span').string=guide['symbol']
         card.select_one('.snippet-footer').string=guide['file'].removeprefix('runtime/')+f' · {end-start+1} lines'
         card.select_one('[data-copy-source]').attrs.pop('disabled',None)
-    soup.select_one('.implementation-workspace')['data-workspace-view']='code'
-    for button in soup.select('[data-workspace-view-button]'):
-        button['aria-pressed']=str(button['data-workspace-view-button']=='code').lower()
+    soup.select_one('.implementation-workspace').attrs.pop('data-workspace-view', None)
+    for tabs in soup.select('.workspace-views'):
+        tabs.decompose()
+    for panel in soup.select('section.component'):
+        for selector, label in (('.result', 'Visualization'), ('.snippet', 'Code')):
+            region = panel.select_one(selector)
+            heading = region.select_one(':scope > .workspace-column-label')
+            if not heading:
+                heading = soup.new_tag('h3', attrs={'class': 'workspace-column-label'})
+                region.insert(0, heading)
+            heading.string = label
     path.write_text(str(soup).rstrip()+'\n')
 
 if __name__=='__main__': build()

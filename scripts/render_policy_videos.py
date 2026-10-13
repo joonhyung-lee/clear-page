@@ -24,6 +24,8 @@ from playwright.sync_api import sync_playwright
 from recording_io import read_recording, write_recording, compact_buffers
 from policy_matrix_scene import arrange, MATRIX, annotate
 from policy_tracking_overlay import TrackingReplay
+from design_tokens import font_path
+from style_recorded_palette import restyle
 from check_research_visuals import FIND, SEEK
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -85,7 +87,7 @@ def write_detail_metrics(video, tracking, start, index, render_size=1920):
     from PIL import ImageDraw,ImageFont
     frames=imageio_ffmpeg.read_frames(str(video),pix_fmt='rgb24')
     meta=next(frames);width,height=meta['size'];fps=meta['fps'];scale=render_size/960
-    font=ImageFont.truetype('DejaVuSans.ttf',round(render_size/74))
+    font=ImageFont.truetype(font_path(mono=True),round(render_size/74))
     with tempfile.TemporaryDirectory(prefix='clear-detail-metrics-') as temporary:
         output=Path(temporary)/video.name
         proc=subprocess.Popen([imageio_ffmpeg.get_ffmpeg_exe(),'-y','-v','error','-f','rawvideo',
@@ -144,6 +146,8 @@ def outlined_recording(record, buffers, width=0.008):
 def render(browser, scene, checkpoints, args, camera_stages=None, camera_cache=None):
     source = (args.recordings_dir or ROOT/'assets/recordings')/f'{scene}.hex.js'
     body='g1' if scene=='learning-g1' else ('spot_arm' if scene=='learning-spot_arm' else 'spot')
+    if body!='spot_arm':
+        font_path()  # Captioned videos require the requested rendering font.
     tracking_path=args.tracking_dir/body/f'{body}-tracking.npz' if args.tracking_dir else None
     tracking=TrackingReplay(tracking_path) if tracking_path and tracking_path.exists() else None
     if any(stage['replay'].get('headingTracking') for stage in checkpoints) and (tracking is None or args.recordings_dir is None):
@@ -151,6 +155,7 @@ def render(browser, scene, checkpoints, args, camera_stages=None, camera_cache=N
     raw = bytes.fromhex(json.loads(source.read_text().rsplit(' = ',1)[1].strip().removesuffix(';')))
     with tempfile.NamedTemporaryFile() as file:
         file.write(raw);file.flush();record,buffers=read_recording(file.name)
+    record,buffers=restyle(record,buffers)
     counts=set()
     for _,message in record['messages']:
         if message['type']=='BatchedMeshesMessage':
@@ -197,7 +202,7 @@ def render(browser, scene, checkpoints, args, camera_stages=None, camera_cache=N
     try:
         for stage in checkpoints:
             replay=stage['replay'];step=replay['cumulativeUpdates'];start=replay.get('startTime',0)+replay.get('videoStartOffset',0)
-            name=f'{scene}-update-{step:05d}.mp4';dest=ROOT/'assets/media'/name
+            name=f'{scene}-update-{step:05d}.mp4';dest=args.output/name
             frames=round(replay.get('duration',8)*args.fps)
             with tempfile.TemporaryDirectory(prefix='clear-policy-') as temporary:
                 output=Path(temporary)/name
@@ -242,7 +247,9 @@ def main():
     parser.add_argument('--height',type=int,help='Canvas height; defaults to 21:16 for larger unclipped terrain views')
     parser.add_argument('--fps',type=int,default=24)
     parser.add_argument('--base-url',default='http://localhost:8772')
+    parser.add_argument('--output',type=Path,default=ROOT/'assets/media')
     args=parser.parse_args()
+    args.output.mkdir(parents=True,exist_ok=True)
     args.height=args.height or round(args.size*21/16)
     scenes={}
     for name in ['g1-restored-data','spot_arm-restored-data','spot-curriculum-data']:
@@ -261,7 +268,7 @@ def main():
                 for stage in stages:results.extend(render(browser,scene,[stage],args,stages,camera_cache))
         finally:
             browser.close()
-    provenance=ROOT/'assets/policy-video-provenance.json'
+    provenance=ROOT/'assets/policy-video-provenance.json' if args.output==ROOT/'assets/media' else args.output/'policy-video-provenance.json'
     with (Path(tempfile.gettempdir())/'clear-policy-provenance.lock').open('w') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX)
         previous=json.loads(provenance.read_text()) if provenance.exists() else []

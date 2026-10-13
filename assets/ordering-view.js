@@ -1,6 +1,6 @@
 /* Scalar priority distributions and saved draws. No object motion is implied. */
 (() => {
- const colors=['#80a3af','#c99e7c','#91ae80','#ad9dc0','#bea973'];
+ const colors=['#00d5be','#ffa2a2','#05df72','#99a1af','#ffa2a2'];
  const ns='http://www.w3.org/2000/svg';
  function node(name,attributes={},text){const n=document.createElementNS(ns,name);for(const[k,v]of Object.entries(attributes))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
  window.clearOrderingPlot=function(host,d,trace=null,selectedOnly=false){

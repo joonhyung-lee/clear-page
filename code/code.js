@@ -133,11 +133,6 @@
   const initial=stages.findIndex(el=>'#'+el.dataset.flowNode===location.hash);
   selectStage(initial>=0?initial:0);
   stageSelect.addEventListener('change',()=>selectStage(stages.findIndex(el=>el.dataset.flowNode===stageSelect.value)));
-  document.querySelectorAll('[data-workspace-view-button]').forEach(button=>button.addEventListener('click',()=>{
-    workspace.dataset.workspaceView=button.dataset.workspaceViewButton;
-    document.querySelectorAll('[data-workspace-view-button]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
-    if(workspace.dataset.workspaceView==='code')panels.filter(p=>!p.hidden).forEach(p=>p.querySelectorAll('video').forEach(v=>v.pause()));
-  }));
   for(const node of document.querySelectorAll('[data-archive]')){
     const item=window.CLEAR_CODE_ARCHIVES?.[node.dataset.archive];if(!item)continue;
     const link=node.closest('a.resource'),key=node.dataset.archive;

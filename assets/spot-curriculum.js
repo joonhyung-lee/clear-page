@@ -40,7 +40,7 @@
     const low=transform(Math.min(0,...values)),high=transform(Math.max(0,...values)),pad=(high-low||1)*.08;
     return {logarithmic,transform,inverse,minimum:low<0?low-pad:0,maximum:high+pad};
   }
-  const stageColors = {locomotion:'#306b91', terrain:'#ae632d', regularization:'#6c5795', arm:'#6c5795'};
+  const stageColors = {locomotion:'#155dfc', terrain:'#ff6467', regularization:'#155dfc', arm:'#155dfc'};
   const number = n => Number(n.toPrecision(5)).toString();
   const nearest = (rows, step) => rows.reduce((best, row, i) => Math.abs(row.update-step)<Math.abs(rows[best].update-step)?i:best, 0);
   function curves(data) {
@@ -118,7 +118,7 @@
       canvas.setAttribute('aria-label', `${bodyName()} ${metricLabels[key]}. Use arrow keys, Home and End to inspect completed PPO updates.`);
       if(!w)return;
       const dpr=Math.min(devicePixelRatio||1,2);canvas.width=w*dpr;canvas.height=h*dpr;
-      const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx.font='10px Arial';
+      const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx.font='10px B612 Mono';
       const vals=rows.map(r=>r[key]).filter(Number.isFinite),scale=metricScale(vals);
       const {minimum,maximum:maximumY}=scale, left=43,right=w-12,top=23,bottom=h-32;
       // The ribbon carries the full schedule. Plots use only recorded updates,
@@ -128,7 +128,7 @@
       const scaleNote=figure.querySelector('.curriculum-scale-note');scaleNote.hidden=!scale.logarithmic;
       scaleNote.textContent=scale.logarithmic?'Symmetric log axis · hover for raw values':'';
       figure._plot={left,right,maximum};
-      for(let j=0;j<3;j++){const v=scale.inverse(minimum+(maximumY-minimum)*j/2);ctx.strokeStyle='#e9ece5';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(left,y(v));ctx.lineTo(right,y(v));ctx.stroke();ctx.fillStyle='#7a8472';ctx.textAlign='right';ctx.fillText(Number(v.toPrecision(2)).toString(),left-5,y(v)+3);}
+      for(let j=0;j<3;j++){const v=scale.inverse(minimum+(maximumY-minimum)*j/2);ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(left,y(v));ctx.lineTo(right,y(v));ctx.stroke();ctx.fillStyle='#6a7282';ctx.textAlign='right';ctx.fillText(Number(v.toPrecision(2)).toString(),left-5,y(v)+3);}
       phases.forEach((phase,pi)=>{
         if(phase.start>=maximum)return;
         const a=x(phase.start),b=x(Math.min(maximum,phases[pi+1]?.start??maximum)),color=stageColors[phase.id];
@@ -159,7 +159,7 @@
         if(pi){ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(a,top);ctx.lineTo(a,bottom);ctx.stroke();ctx.setLineDash([]);}
         ctx.restore();
       });
-      ctx.fillStyle='#65715f';ctx.textAlign='left';ctx.fillText('0',left,h-5);ctx.textAlign='right';ctx.fillText(fmt(maximum)+' recorded updates',right,h-5);
+      ctx.fillStyle='#6a7282';ctx.textAlign='left';ctx.fillText('0',left,h-5);ctx.textAlign='right';ctx.fillText(fmt(maximum)+' recorded updates',right,h-5);
       const replayUpdate=Number(root.dataset.replayUpdates||0);
       const indexBadges=checkpoints(chartData).map(stage=>x(stage.replay.cumulativeUpdates));
       for(let i=1;i<indexBadges.length;i++)indexBadges[i]=Math.max(indexBadges[i],indexBadges[i-1]+18);
@@ -169,23 +169,23 @@
         if(update<0||update>maximum)return;
         const position=x(update),active=stage.id===selected;
         ctx.save();
-        ctx.strokeStyle=active?'#344b39':'#a6afa3';ctx.lineWidth=active?1.6:1;
+        ctx.strokeStyle=active?'#364153':'#99a1af';ctx.lineWidth=active?1.6:1;
         ctx.setLineDash(active?[]:[3,3]);ctx.beginPath();
         ctx.moveTo(position,top);ctx.lineTo(position,bottom+3);ctx.stroke();
         const badge=indexBadges[index];
         ctx.setLineDash([]);
         if(badge!==position){ctx.beginPath();ctx.moveTo(position,bottom+3);ctx.lineTo(badge,bottom+7);ctx.stroke();}
         ctx.beginPath();ctx.arc(badge,bottom+15,7.5,0,2*Math.PI);
-        ctx.fillStyle=active?'#344b39':'#edf0e9';ctx.fill();
-        ctx.fillStyle=active?'#fff':'#596752';ctx.textAlign='center';
+        ctx.fillStyle=active?'#364153':'#f3f4f6';ctx.fill();
+        ctx.fillStyle=active?'#fff':'#4a5565';ctx.textAlign='center';
         ctx.textBaseline='middle';ctx.fillText(String(index+1),badge,bottom+15);
         ctx.restore();
       });
       const row=rows.length?rows[nearest(rows,inspectedStep??replayUpdate)]:null;
       figure.dataset.inspected=JSON.stringify(row?{step:row.update,phase:row.stage,metric:key,value:Number.isFinite(row[key])?row[key]:null}:null);
-      if(row){if(inspectedStep!=null){ctx.strokeStyle='#99a48e';ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(x(row.update),top);ctx.lineTo(x(row.update),bottom);ctx.stroke();ctx.setLineDash([]);}if(Number.isFinite(row[key])){ctx.beginPath();ctx.arc(x(row.update),y(row[key]),3.5,0,2*Math.PI);ctx.fillStyle=stageColors[row.stage];ctx.fill();ctx.strokeStyle='#fff';ctx.stroke();}}
+      if(row){if(inspectedStep!=null){ctx.strokeStyle='#99a1af';ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(x(row.update),top);ctx.lineTo(x(row.update),bottom);ctx.stroke();ctx.setLineDash([]);}if(Number.isFinite(row[key])){ctx.beginPath();ctx.arc(x(row.update),y(row[key]),3.5,0,2*Math.PI);ctx.fillStyle=stageColors[row.stage];ctx.fill();ctx.strokeStyle='#fff';ctx.stroke();}}
       const missing=key==='terrain'?'Not recorded · flat-ground phase':'Not recorded';
-      if(!vals.length){ctx.fillStyle='#63705c';ctx.textAlign='center';ctx.fillText(missing,(left+right)/2,(top+bottom)/2);}
+      if(!vals.length){ctx.fillStyle='#6a7282';ctx.textAlign='center';ctx.fillText(missing,(left+right)/2,(top+bottom)/2);}
       const first=rows.find(r=>Number.isFinite(r[key]));
       const compared=hoveredChart&&row?row:rows.findLast(r=>Number.isFinite(r[key]));
       const comparison=figure.querySelector('.curriculum-comparison');
@@ -202,7 +202,7 @@
         values.title=`First logged update ${fmt(first.update)}. ${hoveredChart?'Inspected':'Latest'} update ${fmt(compared?.update??first.update)}.`;
         change.textContent=delta===null?'Change unavailable':`Δ ${signed(delta)}${percent===null?'':` (${percent>0?'+':''}${percent.toFixed(1)}%)`}`;
         comparison.append(values,change);
-        ctx.save();ctx.strokeStyle='#69736b';ctx.lineWidth=1;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(left,y(first[key]));ctx.lineTo(right,y(first[key]));ctx.stroke();ctx.setLineDash([]);
+        ctx.save();ctx.strokeStyle='#6a7282';ctx.lineWidth=1;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(left,y(first[key]));ctx.lineTo(right,y(first[key]));ctx.stroke();ctx.setLineDash([]);
         ctx.beginPath();ctx.arc(x(first.update),y(first[key]),3,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();ctx.stroke();ctx.restore();
       }else comparison.textContent=key==='terrain'?'Terrain adaptation has not started.':'No logged baseline for this metric yet.';
       const tip=figure.querySelector('.loco-tooltip');tip.hidden=hoveredChart!==figure||!row;
@@ -292,7 +292,10 @@
     if(stage.replay.headingTracking){
       note.title=(stage.replay.body==='g1'?'Matched terrain row across checkpoints; playback starts at 2.5 s. ':'')+'Forward-command evaluation with heading feedback. Four rotated views of one trajectory per terrain.';
       const key=document.createElement('div');key.className='policy-tracking-key';
-      key.innerHTML='<span><i style="color:#d98727">━</i> Target <i style="color:#14a4b8">━</i> Actual velocity</span>';
+      const refreshed=stage.replay.visualStyle==='editorial-v1';
+      const targetColor=refreshed?window.CLEAR_DESIGN.colors.blue[600]:'#d98727';
+      const actualColor=refreshed?window.CLEAR_DESIGN.colors.green[600]:'#14a4b8';
+      key.innerHTML=`<span><i style="color:${targetColor}">━</i> Target <i style="color:${actualColor}">━</i> Actual velocity</span>`;
       host.append(key);
     }
   }

@@ -6,7 +6,8 @@
   let data, pendingLoad, index = null, hovered = null, scheduled = false, selectedRole = null;
   let pointerPreview = null, focusPreview = null;
   const roleKeys={order:['selection','order','kl'],flow:['flow'],affordance:['affordance'],availability:[]};
-  const termColors={selection:'#497f99',order:'#a37a52',kl:'#9780a7',flow:'#598c70',affordance:'#9a9460'};
+  const palette=window.CLEAR_DESIGN.colors;
+  const termColors={selection:palette.blue[600],order:palette.purple[600],kl:palette.gray[600],flow:palette.green[600],affordance:palette.mint[600]};
   const roleHelp={order:'Object selection, pairwise ranking, and Gaussian score regularization.',flow:'Flow matching for continuous object references under a fixed interaction order.',affordance:'Binary supervision of interaction availability and terrain-transition feasibility.',availability:'Availability of the first interaction. Objective weight: 0.'};
   const termHelp=document.createElement('div');termHelp.id='loss-term-help';termHelp.className='loss-term-help';termHelp.setAttribute('role','tooltip');termHelp.hidden=true;root.append(termHelp);
   root.querySelectorAll('.objective-term').forEach(term=>term.setAttribute('aria-describedby',termHelp.id));
@@ -28,10 +29,10 @@
     const ymax = Math.ceil(maximum / unit * 2) / 2 * unit || 1;
     const x = n => left + n / data.maxStep * (right - left), y = n => bottom - n / ymax * (bottom - top);
     chart._plot = {left, right};
-    ctx.font = '13px Arial'; ctx.fillStyle = '#73796e'; ctx.lineWidth = 1;
+    ctx.font = '13px B612 Mono'; ctx.fillStyle = '#6a7282'; ctx.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
       const v = ymax * i / 4;
-      ctx.strokeStyle = '#e8ece4'; ctx.beginPath(); ctx.moveTo(left, y(v)); ctx.lineTo(right, y(v)); ctx.stroke();
+      ctx.strokeStyle = '#e5e7eb'; ctx.beginPath(); ctx.moveTo(left, y(v)); ctx.lineTo(right, y(v)); ctx.stroke();
       ctx.textAlign = 'right'; ctx.fillText(Number(v.toPrecision(3)).toString(), left - 6, y(v) + 4);
     }
     const ticks = w < 300 ? 2 : 4;
@@ -44,15 +45,15 @@
     ctx.beginPath();
     rows.forEach((row, i) => ctx[i ? 'lineTo' : 'moveTo'](x(row.step), y(row.mean + row.std)));
     for (let i = rows.length - 1; i >= 0; i--) ctx.lineTo(x(rows[i].step), y(Math.max(0, rows[i].mean - rows[i].std)));
-    ctx.closePath(); ctx.fillStyle = termColors[key]||'#467b9a'; ctx.globalAlpha=.18;ctx.fill();ctx.globalAlpha=1;
+    ctx.closePath(); ctx.fillStyle = termColors[key]||palette.green[600]; ctx.globalAlpha=.18;ctx.fill();ctx.globalAlpha=1;
     ctx.beginPath(); rows.forEach((row, i) => ctx[i ? 'lineTo' : 'moveTo'](x(row.step), y(row.mean)));
-    ctx.strokeStyle = termColors[key]||'#467b9a'; ctx.lineWidth = 1.6; ctx.stroke(); ctx.restore();
+    ctx.strokeStyle = termColors[key]||palette.green[600]; ctx.lineWidth = 1.6; ctx.stroke(); ctx.restore();
     const row = index === null ? null : rows[index];
     chart.dataset.inspected = JSON.stringify(row); chart.dataset.inspectedStep = row?.step ?? '';
     if (row) {
-      ctx.strokeStyle = '#939f89'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(x(row.step), top); ctx.lineTo(x(row.step), bottom); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = '#467b9a'; ctx.beginPath(); ctx.arc(x(row.step), y(row.mean), 3.5, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x(row.step), y(row.raw), 4, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.strokeStyle = '#467b9a'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.strokeStyle = '#99a1af'; ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(x(row.step), top); ctx.lineTo(x(row.step), bottom); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = termColors[key]||palette.green[600]; ctx.beginPath(); ctx.arc(x(row.step), y(row.mean), 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x(row.step), y(row.raw), 4, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); ctx.strokeStyle = termColors[key]||palette.green[600]; ctx.lineWidth = 1.5; ctx.stroke();
     }
     const tooltip = chart.querySelector('.loss-tooltip'); tooltip.hidden = hovered !== chart || !row;
     if (!tooltip.hidden) {
