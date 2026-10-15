@@ -73,7 +73,7 @@ def static_checks():
     assert link.find('svg') and link.find('span').get_text() == 'Code'
     page = BeautifulSoup((ROOT / 'code/index.html').read_text(), 'html.parser')
     assert page.select_one('a[aria-current="page"]').get_text(strip=True) == 'Code'
-    assert len(page.select('a.resource[href]')) == 2
+    assert len(page.select('a.resource[href]')) == 1
     assert len(page.select('.component')) == 5
     assert not page.select('.package-note') and 'Package scope' not in page.get_text()
     stages = page.select('[data-flow-node]')
@@ -125,7 +125,7 @@ def static_checks():
     for link in page.select('a[download]'):
         assert (ROOT / 'code' / (link.get('href') or link['data-local-download']).split('?')[0]).is_file()
     archives = json.loads((ROOT / 'assets/code-archives.js').read_text().removeprefix('window.CLEAR_CODE_ARCHIVES=').removesuffix(';\n'))
-    assert {node['data-archive-tree'] for node in page.select('[data-archive-tree]')} == set(archives)
+    assert {node['data-archive-tree'] for node in page.select('[data-archive-tree]')} == {'source'}
     for archive in archives.values():
         path = ROOT / 'code' / archive['url']
         assert path.stat().st_size == archive['bytes']
@@ -140,7 +140,7 @@ def static_checks():
     models = archives['checkpoints']['members']
     assert len(models) == 153 and all(m['path'].endswith('.pt') for m in models)
     assert {m['path'].split('/')[2] for m in models} == {'grid', 'maze', 'locomotion'}
-    assert all(m['path'].startswith('clear/checkpoints/') for m in models)
+    assert all(m['path'].startswith('clear/ckpts/') for m in models)
     assert all('/leap2026/' not in m['path'] and '/anonymous/' not in m['path'] for m in models)
     with zipfile.ZipFile(ROOT / 'code' / archives['source']['url']) as package:
         mapping = json.loads(package.read('clear/docs/checkpoint_paths.json'))['models']
@@ -202,9 +202,9 @@ async def browser_checks():
         page.on('pageerror', lambda error: errors.append(str(error)))
         await page.goto((ROOT / 'code/index.html').as_uri())
         await page.locator('.code-line').first.wait_for()
-        assert await page.locator('.resource[download]').count() == 2
-        assert await page.locator('.archive-tree').count() == 2
-        for key in ['source', 'checkpoints']:
+        assert await page.locator('.resource[download]').count() == 0
+        assert await page.locator('.archive-tree').count() == 1
+        for key in ['source']:
             tree = page.locator(f'[data-archive-tree="{key}"]')
             root = tree.locator('details').first
             assert await root.get_attribute('open') is not None

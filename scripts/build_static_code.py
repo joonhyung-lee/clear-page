@@ -14,14 +14,19 @@ def size(value):
         if value >= limit: return f'{value/limit:.1f} {unit}'
     return f'{value} B'
 
+COLLAPSE = {'clear/ckpts/': 3}   # models: show the task folders only
+
 def tree(members):
     root = {'children': {}, 'bytes': 0, 'count': 0}
     for member in members:
+        parts = member['path'].split('/')
+        for prefix, depth in COLLAPSE.items():
+            if member['path'].startswith(prefix): parts = parts[:depth]
         node = root
-        for name in member['path'].split('/'):
+        for name in parts:
             node['bytes'] += member['bytes']; node['count'] += 1
             node = node['children'].setdefault(name, {'children': {}, 'bytes': 0, 'count': 0})
-        node.update(bytes=member['bytes'], type=member.get('type'))
+        node['bytes'] += member['bytes']; node['count'] += 1; node['type'] = member.get('type')
     def branch(parent, depth=0):
         rows = []
         for name, entry in sorted(parent['children'].items(), key=lambda kv:(not bool(kv[1]['children']),kv[0].lower())):
@@ -29,9 +34,9 @@ def tree(members):
                 child_name, child = next(iter(entry['children'].items()))
                 if not child['children']: break
                 name += '/' + child_name; entry = child
-            folder = bool(entry['children'])
-            label = html.escape(name + ('/' if folder else ''))
-            meta = (f"{entry['count']} files · " if folder else 'link · ' if entry.get('type')=='symlink' else '') + size(entry['bytes'])
+            folder = bool(entry['children']); collapsed = not folder and entry['count'] > 1
+            label = html.escape(name + ('/' if folder or collapsed else ''))
+            meta = (f"{entry['count']} files · " if folder or collapsed else 'link · ' if entry.get('type')=='symlink' else '') + size(entry['bytes'])
             tag = 'summary' if folder else 'div'
             row = f'<{tag} class="archive-row"><span class="archive-name">{label}</span><span class="archive-meta">{meta}</span></{tag}>'
             if folder: row = f'<details{" open" if depth==0 else ""}>{row}{branch(entry,depth+1)}</details>'
@@ -44,8 +49,9 @@ def build():
     archives = read_assignment(ROOT/'assets/code-archives.js')
     catalog = read_assignment(ROOT/'code/catalog.js')
     for region in soup.select('[data-archive-tree]'):
-        archive = archives[region['data-archive-tree']]
-        region.clear(); region.append(BeautifulSoup(tree(archive['members']),'html.parser'))
+        members = archives[region['data-archive-tree']]['members']
+        if region['data-archive-tree'] == 'source': members = members + archives['checkpoints']['members']
+        region.clear(); region.append(BeautifulSoup(tree(members),'html.parser'))
         region['data-prerendered']='true'
     downloads = read_assignment(ROOT/'assets/code-download-locations.js')
     for label in soup.select('[data-archive]'):
@@ -61,7 +67,8 @@ def build():
             label.string = 'ZIP · '+size(archive['bytes']) + (f" · {archive['files']}{unit}" if key == 'checkpoints' else '')
             link['download'] = archive['url'].split('/')[-1]
         else:
-            label.string = f"Browse · {archive['files']}{unit} · {size(archive['bytes'])}"
+            models = archives['checkpoints'] if key == 'source' else None   # one repository holds both
+            label.string = f"Browse · {archive['files']}{unit}" + (f" · {models['files']} models · {size(archive['bytes']+models['bytes'])}" if models else f" · {size(archive['bytes'])}")
             link.attrs.pop('download', None); link['rel'] = 'noreferrer'
     for index, panel in enumerate(soup.select('section.component')):
         if index: panel['hidden']=''

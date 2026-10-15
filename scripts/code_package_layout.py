@@ -89,7 +89,7 @@ python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2
 python -m pip install numpy einops pyyaml scipy matplotlib imageio-ffmpeg
 ```
 
-`get.py` downloads the source tree and the checkpoints (1.8 GB, SHA-256 verified) and links them.
+`get.py` downloads the source tree and the checkpoints (1.8 GB, SHA-256 verified) and links them. Physical simulation and the manipulation experiments need the optional extras in `pyproject.toml`.
 
 ## Demo
 
@@ -102,14 +102,8 @@ Writes `outputs/reproduction/plan.json` and `plan.png`; the animation plays the 
 
 ## Experiments
 
-| `run_03_maze.py plan` demo | `run_01_grid.py` exp1 | `run_02_manipulation.py` exp2 |
-|---|---|---|
-| ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/demo_plan.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp1_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp2_manipulation.png) |
-
-| `run_03_maze.py` exp3 | `run_04_replanning.py` exp4 | `run_05_maze_v4.py` exp5 |
-|---|---|---|
-| ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp3_maze.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp4_replanning.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp5_maze_v4.png) |
-
-`run_01_grid.py evaluate --method` selects CLEAR or a baseline (`clear`, `clear_ro`, `clear_ho`, `autoregressive`, `gumbel_sinkhorn`, `polynet`).
-Physical simulation and the manipulation experiments need the optional extras in `pyproject.toml`.
+| (a) 2D Grid | (b) Ordered Manipulation | (c) Maze Navigation | (d) Long Horizon Planning |
+|---|---|---|---|
+| ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/a_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/b_ordered_manipulation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/c_maze_navigation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/d_long_horizon_planning.png) |
+| Select and relocate obstacles to connect start and goal. | Order interactions so later objects remain accessible. | Plan around terrain and movable objects for each body. | Update the plan when object placement or access changes. |
 '''

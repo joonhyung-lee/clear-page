@@ -148,7 +148,9 @@
     }
     const size=item.bytes>=1e9?(item.bytes/1e9).toFixed(2)+' GB':Math.round(item.bytes/1e6)+' MB';
     const unit=key==='checkpoints'?' models':' files';
-    node.textContent=!url?'Download pending · '+item.files+unit:url.startsWith('../')?'ZIP · '+size+(key==='checkpoints'?' · '+item.files+unit:''):'Browse · '+item.files+unit+' · '+size;
+    const models=key==='source'?window.CLEAR_CODE_ARCHIVES?.checkpoints:null;   // one repository holds both
+    const total=models?formatBytes(item.bytes+models.bytes):size;
+    node.textContent=!url?'Download pending · '+item.files+unit:url.startsWith('../')?'ZIP · '+size+(key==='checkpoints'?' · '+item.files+unit:''):'Browse · '+item.files+unit+(models?' · '+models.files+' models':'')+' · '+total;
   }
   function formatBytes(bytes){
     if(bytes<1000)return bytes+' B';
@@ -160,14 +162,16 @@
     const archive=window.CLEAR_CODE_ARCHIVES?.[region.dataset.archiveTree];
     if(!archive?.members){region.textContent='Archive contents unavailable. Reload to retry.';continue;}
     const root={children:new Map(),bytes:0,count:0};
-    for(const member of archive.members){
-      let node=root;const parts=member.path.split('/');
-      parts.forEach((name,index)=>{
+    const members=region.dataset.archiveTree==='source'?archive.members.concat(window.CLEAR_CODE_ARCHIVES?.checkpoints?.members||[]):archive.members;
+    for(const member of members){
+      let node=root;let parts=member.path.split('/');
+      if(member.path.startsWith('clear/ckpts/'))parts=parts.slice(0,3);   // models: task folders only
+      for(const name of parts){
         node.bytes+=member.bytes;node.count++;
         if(!node.children.has(name))node.children.set(name,{name,children:new Map(),bytes:0,count:0});
         node=node.children.get(name);
-        if(index===parts.length-1){node.bytes=member.bytes;node.type=member.type;}
-      });
+      }
+      node.bytes+=member.bytes;node.count++;node.type=member.type;
     }
     function branch(parent,depth=0){
       const list=document.createElement('ul');
@@ -180,10 +184,10 @@
           if(!child.children.size)break;
           label+='/'+child.name;entry=child;
         }
-        const li=document.createElement('li'),folder=entry.children.size>0;
+        const li=document.createElement('li'),folder=entry.children.size>0,collapsed=!folder&&entry.count>1;
         const row=document.createElement(folder?'summary':'div');row.className='archive-row';
-        const name=document.createElement('span');name.className='archive-name';name.textContent=label+(folder?'/':'');
-        const meta=document.createElement('span');meta.className='archive-meta';meta.textContent=(folder?entry.count+' files · ':entry.type==='symlink'?'link · ':'')+formatBytes(entry.bytes);
+        const name=document.createElement('span');name.className='archive-name';name.textContent=label+(folder||collapsed?'/':'');
+        const meta=document.createElement('span');meta.className='archive-meta';meta.textContent=(folder||collapsed?entry.count+' files · ':entry.type==='symlink'?'link · ':'')+formatBytes(entry.bytes);
         row.append(name,meta);row.title=label+(entry.type==='symlink'?' (symbolic link)':'');
         if(folder){
           const details=document.createElement('details');
