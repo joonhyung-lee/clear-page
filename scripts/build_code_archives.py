@@ -16,7 +16,7 @@ OUTPUT = ROOT / 'assets/code-downloads'
 # result tables and the local dependency freeze. README and the checkpoint path map
 # are regenerated below.
 EXCLUDE_PREFIXES = ('docs/', 'tools/', 'runtime/outputs/', 'runtime/evaluation/evidence/', 'runtime/paper/')
-EXCLUDE_FILES = {'LICENSE', 'runtime/LICENSE', '.gitignore', 'requirements-core-linux-py311.txt', 'README.md', 'run.py'}
+EXCLUDE_FILES = {'LICENSE', 'runtime/LICENSE', '.gitignore', 'requirements-core-linux-py311.txt', 'README.md', 'run.py', 'pyproject.toml'}
 
 
 def packaged(relative):
@@ -53,6 +53,7 @@ def main(index_only=False, source_only=False):
         'tools/link_checkpoints.py': (templates / 'link_checkpoints.py').read_bytes(),
         'tools/fetch_checkpoints.py': (templates / 'fetch_checkpoints.py').read_bytes(),
         'get.py': (templates / 'get.py').read_bytes(),
+        'pyproject.toml': (templates / 'pyproject.toml').read_bytes(),
         '_run.py': (templates / '_run.py').read_bytes(),
         'tools/render_plan.py': (templates / 'render_plan.py').read_bytes(),
     }

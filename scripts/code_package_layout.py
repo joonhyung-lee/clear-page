@@ -71,34 +71,50 @@ RUNS = [
 
 README = '''# CLEAR
 
-Source code and 153 pretrained checkpoints of the CLEAR planner.
+**TL;DR** Source code and 153 pretrained checkpoints of the CLEAR planner. Download with `get.py`, install with `uv sync`, run one script per experiment.
 
-- `run_01_grid.py` to `run_05_maze_v4.py`: one entry point per experiment, `python run_0N_name.py <stage> [args]` (`<stage> --help` lists the arguments): grid `train|evaluate`, manipulation `train|refine|evaluate`, maze `plan|train|evaluate`, replanning `train|evaluate`, maze_v4 `train|evaluate|report`
-- `clear/`: model, data and planning implementation
-- `experiments/`: exp1 grid, exp2 manipulation, exp3 maze, exp4 replanning, exp5 maze v4
-- `ckpts/`: `grid/`, `maze/`, `locomotion/`; `docs/checkpoint_paths.json` maps each file to the path the code loads
-- `assets/`, `data/`, `tests/`, `tools/`
-
-## Setup (CPU, Python 3.11)
+## 0. Download
 
 ```bash
 curl -LO https://anonymous-hf.com/api/a/p5icltdspejh/resolve/get.py
 python get.py clear && cd clear
-python3.11 -m venv .venv && source .venv/bin/activate
-python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.7"
-python -m pip install numpy einops pyyaml scipy matplotlib imageio-ffmpeg
 ```
 
-`get.py` downloads the source tree and the checkpoints (1.8 GB, SHA-256 verified) and links them. Physical simulation and the manipulation experiments need the optional extras in `pyproject.toml`.
-
-## Demo
+## 1. Install
 
 ```bash
-python run_03_maze.py plan --input experiments/exp3/data/example_g1.json                 # plan, then open the window
-python run_03_maze.py plan --input experiments/exp3/data/example_g1.json --video demo.mp4  # headless, writes the mp4
+uv sync                                           # Python 3.11, CPU torch (pyproject.toml has the CUDA note)
+uv sync --extra manipulation --extra simulation   # adds MuJoCo for 02, 03 evaluate and 04
 ```
 
-Writes `outputs/reproduction/plan.json` and `plan.png`; the animation plays the object interactions, then the route.
+## 2. Run experiments
+
+```bash
+# 01 grid. --method clear | clear_ro | clear_ho | autoregressive | gumbel_sinkhorn | polynet
+uv run run_01_grid.py evaluate --method clear --out outputs/grid/clear
+uv run run_01_grid.py evaluate --method polynet --out outputs/grid/polynet
+
+# 02 ordered manipulation. --arm clear | bc | plan_bc | bc_shared | ar_bc | clear_nocausal | clear_regression | clear_noaffordance | reference | classical
+uv run run_02_manipulation.py train --arm clear --data experiments/exp2/data/paper --seed 0 --out outputs/manipulation/clear.pt
+uv run run_02_manipulation.py evaluate --arm clear --checkpoint outputs/manipulation/clear.pt --manifest SCENES.json --split val --train-seed 0 --out outputs/manipulation/clear_val
+
+# 03 maze. --method clear | noemb | specialist | robot_id | no_affordance | get_encoder | cdgs
+uv run run_03_maze.py plan --input experiments/exp3/data/example_g1.json --video demo.mp4   # drop --video for a window
+uv run run_03_maze.py evaluate --method clear --checkpoint ckpts/maze/reference/seed0/clear.pt --data experiments/exp3/data/primary_prepared_local_edges/g1_probes.jsonl --scene SCENE_ID --body g1 --controller CONTROLLER.json --training-seed 0 --rollout-seed 0 --out outputs/maze/clear
+
+# 04 long horizon planning. --method clear | clear_frozen | clear_nomask | reference
+uv run run_04_replanning.py evaluate --method clear --manifest FAMILIES.json --family-seed 0 --cell N6 --controller CONTROLLER.json --rollout-seed 0 --out outputs/replanning/clear
+```
+
+`<stage> --help` lists every argument. 01 and `03 plan` run from the released checkpoints. 02 trains its own checkpoints and evaluates against a scene manifest; `03 evaluate` and 04 execute natively with the G1 controller runtime. The manifest and the runtime are not part of this distribution.
+
+## Layout
+
+- `clear/` planner: representation, ordering, trajectory flow, feasibility
+- `experiments/` exp1 grid, exp2 manipulation, exp3 maze, exp4 replanning, exp5 maze v4
+- `ckpts/` pretrained checkpoints: `grid/`, `maze/`, `locomotion/`
+- `baselines/` ordering baselines; `evaluation/`, `training/`, `scripts/` paper evaluation and training entry points
+- `assets/` robot models; `data/` scene plans and probes; `tests/`; `tools/` fetch and render helpers; `viz/` figures
 
 ## Experiments
 
@@ -107,3 +123,4 @@ Writes `outputs/reproduction/plan.json` and `plan.png`; the animation plays the 
 | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/a_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/b_ordered_manipulation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/c_maze_navigation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/d_long_horizon_planning.png) |
 | Select and relocate obstacles to connect start and goal. | Order interactions so later objects remain accessible. | Plan around terrain and movable objects for each body. | Update the plan when object placement or access changes. |
 '''
+

@@ -1,0 +1,23 @@
+[project]
+name = "clear"
+version = "0.1.0"
+description = "CLEAR planner: source and pretrained checkpoints"
+requires-python = ">=3.11,<3.12"
+dependencies = ["torch>=2.7", "numpy", "einops", "pyyaml", "scipy", "matplotlib", "imageio-ffmpeg"]
+
+[project.optional-dependencies]
+manipulation = ["mujoco~=3.11.0", "gymnasium", "ogbench", "pyperplan"]
+simulation = ["mujoco~=3.11.0", "trimesh", "onnxruntime"]
+dev = ["pytest"]
+
+[tool.uv]
+package = false
+
+# CPU wheels keep the install small; delete this block for the CUDA build from PyPI.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
