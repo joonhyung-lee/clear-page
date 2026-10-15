@@ -58,12 +58,12 @@ def checkpoint_layout(package, audit):
 RUNS = [
     # (name, docstring, {stage: (module, *prefix)}); run_03_maze.py is a hand-written template with a `plan` demo stage.
     ('grid', 'Grid (exp1): train the models, or evaluate CLEAR / an ordering baseline (--method clear | clear_ro | clear_ho | autoregressive | gumbel_sinkhorn | polynet).',
-     {'train': ('scripts.train', '--experiment', 'grid2d'), 'evaluate': ('evaluation.exp1',)}),
-    ('manipulation', 'Ordered manipulation (exp2): train the comparison arms, refine the flow checkpoints, evaluate the comparison.',
-     {'train': ('experiments.exp2.train_comparison',), 'refine': ('experiments.exp2.refine_flow_comparison',), 'evaluate': ('experiments.exp2.evaluate_comparison',)}),
+     {'train': ('experiments.common.dispatch', 'train', '--experiment', 'grid2d'), 'evaluate': ('experiments.exp1.evaluate',)}),
+    ('manipulation', 'Ordered manipulation (exp2): train the comparison arms, refine the flow checkpoints.',
+     {'train': ('experiments.exp2.train_comparison',), 'refine': ('experiments.exp2.refine_flow_comparison',)}),
     ('maze', None, None),
-    ('replanning', 'Replanning (exp4): train the adaptation, run the evaluation.',
-     {'train': ('experiments.exp4.sprint6h.train_adapt', 'train'), 'evaluate': ('experiments.exp4.sprint6h.runner',)}),
+    ('replanning', 'Replanning (exp4): train the adaptation.',
+     {'train': ('experiments.exp4.sprint6h.train_adapt', 'train')}),
 ]
 
 
@@ -84,7 +84,7 @@ python3 get.py clear && cd clear
 
 ```bash
 uv sync                                           # Python 3.11, CPU torch (pyproject.toml has the CUDA note)
-uv sync --extra manipulation --extra simulation   # adds MuJoCo for 02, 03 evaluate and 04
+uv sync --extra manipulation                     # adds MuJoCo for 02
 ```
 
 ## 2. Run experiments
@@ -93,25 +93,30 @@ uv sync --extra manipulation --extra simulation   # adds MuJoCo for 02, 03 evalu
 # 01 grid. --method clear | clear_ro | clear_ho | autoregressive | gumbel_sinkhorn | polynet
 uv run run_01_grid.py evaluate --method clear --out outputs/grid/clear
 uv run run_01_grid.py evaluate --method polynet --out outputs/grid/polynet
+uv run run_01_grid.py train --method clear
 
-# 02 ordered manipulation. --arm clear | bc | plan_bc | bc_shared | ar_bc | clear_nocausal | clear_regression | clear_noaffordance | reference | classical
+# 02 ordered manipulation. --arm clear | bc | plan_bc | bc_shared | ar_bc | clear_nocausal | clear_regression | clear_noaffordance
 uv run run_02_manipulation.py train --arm clear --data experiments/exp2/data/paper --seed 0 --out outputs/manipulation/clear.pt
-uv run run_02_manipulation.py evaluate --arm clear --checkpoint outputs/manipulation/clear.pt --manifest SCENES.json --split val --train-seed 0 --out outputs/manipulation/clear_val
 
-# 03 maze. --method clear | noemb | specialist | robot_id | no_affordance | get_encoder | cdgs
-uv run run_03_maze.py plan --input experiments/exp3/data/example_g1.json --video demo.mp4   # drop --video for a window
-uv run run_03_maze.py evaluate --method clear --checkpoint ckpts/maze/reference/seed0/clear.pt --data experiments/exp3/data/primary_prepared_local_edges/g1_probes.jsonl --scene SCENE_ID --body g1 --controller CONTROLLER.json --training-seed 0 --rollout-seed 0 --out outputs/maze/clear
+# 03 maze. plan one scene (window, or --video demo.mp4), or train the planner
+uv run run_03_maze.py plan --input experiments/exp3/data/example_g1.json --video demo.mp4
+uv run run_03_maze.py train --help
 
-# 04 long horizon planning. --method clear | clear_frozen | clear_nomask | reference
-uv run run_04_replanning.py evaluate --method clear --manifest FAMILIES.json --family-seed 0 --cell N6 --controller CONTROLLER.json --rollout-seed 0 --out outputs/replanning/clear
+# 04 long horizon planning. train the replanning adaptation
+uv run run_04_replanning.py train --help
 ```
 
-`<stage> --help` lists every argument. 01 and `03 plan` run from the released checkpoints. 02 trains its own checkpoints and evaluates against a scene manifest; `03 evaluate` and 04 execute natively with the G1 controller runtime. The manifest and the runtime are not part of this distribution.
+`<stage> --help` lists every argument. 01 and `03 plan` run from the released checkpoints. Executing plans on the
+simulated robots (the paper's physical-success numbers) needs the controller runtime, which is not part of this
+distribution; the planners, their training and the grid evaluation are.
 
 ## Layout
 
 - `clear/` → planner
-  - representation, ordering, trajectory flow, feasibility checking
+  - `model/` → `clear.py` (CLEAR core, PAMO), `ordernet.py`, `causalflownet.py`, `affordancenet.py`, `encoders.py`, `quantizers.py`
+  - `data/` → grid scenes, oracle, terrain, capability, probes
+  - `maze/` → `world.py` (scenes, routes, abstract controller), `robots.py` (bodies, structure)
+  - `util.py` → projection, schedule, ranking, CEM
 - `experiments/` → one folder per experiment
   - `exp1/` → grid
   - `exp2/` → manipulation
@@ -127,9 +132,7 @@ uv run run_04_replanning.py evaluate --method clear --manifest FAMILIES.json --f
 - `utils/` → helpers
   - `tools/` → fetch and render
   - `tests/` → unit tests (`uv run pytest utils/tests`)
-  - `viz/` → figure scripts
-  - `training/` → training configs
-  - `scripts/`, `evaluation/` → grid training and evaluation entry points
+  - `training/` → training configs and teacher data
 
 ## Experiments
 

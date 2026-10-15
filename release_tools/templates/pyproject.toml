@@ -7,7 +7,6 @@ dependencies = ["torch>=2.7", "numpy", "einops", "pyyaml", "scipy", "matplotlib"
 
 [project.optional-dependencies]
 manipulation = ["mujoco~=3.11.0", "gymnasium", "ogbench", "pyperplan"]
-simulation = ["mujoco~=3.11.0", "trimesh", "onnxruntime"]
 dev = ["pytest"]
 
 [tool.uv]
