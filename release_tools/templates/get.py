@@ -25,23 +25,27 @@ def walk(path=''):
             yield entry
 
 
-def blob_sha1(path):
-    digest = hashlib.sha1(b'blob %d\0' % path.stat().st_size)
-    with path.open('rb') as stream:
-        for chunk in iter(lambda: stream.read(1 << 20), b''):
-            digest.update(chunk)
-    return digest.hexdigest()
+def blob_sha1(data):
+    return hashlib.sha1(b'blob %d\0' % len(data) + data).hexdigest()
+
+
+def matches(path, oid):
+    """The tree lists the git blob id of the file, or of its LFS pointer for large files."""
+    data = path.read_bytes()
+    pointer = b'version https://git-lfs.github.com/spec/v1\noid sha256:%s\nsize %d\n' % (
+        hashlib.sha256(data).hexdigest().encode(), len(data))
+    return oid in (blob_sha1(data), blob_sha1(pointer))
 
 
 def fetch(root, entry):
     target = root / entry['path']
-    if target.is_file() and blob_sha1(target) == entry['oid']:
+    if target.is_file() and matches(target, entry['oid']):
         return 'kept'
     target.parent.mkdir(parents=True, exist_ok=True)
     for attempt in range(3):
         with get(MIRROR + 'resolve/' + entry['path']) as response, target.open('wb') as out:
             shutil.copyfileobj(response, out, 1 << 20)
-        if blob_sha1(target) == entry['oid']:
+        if matches(target, entry['oid']):
             return 'downloaded'
     raise RuntimeError('content mismatch: ' + entry['path'])
 
