@@ -1,4 +1,4 @@
-"""Download the 153 pretrained checkpoints from the anonymous mirror and link them."""
+"""Download the 153 pretrained checkpoints into ckpts/ from the anonymous mirror and link them."""
 import argparse
 import hashlib
 import json
@@ -11,7 +11,7 @@ from pathlib import Path
 from link_checkpoints import link_checkpoints
 
 ROOT = Path(__file__).resolve().parents[1]
-MIRROR = 'https://anonymous-hf.com/api/a/p5icltdspejh/resolve/clear/'
+MIRROR = 'https://anonymous-hf.com/api/a/p5icltdspejh/resolve/'
 
 
 def sha256(path):

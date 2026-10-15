@@ -55,62 +55,62 @@ def checkpoint_layout(package, audit):
     return mapping
 
 
+RUNS = [
+    ('train_grid', 'scripts.train', ('--experiment', 'grid2d'), 'Train the grid (exp1) models.'),
+    ('evaluate_grid', 'evaluation.exp1', (), 'Evaluate CLEAR or an ordering baseline on the grid (exp1): --method clear | clear_ro | clear_ho | autoregressive | gumbel_sinkhorn | polynet.'),
+    ('train_manipulation', 'experiments.exp2.train_comparison', (), 'Train the manipulation (exp2) comparison arms.'),
+    ('refine_manipulation', 'experiments.exp2.refine_flow_comparison', (), 'Refine the manipulation (exp2) flow checkpoints.'),
+    ('evaluate_manipulation', 'experiments.exp2.evaluate_comparison', (), 'Evaluate the manipulation (exp2) comparison.'),
+    ('train_maze', 'experiments.exp3.trajectory_v3.shared_cli', ('train',), 'Train the maze (exp3) shared-morphology planner.'),
+    ('evaluate_maze', 'experiments.exp3.trajectory_v3.evaluate_frozen', (), 'Evaluate frozen maze (exp3) plans.'),
+    ('train_replanning', 'experiments.exp4.sprint6h.train_adapt', ('train',), 'Train the replanning (exp4) adaptation.'),
+    ('evaluate_replanning', 'experiments.exp4.sprint6h.runner', (), 'Run the replanning (exp4) evaluation.'),
+    ('train_maze_v4', 'experiments.exp5_maze_v4.train', (), 'Train the maze v4 (exp5) models.'),
+    ('evaluate_maze_v4', 'experiments.exp5_maze_v4.evaluate', (), 'Evaluate the maze v4 (exp5) models.'),
+    ('report_maze_v4', 'experiments.exp5_maze_v4.report', (), 'Aggregate the maze v4 (exp5) evaluation tables.'),
+]
+
 README = '''# CLEAR
 
-Source code and pretrained models for the CLEAR planner (anonymous review copy).
+Source code and 153 pretrained checkpoints of the CLEAR planner.
 
-## Layout
+- `run_01` to `run_13`: entry points, one per experiment stage (`python run_XX_name.py --help`)
+- `clear/`: model, data and planning implementation
+- `experiments/`: exp1 grid, exp2 manipulation, exp3 maze, exp4 replanning, exp5 maze v4
+- `ckpts/`: `grid/`, `maze/`, `locomotion/`; `docs/checkpoint_paths.json` maps each file to the path the code loads
+- `assets/`, `data/`, `tests/`, `tools/`
 
-```
-run.py                      one entry point: train / plan / evaluate / refine / report
-runtime/clear/              model, data and planning implementation
-runtime/experiments/        experiment code and inputs: exp1 grid, exp2 manipulation,
-                            exp3 maze, exp4 replanning, exp5 maze v4
-runtime/assets/             robot models and simulation assets
-runtime/data/               probe scenes, rosters and plan cohorts
-runtime/tests/              unit tests
-checkpoints/                pretrained models, downloaded by tools/fetch_checkpoints.py
-tools/fetch_checkpoints.py  downloads the checkpoints and links them
-tools/link_checkpoints.py   links already extracted checkpoints to the paths the experiment code loads
-docs/checkpoint_paths.json  path map and SHA-256 of every checkpoint
-```
-
-## Setup
+## Setup (CPU, Python 3.11)
 
 ```bash
-unzip clear-source.zip && cd clear
+curl -LO https://anonymous-hf.com/api/a/p5icltdspejh/resolve/get.py
+python get.py clear && cd clear
 python3.11 -m venv .venv && source .venv/bin/activate
 python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.7"
-python -m pip install numpy einops pyyaml scipy
-python tools/fetch_checkpoints.py
+python -m pip install numpy einops pyyaml scipy matplotlib imageio-ffmpeg
 ```
 
-`fetch_checkpoints.py` downloads the 1.8 GB of checkpoints into `checkpoints/`
-(verifying each SHA-256, resumable) and links them to the paths the experiment
-code loads. If `clear-pretrained.zip` was obtained separately, extract it next to
-`clear-source.zip` and run `python tools/link_checkpoints.py` instead. Both steps
-are idempotent and never overwrite files.
+`get.py` downloads the source tree and the checkpoints (1.8 GB, SHA-256 verified) and links them.
 
-Planning and evaluation run on CPU with these packages. Physical simulation and
-the manipulation experiments need the optional extras listed in `pyproject.toml`.
-
-## Planning example
+## Demo
 
 ```bash
-python run.py plan maze \\
-  --checkpoint ../checkpoints/maze/reference/seed0/clear.pt \\
-  --input experiments/exp3/data/example_g1.json \\
-  --out outputs/reproduction/plan.json --device cpu
+python run_01_plan_maze.py --input experiments/exp3/data/example_g1.json                 # plan, then open the window
+python run_01_plan_maze.py --input experiments/exp3/data/example_g1.json --video demo.mp4  # headless, writes the mp4
 ```
 
-`python run.py --help` lists every action/task pair. Relative paths resolve
-inside `runtime/`.
+Writes `outputs/reproduction/plan.json` and `plan.png`; the animation plays the object interactions, then the route.
 
-## Checkpoints
+## Experiments
 
-`checkpoints/grid/`, `checkpoints/maze/` and `checkpoints/locomotion/` group the
-153 models by task. Reference models are the ones used for the reported results;
-`training_history/` and the variant directories are provided as trained, for
-inspection. Planning and evaluation with the reference checkpoints are verified;
-retraining every experiment end to end is not claimed.
+| `run_01` demo | `run_02`–`03` exp1 grid | `run_04`–`06` exp2 manipulation |
+|---|---|---|
+| ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/demo_plan.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp1_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp2_manipulation.png) |
+
+| `run_07`–`08` exp3 maze | `run_09`–`10` exp4 replanning | `run_11`–`13` exp5 maze v4 |
+|---|---|---|
+| ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp3_maze.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp4_replanning.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp5_maze_v4.png) |
+
+`run_03_evaluate_grid.py --method` selects CLEAR or a baseline (`clear`, `clear_ro`, `clear_ho`, `autoregressive`, `gumbel_sinkhorn`, `polynet`).
+Physical simulation and the manipulation experiments need the optional extras in `pyproject.toml`.
 '''

@@ -7,7 +7,7 @@ import shutil
 import stat
 import zipfile
 
-from code_package_layout import checkpoint_layout, README
+from code_package_layout import checkpoint_layout, README, RUNS
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = ROOT / 'clear-standalone-anonymous'
@@ -15,8 +15,8 @@ OUTPUT = ROOT / 'assets/code-downloads'
 # Release bookkeeping that reviewers do not need: audit reports, release tooling,
 # result tables and the local dependency freeze. README and the checkpoint path map
 # are regenerated below.
-EXCLUDE_PREFIXES = ('docs/', 'tools/', 'runtime/outputs/', 'runtime/evaluation/evidence/')
-EXCLUDE_FILES = {'LICENSE', '.gitignore', 'requirements-core-linux-py311.txt', 'README.md'}
+EXCLUDE_PREFIXES = ('docs/', 'tools/', 'runtime/outputs/', 'runtime/evaluation/evidence/', 'runtime/paper/')
+EXCLUDE_FILES = {'LICENSE', 'runtime/LICENSE', '.gitignore', 'requirements-core-linux-py311.txt', 'README.md', 'run.py'}
 
 
 def packaged(relative):
@@ -42,17 +42,30 @@ def main(index_only=False, source_only=False):
     if audit['status'] != 'passed':
         raise ValueError('Anonymous snapshot audit must pass before packaging')
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    layout = checkpoint_layout(PACKAGE, audit)
+    # The distribution is flat: runtime/ becomes the root and checkpoints live in ckpts/.
+    layout = {old: dict(path='ckpts/' + item['path'].removeprefix('checkpoints/'), sha256=item['sha256'])
+              for old, item in checkpoint_layout(PACKAGE, audit).items()}
+    paths = {old.removeprefix('runtime/'): item for old, item in layout.items()}
+    templates = ROOT / 'release_tools/templates'
     extras = {
         'README.md': README.encode(),
-        'docs/checkpoint_paths.json': (json.dumps({'schema': 'clear-checkpoint-paths-v1', 'models': layout}, indent=2)+'\n').encode(),
-        'tools/link_checkpoints.py': (ROOT / 'release_tools/templates/link_checkpoints.py').read_bytes(),
-        'tools/fetch_checkpoints.py': (ROOT / 'release_tools/templates/fetch_checkpoints.py').read_bytes(),
+        'docs/checkpoint_paths.json': (json.dumps({'schema': 'clear-checkpoint-paths-v1', 'models': paths}, indent=2)+'\n').encode(),
+        'tools/link_checkpoints.py': (templates / 'link_checkpoints.py').read_bytes(),
+        'tools/fetch_checkpoints.py': (templates / 'fetch_checkpoints.py').read_bytes(),
+        'get.py': (templates / 'get.py').read_bytes(),
+        '_run.py': (templates / '_run.py').read_bytes(),
+        'run_01_plan_maze.py': (templates / 'run_01_plan_maze.py').read_bytes(),
+        'tools/render_plan.py': (templates / 'render_plan.py').read_bytes(),
     }
+    for image in sorted((templates / 'teasers').glob('*.png')):
+        extras['docs/teasers/' + image.name] = image.read_bytes()
+    for index, (name, module, prefix, doc) in enumerate(RUNS, 2):
+        body = f'"""{doc}"""\nfrom _run import run\n\nrun({module!r}' + ''.join(f', {p!r}' for p in prefix) + ')\n'
+        extras[f'run_{index:02d}_{name}.py'] = body.encode()
     def destination(relative):
         if relative in layout:
             return layout[relative]['path']
-        return relative
+        return relative.removeprefix('runtime/')
 
     result = {}
     for key, name in [('source', 'clear-source.zip'), ('checkpoints', 'clear-pretrained.zip')]:
