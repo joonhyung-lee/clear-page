@@ -18,9 +18,15 @@ OUTPUT = ROOT / 'assets/code-downloads'
 EXCLUDE_PREFIXES = ('docs/', 'tools/', 'runtime/outputs/', 'runtime/evaluation/evidence/', 'runtime/paper/',
                     # maze v4 (exp5) is not part of the paper: its module, data and 24 checkpoints stay out
                     'runtime/experiments/exp5_maze_v4/', 'runtime/data/plans/', 'runtime/data/probes/', 'runtime/data/rosters/',
-                    'runtime/assets/checkpoints/leap2026/V4/')
+                    'runtime/assets/checkpoints/leap2026/V4/',
+                    # no code reads runtime/data; the probe-scene cache was for exp5
+                    'runtime/data/')
 EXCLUDE_FILES = {'LICENSE', 'runtime/LICENSE', '.gitignore', 'requirements-core-linux-py311.txt', 'README.md', 'run.py', 'pyproject.toml',
-                 'runtime/tests/test_actual_target_validation.py'}
+                 'runtime/tests/test_actual_target_validation.py',
+                 'runtime/experiments/exp1/configs/paper.json'}   # rewritten below with the packaged paths
+# Helper packages move under utils/, the ordering baselines under models/; utils/run.py puts both on sys.path.
+MOVES = {'tests/': 'utils/tests/', 'viz/': 'utils/viz/', 'training/': 'utils/training/', 'scripts/': 'utils/scripts/',
+         'evaluation/': 'utils/evaluation/', 'baselines/': 'models/baselines/'}
 
 
 def packaged(relative):
@@ -53,27 +59,39 @@ def main(index_only=False, source_only=False):
     templates = ROOT / 'release_tools/templates'
     extras = {
         'README.md': README.encode(),
-        'docs/checkpoint_paths.json': (json.dumps({'schema': 'clear-checkpoint-paths-v1', 'models': paths}, indent=2)+'\n').encode(),
-        'tools/link_checkpoints.py': (templates / 'link_checkpoints.py').read_bytes(),
-        'tools/fetch_checkpoints.py': (templates / 'fetch_checkpoints.py').read_bytes(),
+        'ckpts/paths.json': (json.dumps({'schema': 'clear-checkpoint-paths-v1', 'models': paths}, indent=2)+'\n').encode(),
+        'utils/tools/link_checkpoints.py': (templates / 'link_checkpoints.py').read_bytes(),
+        'utils/tools/fetch_checkpoints.py': (templates / 'fetch_checkpoints.py').read_bytes(),
+        'utils/tools/render_plan.py': (templates / 'render_plan.py').read_bytes(),
+        'utils/run.py': (templates / 'run.py').read_bytes(),
+        'utils/tests/conftest.py': (templates / 'conftest.py').read_bytes(),
         'get.py': (templates / 'get.py').read_bytes(),
         'pyproject.toml': (templates / 'pyproject.toml').read_bytes(),
-        '_run.py': (templates / '_run.py').read_bytes(),
-        'tools/render_plan.py': (templates / 'render_plan.py').read_bytes(),
     }
     for image in sorted((templates / 'teasers').glob('*.png')):
-        extras['docs/teasers/' + image.name] = image.read_bytes()
+        extras['assets/readme/' + image.name] = image.read_bytes()
     for index, (name, doc, stages) in enumerate(RUNS, 1):
         file = f'run_{index:02d}_{name}.py'
         if stages is None:
             extras[file] = (templates / file).read_bytes()
             continue
         table = ''.join(f'    {stage!r}: {spec!r},\n' for stage, spec in stages.items())
-        extras[file] = f'"""{doc}"""\nfrom _run import main\n\nmain({{\n{table}}})\n'.encode()
+        extras[file] = f'"""{doc}"""\nfrom utils.run import main\n\nmain({{\n{table}}})\n'.encode()
     def destination(relative):
         if relative in layout:
             return layout[relative]['path']
-        return relative.removeprefix('runtime/')
+        relative = relative.removeprefix('runtime/')
+        for old, new in MOVES.items():
+            if relative.startswith(old):
+                return new + relative.removeprefix(old)
+        return relative
+
+    # The exp1 release freeze pins source paths; rewrite them to the packaged layout and drop
+    # the files that are not packaged (maze v4 and its test). Hashes are unchanged.
+    freeze = json.loads((PACKAGE / 'runtime/experiments/exp1/configs/paper.json').read_text())
+    freeze['code_sha256'] = {destination('runtime/' + old): digest for old, digest in freeze['code_sha256'].items() if packaged('runtime/' + old)}
+    freeze['packaging_note'] += ' Paths follow the packaged tree (utils/, models/); maze v4 files are not packaged.'
+    extras['experiments/exp1/configs/paper.json'] = (json.dumps(freeze, indent=2) + '\n').encode()
 
     result = {}
     for key, name in [('source', 'clear-source.zip'), ('checkpoints', 'clear-pretrained.zip')]:

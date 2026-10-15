@@ -1,15 +1,19 @@
-"""Shared launcher for the numbered run scripts: forwards arguments to the experiment module."""
+"""Shared launcher for the numbered run scripts: forwards arguments to the experiment module.
+
+The tree keeps helper packages under utils/ and the ordering baselines under models/; both join
+sys.path here so the experiment code imports them by their original names."""
 import os
 import runpy
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
+PATHS = [str(ROOT), str(ROOT / 'utils'), str(ROOT / 'models')]
 
 
 def run(module, *prefix, argv=None):
     os.chdir(ROOT)
-    sys.path.insert(0, str(ROOT))
+    sys.path[:0] = PATHS
     sys.argv = [module, *prefix, *(sys.argv[1:] if argv is None else argv)]
     runpy.run_module(module, run_name='__main__', alter_sys=True)
 

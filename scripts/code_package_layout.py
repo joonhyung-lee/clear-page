@@ -121,21 +121,21 @@ uv run run_04_replanning.py evaluate --method clear --manifest FAMILIES.json --f
   - `grid/`
   - `maze/`
   - `locomotion/`
-- `baselines/` → ordering baselines
-- `evaluation/` → grid evaluation entry point
-- `training/` → training configs and loops
-- `scripts/` → training launcher and demos
-- `assets/` → robot models
-- `data/` → probe scenes for the maze and replanning experiments
-- `tests/` → unit tests
-- `tools/` → fetch and render helpers
-- `viz/` → figure scripts
+  - `paths.json` → where each checkpoint is linked for the code
+- `models/` → ordering baselines
+- `assets/` → robot models and README figures
+- `utils/` → helpers
+  - `tools/` → fetch and render
+  - `tests/` → unit tests (`uv run pytest utils/tests`)
+  - `viz/` → figure scripts
+  - `training/` → training configs
+  - `scripts/`, `evaluation/` → grid training and evaluation entry points
 
 ## Experiments
 
 | (a) 2D Grid | (b) Ordered Manipulation | (c) Maze Navigation | (d) Long Horizon Planning |
 |---|---|---|---|
-| ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/a_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/b_ordered_manipulation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/c_maze_navigation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/d_long_horizon_planning.png) |
+| ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/a_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/b_ordered_manipulation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/c_maze_navigation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/d_long_horizon_planning.png) |
 | Relocate obstacles to open a path. | Order interactions to keep access. | Plan per body around terrain and objects. | Replan when placement or access changes. |
 '''
 

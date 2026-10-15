@@ -3,7 +3,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from _run import main, run
+from utils.run import main, run
 
 
 def plan(argv):
@@ -25,8 +25,7 @@ def plan(argv):
             raise
     if args.no_show:
         return
-    sys.path.insert(0, 'tools')
-    from render_plan import show
+    from tools.render_plan import show
     png = str(Path(out).with_suffix('.png'))
     scene = planner[planner.index('--input') + 1]
     show(scene, out, video=args.video, png=png)

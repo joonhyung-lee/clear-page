@@ -107,7 +107,7 @@ def main():
     progress.close()
     print(f'source: {results.count("downloaded")} downloaded, {results.count("kept")} already present, {len(entries)} files -> {root}')
     if not args.no_checkpoints:
-        subprocess.check_call([sys.executable, str(root / 'tools/fetch_checkpoints.py')], cwd=root)
+        subprocess.check_call([sys.executable, str(root / 'utils/tools/fetch_checkpoints.py')], cwd=root)
 
 
 if __name__ == '__main__':

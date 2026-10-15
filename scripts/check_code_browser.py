@@ -143,9 +143,9 @@ def static_checks():
     assert all(m['path'].startswith('clear/ckpts/') for m in models)
     assert all('/leap2026/' not in m['path'] and '/anonymous/' not in m['path'] for m in models)
     with zipfile.ZipFile(ROOT / 'code' / archives['source']['url']) as package:
-        mapping = json.loads(package.read('clear/docs/checkpoint_paths.json'))['models']
+        mapping = json.loads(package.read('clear/ckpts/paths.json'))['models']
         assert {'clear/'+v['path'] for v in mapping.values()} == {m['path'] for m in models}
-        assert 'clear/tools/link_checkpoints.py' in package.namelist()
+        assert 'clear/utils/tools/link_checkpoints.py' in package.namelist()
     assert 'run_03_maze.py plan' in page.select_one('#reproduce-command').get_text()
     for viewer in page.select('.viewer'):
         assert (ROOT / 'assets/recordings' / (viewer['data-scene']+'.hex.js')).is_file()

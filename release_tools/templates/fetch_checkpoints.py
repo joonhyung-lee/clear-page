@@ -11,7 +11,7 @@ from pathlib import Path
 
 from link_checkpoints import link_checkpoints
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 MIRROR = 'https://anonymous-hf.com/api/a/p5icltdspejh/resolve/'
 
 
@@ -81,7 +81,7 @@ def main():
     parser.add_argument('--base-url', default=MIRROR, help='directory URL that serves checkpoints/<path>')
     parser.add_argument('--workers', type=int, default=4)
     args = parser.parse_args()
-    records = json.loads((ROOT / 'docs/checkpoint_paths.json').read_text())['models']
+    records = json.loads((ROOT / 'ckpts/paths.json').read_text())['models']
     items = list({item['path']: item for item in records.values()}.values())
     progress = Progress('checkpoints', len(items))
     with ThreadPoolExecutor(args.workers) as pool:

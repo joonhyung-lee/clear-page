@@ -7,7 +7,7 @@ from pathlib import Path
 
 def link_checkpoints(root):
     root = root.resolve()
-    records = json.loads((root / 'docs/checkpoint_paths.json').read_text())['models']
+    records = json.loads((root / 'ckpts/paths.json').read_text())['models']
     planned = []
     # Validate the complete set before creating any links.
     for old, item in records.items():
@@ -15,7 +15,7 @@ def link_checkpoints(root):
         if not source.resolve().is_relative_to(root) or not target.resolve().is_relative_to(root):
             raise ValueError('Checkpoint path leaves the package')
         if not source.is_file():
-            raise FileNotFoundError('Extract clear-pretrained.zip first: ' + item['path'])
+            raise FileNotFoundError('Missing checkpoint: ' + item['path'])
         with source.open('rb') as stream:
             if hashlib.file_digest(stream, 'sha256').hexdigest() != item['sha256']:
                 raise ValueError('Checkpoint checksum mismatch: ' + item['path'])
@@ -34,5 +34,5 @@ def link_checkpoints(root):
 
 
 if __name__ == '__main__':
-    count = link_checkpoints(Path(__file__).resolve().parents[1])
+    count = link_checkpoints(Path(__file__).resolve().parents[2])
     print(f'Checkpoint paths ready ({count} new links).')
