@@ -215,22 +215,22 @@ if PUSHABLE_PLAN:
                 pass
 """, ""),
     ],
-    # robot assets: g1/ (was g1_wo_wrist/); husky is not part of the paper. google_robot stays: it is the
-    # wheeled embodiment whose morphology rows the grid data carries (clear.data.morphology.BODY_XML).
+    # robot assets: g1/ (was g1_wo_wrist/); the wheeled embodiment is the husky (google_robot is not shipped)
     'clear.data.morphology': [
+        ("'wheel': 'google_robot/mobile_base.xml'", "'wheel': 'husky/husky_wo_plate.xml'"),
         ("'humanoid': 'g1_wo_wrist/g1_pos_native.xml'", "'humanoid': 'g1/g1_pos_native.xml'"),
     ],
+    'clear.data.kappa': [('ROSTER = ("google_robot", "spot", "spot_w_arm", "g1_wo_wrist")', 'ROSTER = ("husky", "spot", "spot_w_arm", "g1_wo_wrist")')],
+    'clear.data.probes': [('for r in ("google_robot", "spot", "spot_w_arm", "g1_wo_wrist"):', 'for r in ("husky", "spot", "spot_w_arm", "g1_wo_wrist"):')],
     'clear.maze.robot_registry': [
-        ("""    "husky": RobotEntry(
-        "husky", "husky/husky_wo_plate.xml", "base_husky", _wheel_parts,
-        LocomotionLimits(0.075, 10.0, 0.70,
-                         {"max_step_m": _NOM, "max_slope_deg": _NOM, "width_m": _NOM}),
+        ("""    "wheeled_robot": RobotEntry(
+        "wheeled_robot", "google_robot/mobile_base.xml", "chassis", _wheel_parts,
+        LocomotionLimits(0.10, 8.0, 0.56, {"max_step_m": _NOM, "max_slope_deg": _NOM, "width_m": _NOM}),
         color="#d95f02"),
 """, ""),
+        ('MAIN_BODIES = ("wheeled_robot", "spot", "spot_arm", "g1")', 'MAIN_BODIES = ("husky", "spot", "spot_arm", "g1")'),
         ('"g1_wo_wrist/g1_pos_native.xml"', '"g1/g1_pos_native.xml"'),
     ],
-    'experiments.exp3.trajectory_v3.cli': [('default=["husky","spot","spot_arm","g1"]', 'default=["spot","spot_arm","g1"]')],
-    'experiments.exp3.trajectory_v3.scenes': [('bodies=("husky","spot","spot_arm","g1")', 'bodies=("spot","spot_arm","g1")')],
     'clear.maze.physical_registry': [
         ("from dataclasses import replace\nfrom clear.maze import robot_registry as R\n", "from dataclasses import replace\n"),
         ("    from clear.maze import structure_parser\n", ""),

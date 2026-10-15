@@ -67,7 +67,9 @@ RUNS = [
 ]
 
 
-README = '''# CLEAR
+README = '''<p align="center"><img src="https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/teaser.png" alt="CLEAR" width="720"></p>
+
+<p align="center"><em>Capability-aware interaction planning across robot embodiments.</em></p>
 
 > **TL;DR**
 >
@@ -130,7 +132,7 @@ is not part of this distribution; the planners, their training and the grid eval
   - `locomotion/`
   - `paths.json` → where each checkpoint is linked for the code
 - `models/` → ordering baselines
-- `assets/` → robot models (`g1/`, `spot/`, `spot_w_arm/`, `google_robot/` wheeled) and README figures
+- `assets/` → robot models (`g1/`, `spot/`, `spot_w_arm/`, `husky/`) and README figures
 - `utils/` → helpers
   - `tools/` → fetch and render
   - `tests/` → unit tests (`uv run pytest utils/tests`)
