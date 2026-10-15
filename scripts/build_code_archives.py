@@ -22,8 +22,7 @@ EXCLUDE_PREFIXES = ('docs/', 'tools/', 'runtime/outputs/', 'runtime/evaluation/e
                     # maze v4 (exp5) is not part of the paper: its module, data and 24 checkpoints stay out
                     'runtime/experiments/exp5_maze_v4/', 'runtime/data/plans/', 'runtime/data/probes/', 'runtime/data/rosters/',
                     'runtime/assets/checkpoints/leap2026/V4/',
-                    # no code reads runtime/data; the probe-scene cache was for exp5
-                    'runtime/data/')
+                    )
 EXCLUDE_FILES = {'LICENSE', 'runtime/LICENSE', '.gitignore', 'requirements-core-linux-py311.txt', 'README.md', 'run.py', 'pyproject.toml',
                  'runtime/tests/test_actual_target_validation.py',
                  'runtime/experiments/exp1/configs/paper.json'}   # rewritten below with the packaged paths
@@ -37,6 +36,7 @@ DROP_DATA_DIRS = ('runtime/clear/mj_util/', 'runtime/clear/low_level/', 'runtime
                   'runtime/clear/data/v4/', 'runtime/experiments/exp3/development/', 'runtime/scripts/', 'runtime/evaluation/',
                   'runtime/viz/')
 RELOCATE = {'runtime/clear/model/quantizers/LICENSE': 'clear/model/QUANTIZERS_LICENSE'}
+RELOCATE_PREFIXES = {'runtime/data/probe_scenes/': 'experiments/exp3/data/probe_scenes/'}   # probe recordings the exp3/exp4 training reads
 
 
 def packaged(relative):
@@ -94,6 +94,9 @@ def main(index_only=False, source_only=False):
             return layout[relative]['path']
         if relative in RELOCATE:
             return RELOCATE[relative]
+        for old, new in RELOCATE_PREFIXES.items():
+            if relative.startswith(old):
+                return new + relative.removeprefix(old)
         relative = relative.removeprefix('runtime/')
         for old, new in MOVES.items():
             if relative.startswith(old):

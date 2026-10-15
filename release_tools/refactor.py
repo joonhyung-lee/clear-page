@@ -52,8 +52,9 @@ KEEP_ANYWAY = {'clear.mj_util.push_route'}
 
 # new module -> old modules merged into it, in dependency order (a member may import earlier members).
 GROUPS = {
+    # morphology_encoder stays its own module: it needs MuJoCo (clear.data.morphology), which the grid path must not import
     'clear.model.encoders': ['clear.model.scene_encoder', 'clear.model.perception_encoder', 'clear.model.capability_encoder',
-                             'clear.model.morphology_encoder', 'clear.model.structure_encoder', 'clear.model.kappa_set_encoder'],
+                             'clear.model.structure_encoder', 'clear.model.kappa_set_encoder'],
     'clear.model.affordancenet': ['clear.model.affordance_transformer', 'clear.model.stageb_aux_heads'],
     'clear.model.ordernet': ['clear.model.ordering_ablation_heads', 'clear.model.priority_head', 'clear.model.ordering_loss',
                              'clear.model.plan_scorer'],
@@ -261,6 +262,12 @@ if PUSHABLE_PLAN:
     ],
     'clear.maze': [('@file', '"""Maze world model: `world` (scenes, observations, routes, the abstract controller) and\n'
                              '`robots` (body registry and link-level structure descriptions)."""\n')],
+    # the probe-scene recordings ship under experiments/exp3/data; the rows keep their original keys
+    'experiments.exp3.trajectory_v3.shared_morphology': [
+        ('                scene = json.loads((Path(key) / "input.jsonl").read_text())["scene"]\n',
+         '                scene = json.loads((PROBE_SCENES / Path(key).name / "input.jsonl").read_text())["scene"]\n'),
+        ('\ndef attach_probe_scenes(', '\nPROBE_SCENES = Path("experiments/exp3/data/probe_scenes")   # recordings referenced by the probe rows\n\n\ndef attach_probe_scenes('),
+    ],
     'tests.test_inference_recipe': [
         ("    from scripts.evaluation.eval_ood import scene_fn_for\n",
          "    from clear.data.grid import gp_scene, random_scene\n    from clear.data.probes import rooms_fork_scene\n\n"

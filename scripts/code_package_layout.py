@@ -98,22 +98,24 @@ uv run run_01_grid.py train --method clear
 # 02 ordered manipulation. --arm clear | bc | plan_bc | bc_shared | ar_bc | clear_nocausal | clear_regression | clear_noaffordance
 uv run run_02_manipulation.py train --arm clear --data experiments/exp2/data/paper --seed 0 --out outputs/manipulation/clear.pt
 
-# 03 maze. plan one scene (window, or --video demo.mp4), or train the planner
+# 03 maze. plan one scene (window, or --video demo.mp4); train with --config .../{clear | noemb | no_affordance | robot_id | get_encoder | cdgs | clear_nocausal | specialist_g1 | specialist_spot_arm}.json
 uv run run_03_maze.py plan --input experiments/exp3/data/example_g1.json --video demo.mp4
-uv run run_03_maze.py train --help
+D=experiments/exp3/data/primary_prepared_local_edges
+uv run run_03_maze.py train --data $D/shared_teachers.jsonl --probes $D/shared_probes.jsonl --config utils/training/configs/exp3/seed0/clear.json --seed 0 --out outputs/maze/clear
 
-# 04 long horizon planning. train the replanning adaptation
-uv run run_04_replanning.py train --help
+# 04 long horizon planning. adapt the maze planner for replanning
+T=utils/training/exp4
+uv run run_04_replanning.py train --data $T/data/adapt_teachers.jsonl --probes $T/data/adapt_probes.jsonl --config $T/config.json --init-checkpoint ckpts/maze/reference/seed0/clear.pt --steps 500 --allow-geometric-teacher --out outputs/replanning/clear
 ```
 
-`<stage> --help` lists every argument. 01 and `03 plan` run from the released checkpoints. Executing plans on the
-simulated robots (the paper's physical-success numbers) needs the controller runtime, which is not part of this
-distribution; the planners, their training and the grid evaluation are.
+`<stage> --help` lists every argument. Every command above runs on CPU from the released data and checkpoints.
+Executing plans on the simulated robots (the paper's physical-success numbers) needs the controller runtime, which
+is not part of this distribution; the planners, their training and the grid evaluation are.
 
 ## Layout
 
 - `clear/` → planner
-  - `model/` → `clear.py` (CLEAR core, PAMO), `ordernet.py`, `causalflownet.py`, `affordancenet.py`, `encoders.py`, `quantizers.py`
+  - `model/` → `clear.py`, `ordernet.py`, `causalflownet.py`, `affordancenet.py`, `encoders.py`, `morphology_encoder.py`, `quantizers.py`
   - `data/` → grid scenes, oracle, terrain, capability, probes
   - `maze/` → `world.py` (scenes, routes, abstract controller), `robots.py` (bodies, structure)
   - `util.py` → projection, schedule, ranking, CEM

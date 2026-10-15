@@ -1,10 +1,10 @@
 """Five source-backed modules with distinct examples."""
 from html import escape
 
-CORE = 'runtime/clear/model/clear_core.py'
-PLANNER = 'runtime/experiments/exp3/trajectory_v3/navigation_planner.py'
-MPC = 'runtime/experiments/exp3/trajectory_v3/native_sumo_task.py'
-FLOW = 'runtime/clear/model/target_flow.py'
+CORE = 'clear/model/clear.py'
+PLANNER = 'experiments/exp3/trajectory_v3/navigation_planner.py'
+EXEC = 'clear/maze/world.py'
+FLOW = 'clear/model/causalflownet.py'
 
 def node(id, title, file, symbol, stage, description, example):
     return dict(id=id,title=title,file=file,symbol=symbol,stage=stage,parent=None,
@@ -19,8 +19,8 @@ NODES = [
          'Object trajectory generation conditioned on selection and order.', 'Object references'),
     node('verification','Feasibility checking',PLANNER,'validate_sequence','validation',
          'Sequential validation accounts for scene changes induced by preceding interactions.', 'Feasible plan'),
-    node('control','Execution',MPC,'SumoTaskBackend','execution',
-         'G1 and Spot + arm track object references using updated state estimates.', 'Updated observation'),
+    node('control','Execution',EXEC,'AbstractController.interact','execution',
+         'Interactions are executed in order and the observation is updated after each one.', 'Updated observation'),
 ]
 
 

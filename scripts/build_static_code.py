@@ -70,6 +70,7 @@ def build():
             models = archives['checkpoints'] if key == 'source' else None   # one repository holds both
             label.string = f"Browse · {archive['files']}{unit}" + (f" · {models['files']} models · {size(archive['bytes']+models['bytes'])}" if models else f" · {size(archive['bytes'])}")
             link.attrs.pop('download', None); link['rel'] = 'noreferrer'
+    placeholders={}
     for index, panel in enumerate(soup.select('section.component')):
         if index: panel['hidden']=''
         else: panel.attrs.pop('hidden',None)
@@ -84,7 +85,7 @@ def build():
         symbol=next(s for s in display['symbols'] if s['name']==guide['symbol'])
         start,end=symbol['start'],symbol['end']
         rows=''.join(f'<span class="code-line"><span class="line-number" aria-hidden="true">{n}</span><span class="line-content">{display["lines"][n-1]}</span></span>' for n in range(start,end+1))
-        code=card.select_one('code');code.clear();code.append(BeautifulSoup(rows,'html.parser'))
+        code=card.select_one('code');code.clear();code.append(f'@@ROWS:{guide["id"]}@@');placeholders[f'@@ROWS:{guide["id"]}@@']=rows
         card['data-prerendered-node']=guide['id'];card.select_one('.code-status').clear()
         card.select_one('.snippet-heading>span').string=guide['symbol']
         card.select_one('.snippet-footer').string=guide['file'].removeprefix('runtime/')+f' · {end-start+1} lines'
@@ -100,6 +101,9 @@ def build():
                 heading = soup.new_tag('h3', attrs={'class': 'workspace-column-label'})
                 region.insert(0, heading)
             heading.string = label
-    path.write_text(str(soup).rstrip()+'\n')
+    text=str(soup).rstrip()+'\n'
+    for marker, rows in placeholders.items():
+        text=text.replace(marker, rows)
+    path.write_text(text)
 
 if __name__=='__main__': build()
