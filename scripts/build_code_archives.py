@@ -80,11 +80,11 @@ def main(index_only=False, source_only=False):
         'utils/tools/run.py': (templates / 'run.py').read_bytes(),
         'utils/tests/conftest.py': (templates / 'conftest.py').read_bytes(),
         'utils/training/exp2/train_defaults.json': (templates / 'exp2_train_defaults.json').read_bytes(),
-        'get.py': (templates / 'get.py').read_bytes(),
+        'utils/tools/get.py': (templates / 'get.py').read_bytes(),
         'pyproject.toml': (templates / 'pyproject.toml').read_bytes(),
     }
     for image in sorted((templates / 'teasers').glob('*.png')):
-        extras['assets/readme/' + image.name] = image.read_bytes()
+        extras['assets/' + image.name] = image.read_bytes()
     for index, (name, doc, stages) in enumerate(RUNS, 1):
         file = f'run_{index:02d}_{name}.py'
         if stages is None:

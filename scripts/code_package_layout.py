@@ -67,7 +67,7 @@ RUNS = [
 ]
 
 
-README = '''![CLEAR](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/teaser.png)
+README = '''![CLEAR](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/teaser.png)
 
 *Capability-aware interaction planning across robot embodiments.*
 
@@ -78,7 +78,7 @@ README = '''![CLEAR](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/
 ## 0. Download
 
 ```bash
-curl -LO https://anonymous-hf.com/api/a/p5icltdspejh/resolve/get.py
+curl -LO https://anonymous-hf.com/api/a/p5icltdspejh/resolve/utils/tools/get.py
 python3 get.py clear && cd clear
 ```
 
@@ -132,9 +132,9 @@ is not part of this distribution; the planners, their training and the grid eval
   - `locomotion/`
   - `paths.json` → where each checkpoint is linked for the code
 - `models/` → ordering baselines
-- `assets/` → robot models (`g1/`, `spot/`, `spot_w_arm/`, `husky/`) and README figures
+- `assets/` → robot models (`g1/`, `spot/`, `spot_w_arm/`, `husky/`) and the README figures
 - `utils/` → helpers
-  - `tools/` → fetch and render
+  - `tools/` → download, fetch and render
   - `tests/` → unit tests (`uv run pytest utils/tests`)
   - `training/` → per-experiment training configs and teacher data
   - `viz/` → figure scripts
@@ -143,7 +143,7 @@ is not part of this distribution; the planners, their training and the grid eval
 
 | (a) 2D Grid | (b) Ordered Manipulation | (c) Maze Navigation | (d) Long Horizon Planning |
 |---|---|---|---|
-| ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/a_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/b_ordered_manipulation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/c_maze_navigation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/d_long_horizon_planning.png) |
+| ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/a_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/b_ordered_manipulation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/c_maze_navigation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/d_long_horizon_planning.png) |
 | Relocate obstacles to open a path. | Order interactions to keep access. | Plan per body around terrain and objects. | Replan when placement or access changes. |
 '''
 
