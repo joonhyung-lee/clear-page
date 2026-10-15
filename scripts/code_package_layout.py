@@ -71,7 +71,10 @@ RUNS = [
 
 README = '''# CLEAR
 
-**TL;DR** Source code and 153 pretrained checkpoints of the CLEAR planner. Download with `get.py`, install with `uv sync`, run one script per experiment.
+## TL;DR
+
+> **Note.** Source code and 153 pretrained checkpoints of the CLEAR planner.
+> Download with `get.py`, install with `uv sync`, run one script per experiment.
 
 ## 0. Download
 
@@ -121,6 +124,6 @@ uv run run_04_replanning.py evaluate --method clear --manifest FAMILIES.json --f
 | (a) 2D Grid | (b) Ordered Manipulation | (c) Maze Navigation | (d) Long Horizon Planning |
 |---|---|---|---|
 | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/a_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/b_ordered_manipulation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/c_maze_navigation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/d_long_horizon_planning.png) |
-| Select and relocate obstacles to connect start and goal. | Order interactions so later objects remain accessible. | Plan around terrain and movable objects for each body. | Update the plan when object placement or access changes. |
+| Relocate obstacles to open a path. | Order interactions to keep access. | Plan per body around terrain and objects. | Replan when placement or access changes. |
 '''
 
