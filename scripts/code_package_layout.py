@@ -64,17 +64,14 @@ RUNS = [
     ('maze', None, None),
     ('replanning', 'Replanning (exp4): train the adaptation, run the evaluation.',
      {'train': ('experiments.exp4.sprint6h.train_adapt', 'train'), 'evaluate': ('experiments.exp4.sprint6h.runner',)}),
-    ('maze_v4', 'Maze v4 (exp5): train, evaluate, aggregate the evaluation tables.',
-     {'train': ('experiments.exp5_maze_v4.train',), 'evaluate': ('experiments.exp5_maze_v4.evaluate',), 'report': ('experiments.exp5_maze_v4.report',)}),
 ]
 
 
 README = '''# CLEAR
 
-## TL;DR
-
-> **Note.** Source code and 153 pretrained checkpoints of the CLEAR planner.
-> Download with `get.py`, install with `uv sync`, run one script per experiment.
+> **TL;DR**
+>
+> Source code and 153 pretrained checkpoints of the CLEAR planner. Download with `get.py`, install with `uv sync`, run one script per experiment.
 
 ## 0. Download
 
@@ -113,11 +110,19 @@ uv run run_04_replanning.py evaluate --method clear --manifest FAMILIES.json --f
 
 ## Layout
 
-- `clear/` planner: representation, ordering, trajectory flow, feasibility
-- `experiments/` exp1 grid, exp2 manipulation, exp3 maze, exp4 replanning, exp5 maze v4
-- `ckpts/` pretrained checkpoints: `grid/`, `maze/`, `locomotion/`
-- `baselines/` ordering baselines; `evaluation/`, `training/`, `scripts/` paper evaluation and training entry points
-- `assets/` robot models; `data/` scene plans and probes; `tests/`; `tools/` fetch and render helpers; `viz/` figures
+- `clear/` planner
+  - representation, ordering, trajectory flow, feasibility checking
+- `experiments/`
+  - `exp1/` grid · `exp2/` manipulation · `exp3/` maze · `exp4/` replanning
+- `ckpts/` pretrained checkpoints
+  - `grid/` · `maze/` · `locomotion/`
+- `baselines/` ordering baselines
+- `evaluation/` · `training/` · `scripts/` paper evaluation and training entry points
+- `assets/` robot models
+- `data/` scene plans and probes
+- `tests/` unit tests
+- `tools/` fetch and render helpers
+- `viz/` figure scripts
 
 ## Experiments
 
