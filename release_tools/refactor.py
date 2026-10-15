@@ -27,6 +27,7 @@ ENTRIES = (
     'experiments.exp4.sprint6h.train_adapt',
     'tests.test_candidate_orders_guard', 'tests.test_inference_recipe', 'tests.test_ordering_ablation',
     'tests.test_shared_balanced_sampling', 'tests.test_shared_morphology_v3', 'tests.model.test_flow_trace',
+    'viz.model.viz', 'viz.exp3.render',   # figure scripts (the viser viewers need the dropped MuJoCo bridge)
 )
 
 # Modules that never enter the distribution, even when something imports them lazily.

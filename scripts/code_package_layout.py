@@ -137,6 +137,7 @@ is not part of this distribution; the planners, their training and the grid eval
   - `tools/` → fetch and render
   - `tests/` → unit tests (`uv run pytest utils/tests`)
   - `training/` → per-experiment training configs and teacher data
+  - `viz/` → figure scripts
 
 ## Experiments
 

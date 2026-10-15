@@ -34,7 +34,7 @@ MOVES = {'tests/': 'utils/tests/', 'viz/': 'utils/viz/', 'training/': 'utils/tra
 # Folders whose Python the refactor drops entirely; their data files are not shipped either.
 DROP_DATA_DIRS = ('runtime/clear/mj_util/', 'runtime/clear/low_level/', 'runtime/clear/ego_afford/', 'runtime/clear/model/v4/',
                   'runtime/clear/data/v4/', 'runtime/experiments/exp3/development/', 'runtime/scripts/', 'runtime/evaluation/',
-                  'runtime/viz/', 'runtime/assets/google_robot/')
+                  'runtime/assets/google_robot/')
 RELOCATE = {'runtime/clear/model/quantizers/LICENSE': 'clear/model/QUANTIZERS_LICENSE'}
 RELOCATE_PREFIXES = {'runtime/data/probe_scenes/': 'experiments/exp3/data/probe_scenes/',   # probe recordings the exp3/exp4 training reads
                      'runtime/assets/g1_wo_wrist/': 'assets/g1/',                           # the G1 model (the paper's G1 has no wrist joints)
