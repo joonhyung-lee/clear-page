@@ -138,15 +138,17 @@
     const link=node.closest('a.resource'),key=node.dataset.archive;
     const local=['localhost','127.0.0.1','[::1]'].includes(location.hostname)||location.protocol==='file:';
     const configured=window.CLEAR_CODE_DOWNLOADS?.[key];
-    const url=key==='checkpoints'?(configured||(local?item.url:null)):item.url;
+    const url=configured||(key==='checkpoints'?(local?item.url:null):item.url);
     if(url){
       link.href=url+(url.startsWith('../')?'?v='+item.sha256.slice(0,12):'');
+      if(url.startsWith('../'))link.setAttribute('download',item.url.split('/').pop());else link.removeAttribute('download');
       link.removeAttribute('aria-disabled');link.removeAttribute('tabindex');link.referrerPolicy='no-referrer';
     }else{
       link.removeAttribute('href');link.setAttribute('aria-disabled','true');link.tabIndex=-1;
     }
     const size=item.bytes>=1e9?(item.bytes/1e9).toFixed(2)+' GB':Math.round(item.bytes/1e6)+' MB';
-    node.textContent=!url?'Download pending · '+item.files+' models':key==='source'?'ZIP · '+size:url.startsWith('../')?'ZIP · '+size+' · '+item.files+' models':'Browse · '+item.files+' models · '+size;
+    const unit=key==='checkpoints'?' models':' files';
+    node.textContent=!url?'Download pending · '+item.files+unit:url.startsWith('../')?'ZIP · '+size+(key==='checkpoints'?' · '+item.files+unit:''):'Browse · '+item.files+unit+' · '+size;
   }
   function formatBytes(bytes){
     if(bytes<1000)return bytes+' B';

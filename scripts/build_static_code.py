@@ -50,14 +50,19 @@ def build():
     downloads = read_assignment(ROOT/'assets/code-download-locations.js')
     for label in soup.select('[data-archive]'):
         key = label['data-archive']; archive = archives[key]; link = label.find_parent('a')
-        url = archive['url']+'?v='+archive['sha256'][:12] if key == 'source' else downloads.get(key)
-        if url:
-            label.string = 'ZIP · '+size(archive['bytes']) if key == 'source' else f"Browse · {archive['files']} models · {size(archive['bytes'])}"
-            link['href'] = url; link.attrs.pop('aria-disabled', None); link.attrs.pop('tabindex', None)
-            if key == 'checkpoints': link.attrs.pop('download', None)
-        else:
-            label.string = f"Download pending · {archive['files']} models"
+        unit = ' models' if key == 'checkpoints' else ' files'
+        url = downloads.get(key) or (archive['url']+'?v='+archive['sha256'][:12] if key == 'source' else None)
+        if not url:
+            label.string = f"Download pending · {archive['files']}{unit}"
             link.attrs.pop('href', None); link['aria-disabled'] = 'true'; link['tabindex'] = '-1'
+            continue
+        link['href'] = url; link.attrs.pop('aria-disabled', None); link.attrs.pop('tabindex', None)
+        if url.startswith('../'):
+            label.string = 'ZIP · '+size(archive['bytes']) + (f" · {archive['files']}{unit}" if key == 'checkpoints' else '')
+            link['download'] = archive['url'].split('/')[-1]
+        else:
+            label.string = f"Browse · {archive['files']}{unit} · {size(archive['bytes'])}"
+            link.attrs.pop('download', None); link['rel'] = 'noreferrer'
     for index, panel in enumerate(soup.select('section.component')):
         if index: panel['hidden']=''
         else: panel.attrs.pop('hidden',None)
