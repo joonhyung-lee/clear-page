@@ -101,7 +101,7 @@ uv run run_02_manipulation.py train --arm clear --data experiments/exp2/data/pap
 # 03 maze. plan one scene (window, or --video demo.mp4); train with --config .../{clear | noemb | no_affordance | robot_id | get_encoder | cdgs | clear_nocausal | specialist_g1 | specialist_spot_arm}.json
 uv run run_03_maze.py plan --input experiments/exp3/data/example_g1.json --video demo.mp4
 D=experiments/exp3/data/primary_prepared_local_edges
-uv run run_03_maze.py train --data $D/shared_teachers.jsonl --probes $D/shared_probes.jsonl --config utils/training/configs/exp3/seed0/clear.json --seed 0 --out outputs/maze/clear
+uv run run_03_maze.py train --data $D/shared_teachers.jsonl --probes $D/shared_probes.jsonl --config utils/training/exp3/configs/seed0/clear.json --seed 0 --out outputs/maze/clear
 
 # 04 long horizon planning. adapt the maze planner for replanning
 T=utils/training/exp4
@@ -130,11 +130,11 @@ is not part of this distribution; the planners, their training and the grid eval
   - `locomotion/`
   - `paths.json` → where each checkpoint is linked for the code
 - `models/` → ordering baselines
-- `assets/` → robot models and README figures
+- `assets/` → robot models (`g1/`, `spot/`, `spot_w_arm/`, `google_robot/` wheeled) and README figures
 - `utils/` → helpers
   - `tools/` → fetch and render
   - `tests/` → unit tests (`uv run pytest utils/tests`)
-  - `training/` → training configs and teacher data
+  - `training/` → per-experiment training configs and teacher data
 
 ## Experiments
 

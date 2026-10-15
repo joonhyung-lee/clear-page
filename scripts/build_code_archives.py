@@ -34,9 +34,11 @@ MOVES = {'tests/': 'utils/tests/', 'viz/': 'utils/viz/', 'training/': 'utils/tra
 # Folders whose Python the refactor drops entirely; their data files are not shipped either.
 DROP_DATA_DIRS = ('runtime/clear/mj_util/', 'runtime/clear/low_level/', 'runtime/clear/ego_afford/', 'runtime/clear/model/v4/',
                   'runtime/clear/data/v4/', 'runtime/experiments/exp3/development/', 'runtime/scripts/', 'runtime/evaluation/',
-                  'runtime/viz/')
+                  'runtime/viz/', 'runtime/assets/husky/')
 RELOCATE = {'runtime/clear/model/quantizers/LICENSE': 'clear/model/QUANTIZERS_LICENSE'}
-RELOCATE_PREFIXES = {'runtime/data/probe_scenes/': 'experiments/exp3/data/probe_scenes/'}   # probe recordings the exp3/exp4 training reads
+RELOCATE_PREFIXES = {'runtime/data/probe_scenes/': 'experiments/exp3/data/probe_scenes/',   # probe recordings the exp3/exp4 training reads
+                     'runtime/assets/g1_wo_wrist/': 'assets/g1/',                           # the G1 model (the paper's G1 has no wrist joints)
+                     'runtime/training/configs/exp3/': 'utils/training/exp3/configs/'}      # one training folder per experiment
 
 
 def packaged(relative):
@@ -77,6 +79,7 @@ def main(index_only=False, source_only=False):
         'utils/tools/render_plan.py': (templates / 'render_plan.py').read_bytes(),
         'utils/run.py': (templates / 'run.py').read_bytes(),
         'utils/tests/conftest.py': (templates / 'conftest.py').read_bytes(),
+        'utils/training/exp2/train_defaults.json': (templates / 'exp2_train_defaults.json').read_bytes(),
         'get.py': (templates / 'get.py').read_bytes(),
         'pyproject.toml': (templates / 'pyproject.toml').read_bytes(),
     }

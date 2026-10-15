@@ -72,7 +72,7 @@ GROUPS = {
     'clear.maze.robots': ['clear.maze.robot_registry', 'clear.maze.structure_parser', 'clear.maze.physical_registry'],
 }
 RENAMES = {'scripts._dispatch': 'experiments.common.dispatch', 'evaluation.exp1': 'experiments.exp1.evaluate',
-           'clear.model.quantizers': 'clear.model.quantizers'}
+           'clear.model.quantizers': 'clear.model.quantizers', 'tests.model.test_flow_trace': 'tests.test_flow_trace'}
 
 # Exact-text edits that remove code paths of the dropped stack (applied before merging).
 PATCHES: dict[str, list[tuple[str, str]]] = {
@@ -215,6 +215,22 @@ if PUSHABLE_PLAN:
                 pass
 """, ""),
     ],
+    # robot assets: g1/ (was g1_wo_wrist/); husky is not part of the paper. google_robot stays: it is the
+    # wheeled embodiment whose morphology rows the grid data carries (clear.data.morphology.BODY_XML).
+    'clear.data.morphology': [
+        ("'humanoid': 'g1_wo_wrist/g1_pos_native.xml'", "'humanoid': 'g1/g1_pos_native.xml'"),
+    ],
+    'clear.maze.robot_registry': [
+        ("""    "husky": RobotEntry(
+        "husky", "husky/husky_wo_plate.xml", "base_husky", _wheel_parts,
+        LocomotionLimits(0.075, 10.0, 0.70,
+                         {"max_step_m": _NOM, "max_slope_deg": _NOM, "width_m": _NOM}),
+        color="#d95f02"),
+""", ""),
+        ('"g1_wo_wrist/g1_pos_native.xml"', '"g1/g1_pos_native.xml"'),
+    ],
+    'experiments.exp3.trajectory_v3.cli': [('default=["husky","spot","spot_arm","g1"]', 'default=["spot","spot_arm","g1"]')],
+    'experiments.exp3.trajectory_v3.scenes': [('bodies=("husky","spot","spot_arm","g1")', 'bodies=("spot","spot_arm","g1")')],
     'clear.maze.physical_registry': [
         ("from dataclasses import replace\nfrom clear.maze import robot_registry as R\n", "from dataclasses import replace\n"),
         ("    from clear.maze import structure_parser\n", ""),

@@ -1,0 +1,37 @@
+{
+  "source": "defaults of experiments/exp2/train_comparison.py; the paper arms were trained with these",
+  "data": "experiments/exp2/data/paper",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "arms": [
+    "clear",
+    "bc",
+    "plan_bc",
+    "bc_shared",
+    "ar_bc",
+    "clear_nocausal",
+    "clear_regression",
+    "clear_noaffordance"
+  ],
+  "train": {
+    "steps": 6000,
+    "target_steps": 3000,
+    "target_lr": 0.0001,
+    "dim": 128,
+    "depth": 4,
+    "heads": 4,
+    "batch": 128,
+    "lr": 0.0003,
+    "mu_scale": 0.0,
+    "target_frame": "train_affine",
+    "affordance_context": "local_access",
+    "availability_weight": 1.0,
+    "flow_scale": 0.1,
+    "kl_weight": 0.001,
+    "causal": 1,
+    "causal_bias_slope": 0.0
+  }
+}
