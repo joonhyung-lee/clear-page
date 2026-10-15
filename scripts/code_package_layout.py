@@ -67,7 +67,7 @@ RUNS = [
 ]
 
 
-README = '''![CLEAR](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/teaser.png)
+README = '''![CLEAR](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/teaser.png?v=2)
 
 *Capability-aware interaction planning across robot embodiments.*
 
