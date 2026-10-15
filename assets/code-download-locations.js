@@ -1,2 +1,2 @@
 /* Public download locations. Keep personal repository URLs out of this file. */
-window.CLEAR_CODE_DOWNLOADS={"checkpoints":null};
+window.CLEAR_CODE_DOWNLOADS={"checkpoints": "https://anonymous-hf.com/a/p5icltdspejh/"};

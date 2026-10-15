@@ -238,7 +238,7 @@ for path in files:
         if document.embfile_count(): fail(label, 'PDF attachments require review')
         for page in document:
             scan(page.get_text().encode(), label+':page-'+str(page.number+1), text=True)
-            scan(json.dumps(page.get_links()).encode(), label+':links', text=True)
+            scan(json.dumps(page.get_links(), default=str).encode(), label+':links', text=True)
 if failed:
     for label, reason in sorted(failed): print(f'FAIL {label}: {reason}')
     raise SystemExit(1)

@@ -12,6 +12,15 @@ from code_package_layout import checkpoint_layout, README
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = ROOT / 'clear-standalone-anonymous'
 OUTPUT = ROOT / 'assets/code-downloads'
+# Release bookkeeping that reviewers do not need: audit reports, release tooling,
+# result tables and the local dependency freeze. README and the checkpoint path map
+# are regenerated below.
+EXCLUDE_PREFIXES = ('docs/', 'tools/', 'runtime/outputs/', 'runtime/evaluation/evidence/')
+EXCLUDE_FILES = {'LICENSE', '.gitignore', 'requirements-core-linux-py311.txt', 'README.md'}
+
+
+def packaged(relative):
+    return relative not in EXCLUDE_FILES and not relative.startswith(EXCLUDE_PREFIXES)
 
 
 def digest(path):
@@ -28,7 +37,7 @@ def archive_metadata(target):
                 sha256=digest(target), files=len(members), members=members)
 
 
-def main(index_only=False):
+def main(index_only=False, source_only=False):
     audit = json.loads((PACKAGE / 'docs/tree_audit.json').read_text())
     if audit['status'] != 'passed':
         raise ValueError('Anonymous snapshot audit must pass before packaging')
@@ -38,18 +47,19 @@ def main(index_only=False):
         'README.md': README.encode(),
         'docs/checkpoint_paths.json': (json.dumps({'schema': 'clear-checkpoint-paths-v1', 'models': layout}, indent=2)+'\n').encode(),
         'tools/link_checkpoints.py': (ROOT / 'release_tools/templates/link_checkpoints.py').read_bytes(),
+        'tools/fetch_checkpoints.py': (ROOT / 'release_tools/templates/fetch_checkpoints.py').read_bytes(),
     }
     def destination(relative):
         if relative in layout:
             return layout[relative]['path']
-        return 'docs/SNAPSHOT_README.md' if relative == 'README.md' else relative
+        return relative
 
     result = {}
     for key, name in [('source', 'clear-source.zip'), ('checkpoints', 'clear-pretrained.zip')]:
         entries = [(p, row) for p, row in audit['scanned_files'].items()
-                   if (Path(p).suffix == '.pt') == (key == 'checkpoints')]
+                   if (Path(p).suffix == '.pt') == (key == 'checkpoints') and packaged(p)]
         target = OUTPUT / name
-        if index_only:
+        if index_only or (source_only and key == 'checkpoints'):
             result[key] = archive_metadata(target)
             continue
         temporary = target.with_suffix('.zip.partial')
@@ -102,4 +112,6 @@ def main(index_only=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--index-only', action='store_true', help='Read existing ZIP contents without rebuilding archives')
-    main(parser.parse_args().index_only)
+    parser.add_argument('--source-only', action='store_true', help='Rebuild the source ZIP; index the existing checkpoint ZIP')
+    arguments = parser.parse_args()
+    main(arguments.index_only, arguments.source_only)

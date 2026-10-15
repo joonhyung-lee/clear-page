@@ -73,7 +73,7 @@ def static_checks():
     assert link.find('svg') and link.find('span').get_text() == 'Code'
     page = BeautifulSoup((ROOT / 'code/index.html').read_text(), 'html.parser')
     assert page.select_one('a[aria-current="page"]').get_text(strip=True) == 'Code'
-    assert len(page.select('a[download]')) == 2
+    assert len(page.select('a[download]')) == 1
     assert len(page.select('.component')) == 5
     assert not page.select('.package-note') and 'Package scope' not in page.get_text()
     stages = page.select('[data-flow-node]')

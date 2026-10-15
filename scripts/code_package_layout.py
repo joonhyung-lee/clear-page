@@ -57,28 +57,42 @@ def checkpoint_layout(package, audit):
 
 README = '''# CLEAR
 
+Source code and pretrained models for the CLEAR planner (anonymous review copy).
+
+## Layout
+
+```
+run.py                      one entry point: train / plan / evaluate / refine / report
+runtime/clear/              model, data and planning implementation
+runtime/experiments/        experiment code and inputs: exp1 grid, exp2 manipulation,
+                            exp3 maze, exp4 replanning, exp5 maze v4
+runtime/assets/             robot models and simulation assets
+runtime/data/               probe scenes, rosters and plan cohorts
+runtime/tests/              unit tests
+checkpoints/                pretrained models, downloaded by tools/fetch_checkpoints.py
+tools/fetch_checkpoints.py  downloads the checkpoints and links them
+tools/link_checkpoints.py   links already extracted checkpoints to the paths the experiment code loads
+docs/checkpoint_paths.json  path map and SHA-256 of every checkpoint
+```
+
 ## Setup
 
-Extract `clear-source.zip` and `clear-pretrained.zip` into the same directory.
-From `clear/`, run `python tools/link_checkpoints.py` to connect the organized
-checkpoint files to the paths used by the original experiment code.
-The link step is idempotent and does not overwrite existing files.
+```bash
+unzip clear-source.zip && cd clear
+python3.11 -m venv .venv && source .venv/bin/activate
+python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.7"
+python -m pip install numpy einops pyyaml scipy
+python tools/fetch_checkpoints.py
+```
 
-## Contents
+`fetch_checkpoints.py` downloads the 1.8 GB of checkpoints into `checkpoints/`
+(verifying each SHA-256, resumable) and links them to the paths the experiment
+code loads. If `clear-pretrained.zip` was obtained separately, extract it next to
+`clear-source.zip` and run `python tools/link_checkpoints.py` instead. Both steps
+are idempotent and never overwrite files.
 
-- `runtime/clear/`: model and planning implementation.
-- `runtime/experiments/`: experiment configurations, inputs and evaluation code.
-- `runtime/assets/`: robot assets and runtime resources.
-- `checkpoints/grid/`: reference models, variants and training history for 2D grids.
-- `checkpoints/maze/`: reference navigation, body transfer and joint planning models.
-- `checkpoints/locomotion/`: G1, Go1 and Spot locomotion policies.
-- `docs/`: training recipes and provenance for the available snapshot.
-- `tools/`: verification and checkpoint setup.
-
-Checkpoints are grouped by task and experiment protocol, not collection directory.
-All 153 checkpoint payloads are unchanged. The path map in
-`docs/checkpoint_paths.json` records each original path and SHA-256.
-The original source and provenance records retain their recorded paths.
+Planning and evaluation run on CPU with these packages. Physical simulation and
+the manipulation experiments need the optional extras listed in `pyproject.toml`.
 
 ## Planning example
 
@@ -89,7 +103,14 @@ python run.py plan maze \\
   --out outputs/reproduction/plan.json --device cpu
 ```
 
-The available snapshot is incomplete. See `docs/STATUS.md` for missing inputs
-and validation scope. Historical runs are not interchangeable with reference
-models. No end-to-end reproduction claim is made for every packaged experiment.
+`python run.py --help` lists every action/task pair. Relative paths resolve
+inside `runtime/`.
+
+## Checkpoints
+
+`checkpoints/grid/`, `checkpoints/maze/` and `checkpoints/locomotion/` group the
+153 models by task. Reference models are the ones used for the reported results;
+`training_history/` and the variant directories are provided as trained, for
+inspection. Planning and evaluation with the reference checkpoints are verified;
+retraining every experiment end to end is not claimed.
 '''

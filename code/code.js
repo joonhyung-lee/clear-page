@@ -146,7 +146,7 @@
       link.removeAttribute('href');link.setAttribute('aria-disabled','true');link.tabIndex=-1;
     }
     const size=item.bytes>=1e9?(item.bytes/1e9).toFixed(2)+' GB':Math.round(item.bytes/1e6)+' MB';
-    node.textContent=url?'ZIP · '+size+(key==='checkpoints'?' · '+item.files+' models':''):'Download pending · '+item.files+' models';
+    node.textContent=!url?'Download pending · '+item.files+' models':key==='source'?'ZIP · '+size:url.startsWith('../')?'ZIP · '+size+' · '+item.files+' models':'Browse · '+item.files+' models · '+size;
   }
   function formatBytes(bytes){
     if(bytes<1000)return bytes+' B';
