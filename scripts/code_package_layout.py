@@ -77,7 +77,7 @@ README = '''# CLEAR
 
 ```bash
 curl -LO https://anonymous-hf.com/api/a/p5icltdspejh/resolve/get.py
-python get.py clear && cd clear
+python3 get.py clear && cd clear
 ```
 
 ## 1. Install
