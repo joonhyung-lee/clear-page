@@ -67,9 +67,9 @@ RUNS = [
 ]
 
 
-README = '''<p align="center"><img src="https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/teaser.png" alt="CLEAR" width="720"></p>
+README = '''![CLEAR](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/readme/teaser.png)
 
-<p align="center"><em>Capability-aware interaction planning across robot embodiments.</em></p>
+*Capability-aware interaction planning across robot embodiments.*
 
 > **TL;DR**
 >
