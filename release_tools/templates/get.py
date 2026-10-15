@@ -51,12 +51,19 @@ def get(url):
     return urllib.request.urlopen(urllib.request.Request(url, headers=HEADERS), timeout=120)
 
 
-def walk(path=''):
-    for entry in json.load(get(MIRROR + 'tree/' + path)):
-        if entry['type'] == 'directory':
-            yield from walk(entry['path'])
-        else:
-            yield entry
+def walk(skip=('ckpts/',), workers=8):
+    """List the repository tree level by level in parallel, reporting progress on stderr."""
+    files, folders, pending = [], 0, ['']
+    with ThreadPoolExecutor(workers) as pool:
+        while pending:
+            folders += len(pending)
+            listings = list(pool.map(lambda path: json.load(get(MIRROR + 'tree/' + path)), pending))
+            pending = [entry['path'] for listing in listings for entry in listing
+                       if entry['type'] == 'directory' and not entry['path'].startswith(skip)]
+            files += [entry for listing in listings for entry in listing if entry['type'] != 'directory']
+            sys.stderr.write(f'\rlisting     {folders} folders  {len(files)} files'); sys.stderr.flush()
+    sys.stderr.write('\n')
+    return files
 
 
 def blob_sha1(data):
@@ -93,7 +100,7 @@ def main():
     parser.add_argument('--workers', type=int, default=8)
     args = parser.parse_args()
     root = Path(args.destination).resolve()
-    entries = [e for e in walk() if not e['path'].startswith('ckpts/') and e['path'] != '.gitattributes']
+    entries = [e for e in walk(workers=args.workers) if not e['path'].startswith('ckpts/') and e['path'] != '.gitattributes']
     progress = Progress('source     ', len(entries))
     with ThreadPoolExecutor(args.workers) as pool:
         results = list(pool.map(lambda e: fetch(root, e, progress), entries))
