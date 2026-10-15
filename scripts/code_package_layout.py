@@ -71,7 +71,7 @@ README = '''# CLEAR
 
 > **TL;DR**
 >
-> Source code and 153 pretrained checkpoints of the CLEAR planner. Download with `get.py`, install with `uv sync`, run one script per experiment.
+> Source code and 129 pretrained checkpoints of the CLEAR planner. Download with `get.py`, install with `uv sync`, run one script per experiment.
 
 ## 0. Download
 
@@ -110,19 +110,26 @@ uv run run_04_replanning.py evaluate --method clear --manifest FAMILIES.json --f
 
 ## Layout
 
-- `clear/` planner
+- `clear/` → planner
   - representation, ordering, trajectory flow, feasibility checking
-- `experiments/`
-  - `exp1/` grid · `exp2/` manipulation · `exp3/` maze · `exp4/` replanning
-- `ckpts/` pretrained checkpoints
-  - `grid/` · `maze/` · `locomotion/`
-- `baselines/` ordering baselines
-- `evaluation/` · `training/` · `scripts/` paper evaluation and training entry points
-- `assets/` robot models
-- `data/` scene plans and probes
-- `tests/` unit tests
-- `tools/` fetch and render helpers
-- `viz/` figure scripts
+- `experiments/` → one folder per experiment
+  - `exp1/` → grid
+  - `exp2/` → manipulation
+  - `exp3/` → maze
+  - `exp4/` → replanning
+- `ckpts/` → pretrained checkpoints
+  - `grid/`
+  - `maze/`
+  - `locomotion/`
+- `baselines/` → ordering baselines
+- `evaluation/` → grid evaluation entry point
+- `training/` → training configs and loops
+- `scripts/` → training launcher and demos
+- `assets/` → robot models
+- `data/` → probe scenes for the maze and replanning experiments
+- `tests/` → unit tests
+- `tools/` → fetch and render helpers
+- `viz/` → figure scripts
 
 ## Experiments
 

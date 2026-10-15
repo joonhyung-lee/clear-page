@@ -138,7 +138,7 @@ def static_checks():
         assert len({entry['path'] for entry in expected}) == archive['files']
         assert all(entry['path'].startswith('clear/') and '..' not in entry['path'].split('/') for entry in expected)
     models = archives['checkpoints']['members']
-    assert len(models) == 153 and all(m['path'].endswith('.pt') for m in models)
+    assert len(models) == 129 and all(m['path'].endswith('.pt') for m in models)
     assert {m['path'].split('/')[2] for m in models} == {'grid', 'maze', 'locomotion'}
     assert all(m['path'].startswith('clear/ckpts/') for m in models)
     assert all('/leap2026/' not in m['path'] and '/anonymous/' not in m['path'] for m in models)

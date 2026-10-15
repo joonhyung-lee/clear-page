@@ -1,4 +1,4 @@
-"""Download the 153 pretrained checkpoints into ckpts/ from the anonymous mirror and link them."""
+"""Download the 129 pretrained checkpoints into ckpts/ from the anonymous mirror and link them."""
 import argparse
 import hashlib
 import json

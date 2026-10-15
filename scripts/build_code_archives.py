@@ -15,8 +15,12 @@ OUTPUT = ROOT / 'assets/code-downloads'
 # Release bookkeeping that reviewers do not need: audit reports, release tooling,
 # result tables and the local dependency freeze. README and the checkpoint path map
 # are regenerated below.
-EXCLUDE_PREFIXES = ('docs/', 'tools/', 'runtime/outputs/', 'runtime/evaluation/evidence/', 'runtime/paper/')
-EXCLUDE_FILES = {'LICENSE', 'runtime/LICENSE', '.gitignore', 'requirements-core-linux-py311.txt', 'README.md', 'run.py', 'pyproject.toml'}
+EXCLUDE_PREFIXES = ('docs/', 'tools/', 'runtime/outputs/', 'runtime/evaluation/evidence/', 'runtime/paper/',
+                    # maze v4 (exp5) is not part of the paper: its module, data and 24 checkpoints stay out
+                    'runtime/experiments/exp5_maze_v4/', 'runtime/data/plans/', 'runtime/data/probes/', 'runtime/data/rosters/',
+                    'runtime/assets/checkpoints/leap2026/V4/')
+EXCLUDE_FILES = {'LICENSE', 'runtime/LICENSE', '.gitignore', 'requirements-core-linux-py311.txt', 'README.md', 'run.py', 'pyproject.toml',
+                 'runtime/tests/test_actual_target_validation.py'}
 
 
 def packaged(relative):
@@ -44,7 +48,7 @@ def main(index_only=False, source_only=False):
     OUTPUT.mkdir(parents=True, exist_ok=True)
     # The distribution is flat: runtime/ becomes the root and checkpoints live in ckpts/.
     layout = {old: dict(path='ckpts/' + item['path'].removeprefix('checkpoints/'), sha256=item['sha256'])
-              for old, item in checkpoint_layout(PACKAGE, audit).items()}
+              for old, item in checkpoint_layout(PACKAGE, audit).items() if packaged(old)}
     paths = {old.removeprefix('runtime/'): item for old, item in layout.items()}
     templates = ROOT / 'release_tools/templates'
     extras = {
