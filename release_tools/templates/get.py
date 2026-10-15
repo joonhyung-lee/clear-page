@@ -100,7 +100,8 @@ def main():
     parser.add_argument('--workers', type=int, default=8)
     args = parser.parse_args()
     root = Path(args.destination).resolve()
-    entries = [e for e in walk(workers=args.workers) if not e['path'].startswith('ckpts/') and e['path'] != '.gitattributes']
+    entries = [e for e in walk(workers=args.workers)
+               if not (e['path'].startswith('ckpts/') and e['path'].endswith('.pt')) and e['path'] != '.gitattributes']
     progress = Progress('source     ', len(entries))
     with ThreadPoolExecutor(args.workers) as pool:
         results = list(pool.map(lambda e: fetch(root, e, progress), entries))
