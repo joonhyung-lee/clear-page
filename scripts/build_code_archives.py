@@ -24,7 +24,7 @@ EXCLUDE_PREFIXES = ('docs/', 'tools/', 'runtime/outputs/', 'runtime/evaluation/e
                     'runtime/assets/checkpoints/leap2026/V4/',
                     )
 EXCLUDE_FILES = {'LICENSE', 'runtime/LICENSE', '.gitignore', 'requirements-core-linux-py311.txt', 'README.md', 'run.py', 'pyproject.toml',
-                 'runtime/tests/test_actual_target_validation.py',
+                 'runtime/tests/test_actual_target_validation.py', 'runtime/LICENSING.md',   # notices live in the README
                  'runtime/experiments/exp1/configs/paper.json'}   # rewritten below with the packaged paths
 # Helper packages move under utils/, the ordering baselines under models/; utils/tools/run.py puts both on sys.path.
 MOVES = {'tests/': 'utils/tests/', 'viz/': 'utils/viz/', 'training/': 'utils/training/', 'scripts/': 'utils/scripts/',

@@ -145,5 +145,14 @@ is not part of this distribution; the planners, their training and the grid eval
 |---|---|---|---|
 | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/a_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/b_ordered_manipulation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/c_maze_navigation.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/assets/d_long_horizon_planning.png) |
 | Relocate obstacles to open a path. | Order interactions to keep access. | Plan per body around terrain and objects. | Replan when placement or access changes. |
+
+## Licensing
+
+The CLEAR code is released under the MIT License. Third-party assets keep their own licenses and notices:
+
+- `assets/spot/`, `assets/spot_w_arm/` → `assets/spot/LICENSE`, `assets/spot/README.md`
+- `assets/g1/` → `assets/g1/README_upstream.md`
+- `assets/husky/` → `assets/husky/README.md` (provenance recorded; the bundle has no standalone redistribution license)
+- `clear/model/quantizers.py` → `clear/model/QUANTIZERS_LICENSE` (MIT)
 '''
 
