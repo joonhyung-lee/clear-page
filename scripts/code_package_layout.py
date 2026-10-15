@@ -56,25 +56,24 @@ def checkpoint_layout(package, audit):
 
 
 RUNS = [
-    ('train_grid', 'scripts.train', ('--experiment', 'grid2d'), 'Train the grid (exp1) models.'),
-    ('evaluate_grid', 'evaluation.exp1', (), 'Evaluate CLEAR or an ordering baseline on the grid (exp1): --method clear | clear_ro | clear_ho | autoregressive | gumbel_sinkhorn | polynet.'),
-    ('train_manipulation', 'experiments.exp2.train_comparison', (), 'Train the manipulation (exp2) comparison arms.'),
-    ('refine_manipulation', 'experiments.exp2.refine_flow_comparison', (), 'Refine the manipulation (exp2) flow checkpoints.'),
-    ('evaluate_manipulation', 'experiments.exp2.evaluate_comparison', (), 'Evaluate the manipulation (exp2) comparison.'),
-    ('train_maze', 'experiments.exp3.trajectory_v3.shared_cli', ('train',), 'Train the maze (exp3) shared-morphology planner.'),
-    ('evaluate_maze', 'experiments.exp3.trajectory_v3.evaluate_frozen', (), 'Evaluate frozen maze (exp3) plans.'),
-    ('train_replanning', 'experiments.exp4.sprint6h.train_adapt', ('train',), 'Train the replanning (exp4) adaptation.'),
-    ('evaluate_replanning', 'experiments.exp4.sprint6h.runner', (), 'Run the replanning (exp4) evaluation.'),
-    ('train_maze_v4', 'experiments.exp5_maze_v4.train', (), 'Train the maze v4 (exp5) models.'),
-    ('evaluate_maze_v4', 'experiments.exp5_maze_v4.evaluate', (), 'Evaluate the maze v4 (exp5) models.'),
-    ('report_maze_v4', 'experiments.exp5_maze_v4.report', (), 'Aggregate the maze v4 (exp5) evaluation tables.'),
+    # (name, docstring, {stage: (module, *prefix)}); run_03_maze.py is a hand-written template with a `plan` demo stage.
+    ('grid', 'Grid (exp1): train the models, or evaluate CLEAR / an ordering baseline (--method clear | clear_ro | clear_ho | autoregressive | gumbel_sinkhorn | polynet).',
+     {'train': ('scripts.train', '--experiment', 'grid2d'), 'evaluate': ('evaluation.exp1',)}),
+    ('manipulation', 'Ordered manipulation (exp2): train the comparison arms, refine the flow checkpoints, evaluate the comparison.',
+     {'train': ('experiments.exp2.train_comparison',), 'refine': ('experiments.exp2.refine_flow_comparison',), 'evaluate': ('experiments.exp2.evaluate_comparison',)}),
+    ('maze', None, None),
+    ('replanning', 'Replanning (exp4): train the adaptation, run the evaluation.',
+     {'train': ('experiments.exp4.sprint6h.train_adapt', 'train'), 'evaluate': ('experiments.exp4.sprint6h.runner',)}),
+    ('maze_v4', 'Maze v4 (exp5): train, evaluate, aggregate the evaluation tables.',
+     {'train': ('experiments.exp5_maze_v4.train',), 'evaluate': ('experiments.exp5_maze_v4.evaluate',), 'report': ('experiments.exp5_maze_v4.report',)}),
 ]
+
 
 README = '''# CLEAR
 
 Source code and 153 pretrained checkpoints of the CLEAR planner.
 
-- `run_01` to `run_13`: entry points, one per experiment stage (`python run_XX_name.py --help`)
+- `run_01_grid.py` to `run_05_maze_v4.py`: one entry point per experiment, `python run_0N_name.py <stage> [args]` (`<stage> --help` lists the arguments): grid `train|evaluate`, manipulation `train|refine|evaluate`, maze `plan|train|evaluate`, replanning `train|evaluate`, maze_v4 `train|evaluate|report`
 - `clear/`: model, data and planning implementation
 - `experiments/`: exp1 grid, exp2 manipulation, exp3 maze, exp4 replanning, exp5 maze v4
 - `ckpts/`: `grid/`, `maze/`, `locomotion/`; `docs/checkpoint_paths.json` maps each file to the path the code loads
@@ -95,22 +94,22 @@ python -m pip install numpy einops pyyaml scipy matplotlib imageio-ffmpeg
 ## Demo
 
 ```bash
-python run_01_plan_maze.py --input experiments/exp3/data/example_g1.json                 # plan, then open the window
-python run_01_plan_maze.py --input experiments/exp3/data/example_g1.json --video demo.mp4  # headless, writes the mp4
+python run_03_maze.py plan --input experiments/exp3/data/example_g1.json                 # plan, then open the window
+python run_03_maze.py plan --input experiments/exp3/data/example_g1.json --video demo.mp4  # headless, writes the mp4
 ```
 
 Writes `outputs/reproduction/plan.json` and `plan.png`; the animation plays the object interactions, then the route.
 
 ## Experiments
 
-| `run_01` demo | `run_02`–`03` exp1 grid | `run_04`–`06` exp2 manipulation |
+| `run_03_maze.py plan` demo | `run_01_grid.py` exp1 | `run_02_manipulation.py` exp2 |
 |---|---|---|
 | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/demo_plan.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp1_grid.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp2_manipulation.png) |
 
-| `run_07`–`08` exp3 maze | `run_09`–`10` exp4 replanning | `run_11`–`13` exp5 maze v4 |
+| `run_03_maze.py` exp3 | `run_04_replanning.py` exp4 | `run_05_maze_v4.py` exp5 |
 |---|---|---|
 | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp3_maze.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp4_replanning.png) | ![](https://anonymous-hf.com/api/a/p5icltdspejh/resolve/docs/teasers/exp5_maze_v4.png) |
 
-`run_03_evaluate_grid.py --method` selects CLEAR or a baseline (`clear`, `clear_ro`, `clear_ho`, `autoregressive`, `gumbel_sinkhorn`, `polynet`).
+`run_01_grid.py evaluate --method` selects CLEAR or a baseline (`clear`, `clear_ro`, `clear_ho`, `autoregressive`, `gumbel_sinkhorn`, `polynet`).
 Physical simulation and the manipulation experiments need the optional extras in `pyproject.toml`.
 '''

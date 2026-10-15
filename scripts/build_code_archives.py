@@ -54,14 +54,17 @@ def main(index_only=False, source_only=False):
         'tools/fetch_checkpoints.py': (templates / 'fetch_checkpoints.py').read_bytes(),
         'get.py': (templates / 'get.py').read_bytes(),
         '_run.py': (templates / '_run.py').read_bytes(),
-        'run_01_plan_maze.py': (templates / 'run_01_plan_maze.py').read_bytes(),
         'tools/render_plan.py': (templates / 'render_plan.py').read_bytes(),
     }
     for image in sorted((templates / 'teasers').glob('*.png')):
         extras['docs/teasers/' + image.name] = image.read_bytes()
-    for index, (name, module, prefix, doc) in enumerate(RUNS, 2):
-        body = f'"""{doc}"""\nfrom _run import run\n\nrun({module!r}' + ''.join(f', {p!r}' for p in prefix) + ')\n'
-        extras[f'run_{index:02d}_{name}.py'] = body.encode()
+    for index, (name, doc, stages) in enumerate(RUNS, 1):
+        file = f'run_{index:02d}_{name}.py'
+        if stages is None:
+            extras[file] = (templates / file).read_bytes()
+            continue
+        table = ''.join(f'    {stage!r}: {spec!r},\n' for stage, spec in stages.items())
+        extras[file] = f'"""{doc}"""\nfrom _run import main\n\nmain({{\n{table}}})\n'.encode()
     def destination(relative):
         if relative in layout:
             return layout[relative]['path']

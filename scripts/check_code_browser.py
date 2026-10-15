@@ -146,7 +146,7 @@ def static_checks():
         mapping = json.loads(package.read('clear/docs/checkpoint_paths.json'))['models']
         assert {'clear/'+v['path'] for v in mapping.values()} == {m['path'] for m in models}
         assert 'clear/tools/link_checkpoints.py' in package.namelist()
-    assert 'run_01_plan_maze.py' in page.select_one('#reproduce-command').get_text()
+    assert 'run_03_maze.py plan' in page.select_one('#reproduce-command').get_text()
     for viewer in page.select('.viewer'):
         assert (ROOT / 'assets/recordings' / (viewer['data-scene']+'.hex.js')).is_file()
     for media in page.select('video source, img'):
