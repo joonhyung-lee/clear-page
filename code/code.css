@@ -134,12 +134,12 @@ main{width:min(1600px,94%)}
 .implementation-workspace .component-heading p{margin-top:4px;font-size:12px;max-width:88ch;line-height:1.65}
 .implementation-workspace .component-content{column-gap:28px}
 .component-content>.result{max-width:none}
-.example-heading,.snippet-heading{min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid #e5e7eb;background:#f9faf7;font-size:11px;color:var(--muted)}
+.example-heading,.snippet-heading{min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid #e5e7eb;background:transparent;font-size:11px;color:var(--muted)}
 .example-heading{margin-bottom:12px}
 .example-heading{flex-wrap:wrap;justify-content:flex-start;gap:3px 8px}
 .example-source-path{min-width:0;font:10px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);overflow-wrap:anywhere}
 .snippet{overflow:visible;border:1px solid #e5e7eb;border-radius:4px;background:#fcfdfa}
-.snippet-heading{border-radius:3px 3px 0 0;position:sticky;top:73px;z-index:3;background:#f9faf7}
+.snippet-heading{position:static;background:transparent;border-radius:0}
 .snippet-heading>span{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}
 .snippet-heading button,.snippet-heading [data-source-scope]{padding:3px 6px;border:0;background:transparent;font-size:10px;color:var(--green)}
 .snippet-heading button:hover{background:#f3f4f6;text-decoration:none}
@@ -164,13 +164,13 @@ main{width:min(1600px,94%)}
  #pipeline-select{display:block;flex:1;min-width:0;max-width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:4px;background:#f9faf7;color:#364153;font:12px/1.5 Arial,sans-serif}
  .implementation-workspace .component-heading h2{font-size:18px}
  .example-heading,.snippet-heading{padding:9px 10px}
- .snippet-heading{top:65px;flex-wrap:wrap}
+ .snippet-heading{flex-wrap:wrap}
  .snippet-heading>span{flex-basis:100%}
  .implementation-workspace .component-content{grid-template-columns:1fr;gap:0}
  .implementation-workspace .component-content>.result{padding:16px 0 20px}
  .implementation-workspace .component-content>.snippet{padding:20px 0;border-left:0;border-top:1px dashed var(--line)}
 }
-.snippet-heading{top:85px}
-@media(max-width:620px){.snippet-heading{top:77px}}
+
+@media(max-width:620px){}
 
 .resource[aria-disabled=true]{cursor:default}.resource[aria-disabled=true]:hover{background:transparent}.resource[aria-disabled=true] .download-mark{visibility:hidden}
