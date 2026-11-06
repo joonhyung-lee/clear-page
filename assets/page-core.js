@@ -2026,7 +2026,7 @@ window.CLEAR_CONTEXT={"dimensions":128,"validTokens":18,"displayDimensions":12,"
  function close(){content.querySelector('video')?.pause();dialog.close();content.replaceChildren();}
  document.querySelectorAll('[data-resource]').forEach(button=>button.onclick=()=>{
   const paper=button.dataset.resource==='paper';dialog.querySelector('h2').textContent=paper?'Paper':'Video';
-  const url=clearAssetURL(paper?'assets/clear-paper.pdf':'assets/media/teaser.mp4');
+  const url=clearAssetURL(paper?'assets/clear-paper.pdf':'assets/media/tldr.mp4');
   download.href=url;download.textContent=paper?'Download PDF':'Download video';
   const preview=document.createElement(paper?'iframe':'video');
   if(paper){preview.title='Anonymous CLEAR paper';preview.src=clearAssetURL('assets/paper-preview.html');}else{preview.controls=true;preview.playsInline=true;preview.preload='metadata';preview.src=url;}
